@@ -2,7 +2,7 @@
 
 #let handler-base64-image(data) = image(base64.decode(data.trim()))
 #let handler-str-image(data) = image(bytes(data))
-#let handler-noop(data) = data
+#let handler-text(data) = raw(data, block: true)
 
 #let cell-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/plain")
@@ -10,7 +10,7 @@
   "image/svg+xml": handler-str-image,
   "image/png": handler-base64-image,
   "image/jpeg": handler-base64-image,
-  "text/plain": handler-noop,
+  "text/plain": handler-text,
 )
 #let default-names = ("metadata.label", "id", "tags")
 
