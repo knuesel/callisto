@@ -204,7 +204,9 @@
 }
 
 // Process a "rich" item, which can have various formats.
-// Can return none if item is available only in unsupported formats.
+// Can return none if item is available only in unsupported formats (and
+// ignore-wrong-format is true) or if the item is empty (data dict empty in
+// notebook JSON).
 #let process-rich(
   item,
   format: auto,
@@ -213,6 +215,9 @@
   ..args,
 ) = {
   let item-formats = item.data.keys()
+  if item-formats.len() == 0 {
+    return none
+  }
   let fmt = pick-format(item-formats, precedence: format)
   if fmt == none {
     if not ignore-wrong-format {
