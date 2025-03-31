@@ -1,0 +1,17 @@
+- [x] Import cell source and outputs from notebooks
+- [x] Render notebooks in Typst
+      - [x] Markdown (with cmarker and mitex)
+      - [x] results (basic types)
+      - [x] displays (basic types)
+      - [x] stdout and stderr
+      - [x] errors
+- [ ] Support for more output types
+      - [x] text/plain
+      - [x] image/png
+      - [x] image/jpeg
+      - [x] image/svg+xml
+      - [ ] text/html
+      - [ ] text/latex
+      - [ ] text/markdown
+- [ ] Exporting raw blocks to notebook
+- [ ] Round-tripping similar to prequery
