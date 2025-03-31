@@ -1,7 +1,7 @@
 #import "callisto.typ" as callisto: *
 
 #[
-  #let (Cell, In, Out) = callisto.config(nb: "examples/cairomakie.ipynb", count: "execution")
+  #let (Cell, In, Out) = callisto.config(nb: "notebooks/cairomakie.ipynb", count: "execution")
 
   #Cell(2)
   == Input
@@ -12,17 +12,17 @@
 
 = CairoMakie
 #render(
-  nb: "examples/cairomakie.ipynb",
+  nb: "notebooks/cairomakie.ipynb",
   type: ("markdown", "code"),
   // output-args: (type: "execute_result"),
 )
 
 = Python
-#render(nb: "examples/python.ipynb")
+#render(nb: "notebooks/python.ipynb")
 
 == Plain template
 
 #show: callisto.templates.doc-template
 
-#render(nb: "examples/python.ipynb", template: callisto.templates.plain)
+#render(nb: "notebooks/python.ipynb", template: callisto.templates.plain)
 

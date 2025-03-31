@@ -8,7 +8,7 @@
   precedence: ("gif", "abc", "text/plain", "xml"),
 )
 
-#let (cells, cell, source) = config(nb: "examples/python.ipynb")
+#let (cells, cell, source) = config(nb: "notebooks/python.ipynb")
 
 #cells(type: "markdown")
 
@@ -19,7 +19,7 @@
 #source(0)
 
 
-#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "examples/cairomakie.ipynb")
+#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "notebooks/cairomakie.ipynb")
 
 #displays().join()
 
