@@ -1,6 +1,6 @@
 #import "@preview/based:0.2.0": base64
 
-#let handler-base64-image(data) = image(base64.decode(data.trim()))
+#let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
 #let handler-str-image(data) = image(bytes(data))
 #let handler-text(data) = raw(data, block: true)
 
