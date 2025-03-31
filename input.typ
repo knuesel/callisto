@@ -18,6 +18,9 @@
 // array with one string per line) and convert source header metadata to cell
 // metadata.
 #let process-cell(i, cell) = {
+  if "id" not in cell {
+    cell.id = str(i)
+  }
   let source = cell.at("source", default: "")
   if type(source) == array {
     // Normalize source field to a single string
