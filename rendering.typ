@@ -80,7 +80,7 @@
     if cs.len() != 1 {
       panic("expected 1 item, found " + str(cs.len()))
     }
-  } else if type(keep) == integer {
+  } else if type(keep) == int {
     cs = (cs.at(keep),)
   } else if type(keep) == array {
     cs = keep.map(i => cs.at(i))
