@@ -18,7 +18,7 @@
   "text/latex": handler-latex,
   "text/plain": handler-text,
 )
-#let default-names = ("metadata.label", "id", "tags")
+#let default-names = ("metadata.label", "id", "metadata.tags")
 
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
@@ -91,6 +91,11 @@
 
 #let ensure-array(x) = if type(x) == array { x } else { (x,) }
 
+#let name-matches(cell, spec, name) = {
+  let value = at-path(cell, name)
+  return value == spec or (type(value) == array and spec in value)
+}
+
 // Get cells for a single specification
 #let _cells(spec, nb-cells, count, name) = {
   if type(spec) == dictionary {
@@ -108,7 +113,7 @@
     } else {
       ensure-array(name)
     }
-    return nb-cells.filter(x => names.any(path => at-path(x, path) == spec))
+    return nb-cells.filter(x => names.any(name-matches.with(x, spec)))
   }
   if type(spec) == int {
     if count == "position" {
