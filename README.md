@@ -44,13 +44,13 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 
 ### Main functions
 
--  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly.Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
+-  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
 
 -  `cells([spec], nb: none, count: "position", name: auto, cell-type: "all", keep: "all")`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
-   `spec` argument is used to select cells: if omitted, all cells are selected. Possible values:
+   The optional `spec` argument is used to select cells: if omitted, all cells are selected. Possible values:
 
    -  An integer: by default this refers to the cell position in the notebook, but `count: "execution"` can be used to have this refer to the execution count.
    -  A string: by default this can be either a cell label, ID, or tag. Cell labels must be set as a "label" field in the cell metadata, or on the first line of cell code:
@@ -80,7 +80,7 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 
    `result`: how the function should return its result: `"value"` to return a list of values that can be inserted, or `"dict"` to return a dictionary that contains a `"value"` field as well as metadata.
 
-   `lang` specifies the language to set on the returned raw blocks. By default this is inferred from the notebook metadata.
+   `lang`: the language to set on the returned raw blocks. By default this is inferred from the notebook metadata.
 
 -  `outputs(..cell-args, output-type: "all", format: default-formats, handlers: auto, ignore-wrong-format: false, stream: "all", result: "value")`
 
@@ -112,7 +112,7 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 
    `output` specifies if cell outputs should be rendered.
 
-   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function, or a dict of functions with keys among `raw`, `markdown`, `code`, `input` and `output`. Functions should accept a `cell` positional argument (dict) for the cell to render, `input` and `output` keyword arguments (booleans) to enable/disable rendering of the input or output, and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively.
+   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`. A function should accept a `cell` positional argument (dict) for the cell to render, `input` and `output` keyword arguments (booleans) to enable/disable rendering of the input or output, and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell/cell component. The template specified for `code` if specified will be used for both code input and output.
 
 ### Auxiliary functions
 
@@ -135,6 +135,7 @@ The package also provides many functions that are mostly aliases of the main fun
 - [x] Easy reading of cell source and outputs from notebooks
 
 - [x] Render notebooks in Typst
+
       - [x] Markdown
       - [x] results (basic types)
       - [x] displays (basic types)
@@ -142,6 +143,7 @@ The package also provides many functions that are mostly aliases of the main fun
       - [x] errors
 
 - Supported output types
+
       - [x] text/plain
       - [x] image/png
       - [x] image/jpeg
