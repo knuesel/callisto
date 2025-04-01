@@ -8,11 +8,11 @@
   precedence: ("gif", "abc", "text/plain", "xml"),
 )
 
-#let (cells, cell, source) = config(nb: "/tests/notebooks/python.ipynb")
+#let (cells, cell, source, Cell) = config(nb: "/tests/notebooks/python.ipynb")
 
 #cells(cell-type: "markdown")
 
-#cell(4)
+#Cell(4)
 
 #cell("288d448a-380a-4fdd-a907-f5b149f87456")
 
@@ -21,7 +21,7 @@
 
 #let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "/tests/notebooks/julia.ipynb")
 
-#displays().join()
+#display("plot1", item: 0)
 
 #display("plots", name: "metadata.name", item: 1)
 

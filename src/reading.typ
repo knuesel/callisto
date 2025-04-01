@@ -191,7 +191,7 @@
   return _filter-cells(cs, cell-type: cell-type, keep: keep)
 }
 
-#let cell(..args) = cells(..args, keep: "unique").first()
+#let cell(..args, keep: "unique") = cells(..args, keep: keep).first()
 
 #let normalize-formats(formats) = {
   formats = ensure-array(formats)
