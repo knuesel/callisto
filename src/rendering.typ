@@ -23,7 +23,7 @@
 }
 
 // Render a cell by using the sub-templates specified in the
-// `templates` dictionary, with fields: raw, markdown, input, output.
+// `templates` dictionary, with fields: raw, markdown, code, input, output.
 #let cell-template(
   cell,
   templates: (:),
@@ -104,7 +104,6 @@
   ) {
     template(
       cell,
-      nb: nb,
       template: template,
       input: input,
       output: output,
