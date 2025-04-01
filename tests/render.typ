@@ -2,7 +2,7 @@
 
 #[
   #let (Cell, In, Out) = callisto.config(
-    nb: "/tests/notebooks/cairomakie.ipynb",
+    nb: "/tests/notebooks/julia.ipynb",
     count: "execution",
   )
 
@@ -13,9 +13,9 @@
   #Out(2, output-args: (type: "error"), template: "plain")
 ]
 
-= CairoMakie
+= Julia
 #render(
-  nb: "tests/notebooks/cairomakie.ipynb",
+  nb: "tests/notebooks/julia.ipynb",
   type: ("markdown", "code"),
   // output-args: (type: "execute_result"),
 )

@@ -19,7 +19,7 @@
 #source(0)
 
 
-#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "tests/notebooks/cairomakie.ipynb")
+#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "tests/notebooks/julia.ipynb")
 
 #displays().join()
 
@@ -35,12 +35,12 @@
 
 #result("plots", name: "metadata.name", output: "dict")
 
-#error(4)
+#error(5)
 
 #streams()
 
-#stream(4, output: "dict")
+#stream(5, output: "dict")
 
-#result(6)
+#result(7)
 
-#result(5, handlers: ("text/plain": repr))
+#result(6, handlers: ("text/plain": repr))
