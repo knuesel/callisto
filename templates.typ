@@ -12,7 +12,7 @@
 
 #let plain-raw(cell, ..args) = source(cell)
 #let plain-markdown(cell, cmarker: (:), ..args) = {
- cm.render(source(cell).text, math: mitex, ..cmarker)
+  cm.render(source(cell).text, math: mitex, ..cmarker)
 }
 #let plain-input(cell, input-args: (:), ..args) = source(cell, ..input-args)
 #let plain-output(cell, output-args: (:), ..args) = {

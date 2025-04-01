@@ -91,10 +91,6 @@
     // Literal cell. We must still return an array.
     return (spec,)
   }
-  if spec == none {
-    // Select all cells
-    return nb-cells
-  }
   if type(spec) == function {
     // Filter with given predicate
     return nb-cells.filter(spec)
@@ -122,50 +118,72 @@
   panic("invalid cell specification: " + repr(spec))
 }
 
-// Cell selector. The type parameter is a filter applied at the end.
+#let _filter-cells(cells, type: "all", keep: "all") = {
+  if type == "all" {
+    type = ("code", "markdown", "raw")
+  }
+  let types = ensure-array(type)
+  cells = cells.filter(x => x.cell_type in types)
+  if keep == "all" {
+    return cells
+  }
+  if keep == "unique" {
+    if cells.len() != 1 {
+      panic("expected 1 cell, found " + str(cells.len()))
+    }
+    return cells
+  }
+  if std.type(keep) == int {
+    return (cells.at(keep),)
+  }
+  if std.type(keep) == array {
+    return keep.map(i => cells.at(i))
+  }
+  if std.type(keep) == function {
+    return cells.filter(keep)
+  }
+  panic("invalid keep value: " + repr(keep))
+}
+
+#let _cells-from-spec(spec, nb, count, name) = {
+  if spec == none {
+    // No spec means select all cells
+    return read-notebook(nb).cells
+  }
+  let specs = ensure-array(spec)
+  if specs.all(x => std.type(x) == dictionary) {
+    // No need to read the notebook
+    return specs
+  }
+  let nb-cells = read-notebook(nb).cells
+  let cells = ()
+  for s in specs {
+    cells += _cells(s, nb-cells, count, name)
+  }
+  return cells
+}
+
+// Cell selector. The type and keep parameters are filters applied at the end.
 #let cells(
   ..args,
   nb: none,
   count: "position",
   name: auto,
   type: "all",
+  keep: "all",
 ) = {
   if args.named().len() > 0 {
     panic("invalid named arguments: " + repr(args.named()))
   }
-  if type == "all" {
-    type = ("code", "markdown", "raw")
+  if args.pos().len() > 1 {
+    panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
-  let types = ensure-array(type)
-  let specs = args.pos()
-  if specs.len() == 0 {
-    // Note: none (no selector) means all cells in notebook
-    specs = (none,)
-  }
-  if specs.all(x => std.type(x) == dictionary) {
-    // No need to read the notebook
-    return specs
-  }
-  let nb = read-notebook(nb)
-  let cells = ()
-  for spec in specs {
-    // Concatenate cells for each spec
-    cells += _cells(spec, nb.cells, count, name)
-      .filter(x => x.cell_type in types)
-  }
-  return cells
+  let spec = args.pos().at(0, default: none)
+  let cs = _cells-from-spec(spec, nb, count, name)
+  return _filter-cells(cs, type: type, keep: keep)
 }
 
-#let cell(..args) = {
-  let cs = cells(..args)
-  if cs.len() == 0 {
-    panic("no cell found for specification " + repr(spec))
-  }
-  if cs.len() > 1 {
-    panic("multiple cells founds for specification " + repr(spec))
-  }
-  return cs.first()
-}
+#let cell = cells.with(keep: "unique")
 
 #let normalize-formats(formats) = {
   formats = ensure-array(formats)
@@ -292,6 +310,8 @@
   panic("invalid output specification: " + repr(output))
 }
 
+// For outputs, the cell type is always code, and the type parameter selects
+// the output type.
 #let outputs(
   ..cell-args,
   type: "all",

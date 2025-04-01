@@ -55,7 +55,6 @@
   input-args: (:), // for input (source of code cell) template
   output-args: (:), // for output template
   cmarker: (:),
-  keep: "all",
   template: "notebook",
 ) = {
   if type(template) == str {
@@ -73,21 +72,7 @@
     lang = notebook-lang(nb)
     input-args.lang = lang
   }
-  let cs = cells(..cell-args, nb: nb)
-  if keep == "all" {
-    // nothing to do
-  } else if keep == "unique" {
-    if cs.len() != 1 {
-      panic("expected 1 item, found " + str(cs.len()))
-    }
-  } else if type(keep) == int {
-    cs = (cs.at(keep),)
-  } else if type(keep) == array {
-    cs = keep.map(i => cs.at(i))
-  } else {
-    panic("invalid keep value: " + repr(keep))
-  }
-  for cell in cs {
+  for cell in cells(..cell-args, nb: nb) {
     template(
       cell,
       nb: nb,

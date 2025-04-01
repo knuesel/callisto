@@ -7,6 +7,7 @@
   nb: none,
   count: "position",
   name: auto,
+  keep: "all",
   // Source args
   lang: auto,
   // Output args
@@ -23,7 +24,7 @@
     // Start with default handlers and add/overwrite with provided ones
     handlers = input.default-handlers + handlers
   }
-  let cell-args = (nb: nb, count: count, name: name)
+  let cell-args = (nb: nb, count: count, name: name, keep: keep)
   let input-args = (lang: lang)
   let output-args = (
     format: format,
