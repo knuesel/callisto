@@ -136,21 +136,21 @@ The package also provides many functions that are mostly aliases of the main fun
 
 - [x] Render notebooks in Typst
 
-      - [x] Markdown
-      - [x] results (basic types)
-      - [x] displays (basic types)
-      - [x] stdout and stderr
-      - [x] errors
+   - [x] Markdown
+   - [x] results (basic types)
+   - [x] displays (basic types)
+   - [x] stdout and stderr
+   - [x] errors
 
 - Supported output types
 
-      - [x] text/plain
-      - [x] image/png
-      - [x] image/jpeg
-      - [x] image/svg+xml
-      - [x] text/markdown
-      - [x] text/latex
-      - [ ] text/html
+   - [x] text/plain
+   - [x] image/png
+   - [x] image/jpeg
+   - [x] image/svg+xml
+   - [x] text/markdown
+   - [x] text/latex
+   - [ ] text/html
 
 - [ ] Export, e.g. for round-tripping similar to prequery
 
