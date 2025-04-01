@@ -1,5 +1,5 @@
 #import "/callisto.typ": *
-#import input: pick-format
+#import reading: pick-format
 
 #pick-format(("xyz", "text/plain", "abc"))
 

@@ -1,11 +1,11 @@
 #import "@preview/based:0.2.0": base64
-#import "@preview/cmarker:0.1.3" as cm
+#import "@preview/cmarker:0.1.3"
 #import "@preview/mitex:0.2.5": mitex
 
 #let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
 #let handler-str-image(data) = image(bytes(data))
 #let handler-text(data) = raw(data, block: true)
-#let handler-markdown(data) = cm.render(data, math: mitex)
+#let handler-markdown(data) = cmarker.render(data, math: mitex)
 
 #let cell-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/plain")
@@ -205,20 +205,26 @@
   return precedence.find(f => f in available)
 }
 
-#let read-mime(format, data, handlers) = {
+#let get-all-handlers(handlers) = {
+  if handlers == auto {
+    return default-handlers
+  }
+  if type(handlers) != dictionary {
+    panic("handlers must be auto or a dictionary mapping formats to functions")
+  }
+  // Start with default handlers and add/overwrite with provided ones
+  return default-handlers + handlers
+}
+
+#let read-mime(data, format: default-formats, handlers: default-handlers) = {
   if type(data) == array {
     data = data.join()
   }
-  if handlers == auto {
-    handlers = default-handlers
-  }
-  if type(handlers) != dictionary {
-    panic("handlers must be a dictionary mapping formats to functions")
-  }
-  if format not in handlers {
+  let all-handlers = get-all-handlers(handlers)
+  if format not in all-handlers {
     panic("format " + repr(format) + " has no registered handler")
   }
-  let handler = handlers.at(format)
+  let handler = all-handlers.at(format)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
@@ -248,7 +254,7 @@
     }
     return none
   }
-  let value = read-mime(fmt, item.data.at(fmt), handlers)
+  let value = read-mime(item.data.at(fmt), format: fmt, handlers: handlers)
   return (
     type: item.output_type,
     format: fmt,
@@ -314,8 +320,6 @@
   panic("invalid result specification: " + repr(result))
 }
 
-// For outputs, the cell type is always code, and the type parameter selects
-// the output type.
 #let outputs(
   ..cell-args,
   output-type: "all",
@@ -372,6 +376,10 @@
 // Same as stream-items, but merges all streams (matching `stream`) of the same cell, and always returns an item (possibly with an empty string as value) for each selected cell (of code type).
 #let streams(
   ..cell-args,
+  output-type: "all",
+  format: default-formats,
+  handlers: auto,
+  ignore-wrong-format: false,
   stream: "all",
   result: "value",
 ) = {

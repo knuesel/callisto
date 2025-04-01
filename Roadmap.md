@@ -10,8 +10,8 @@
       - [x] image/png
       - [x] image/jpeg
       - [x] image/svg+xml
+      - [x] text/markdown
       - [ ] text/html
       - [ ] text/latex
-      - [ ] text/markdown
 - [ ] Exporting raw blocks to notebook
 - [ ] Round-tripping similar to prequery

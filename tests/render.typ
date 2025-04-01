@@ -10,7 +10,7 @@
   == Input
   #In(2, template: "plain")
   == Output
-  #Out(2, output-args: (output-type: "error"), template: "plain")
+  #Out(2, output-type: "error", template: "plain")
 ]
 
 = Julia

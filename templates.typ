@@ -1,7 +1,4 @@
-#import "@preview/cmarker:0.1.3" as cm
-#import "@preview/mitex:0.2.5": mitex
-
-#import "input.typ": *
+#import "reading.typ": *
 
 #let _count-string(count) = if count == none { return " " } else { str(count) }
 
@@ -11,17 +8,19 @@
 }
 
 #let plain-raw(cell, ..args) = source(cell)
-#let plain-markdown(cell, cmarker: (:), ..args) = {
-  cm.render(source(cell).text, math: mitex, ..cmarker)
-}
-#let plain-input(cell, input-args: (:), ..args) = source(cell, ..input-args)
-#let plain-output(cell, output-args: (:), ..args) = {
+#let plain-markdown(cell, output-args: none, ..args) = read-mime(
+  source(cell).text,
+  format: "text/markdown",
+  handlers: output-args.handlers,
+)
+#let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
+#let plain-output(cell, output-args: none, ..args) = {
   outputs(cell, ..output-args, result: "value").join()
 }
 
 #let notebook-raw = plain-raw
 #let notebook-markdown = plain-markdown
-#let notebook-input(cell, input-args: (:), ..args) = {
+#let notebook-input(cell, input-args: none, ..args) = {
   let src = source(cell, ..input-args)
   block(
     above: 2em,
@@ -39,7 +38,7 @@
   outset: 0.5em,
   width: 100%,
 )
-#let notebook-output(cell, output-args: (:), ..args) = {
+#let notebook-output(cell, output-args: none, ..args) = {
   let outs = outputs(cell, ..output-args, result: "dict")
   if outs.len() == 0 { return }
   block(

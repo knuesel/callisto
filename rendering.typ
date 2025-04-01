@@ -1,4 +1,4 @@
-#import "input.typ": *
+#import "reading.typ": *
 #import "templates.typ"
 
 #let _template-from-name(name) = {
@@ -48,14 +48,24 @@
 }
 
 #let render(
-  ..cell-args, // includes type to select by cell type
+  // Cell args
+  ..cell-spec,
   nb: none,
-  input: true, // source of a code cell
-  output: true,
-  input-args: (:), // for input (source of code cell) template
-  output-args: (:), // for output template
-  cmarker: (:),
+  count: "position",
+  name: auto,
+  cell-type: "all",
+  keep: "all",
+  // Other args
+  lang: auto,
+  result: "value", // unused but accepted to have more uniform API
+  stream: "all",
+  format: auto,
+  handlers: auto,
+  ignore-wrong-format: false,
   template: "notebook",
+  output-type: "all",
+  input: true,
+  output: true,
 ) = {
   if type(template) == str {
     template = _template-from-name(template)
@@ -67,20 +77,39 @@
     nb = read-notebook(nb)
   }
   // Get lang from notebook if auto
-  let lang = input-args.at("lang", default: auto)
   if lang == auto {
     lang = notebook-lang(nb)
-    input-args.lang = lang
   }
-  for cell in cells(..cell-args, nb: nb) {
+
+  // Arguments for rendering cell inputs
+  let input-args = (
+    lang: lang,
+  )
+  // Arguments for rendering cell outputs
+  let output-args = (
+    stream: stream,
+    format: format,
+    handlers: handlers,
+    ignore-wrong-format: ignore-wrong-format,
+    output-type: output-type,
+  )
+
+  for cell in cells(
+    ..cell-spec,
+    nb: nb,
+    count: count,
+    name: name,
+    cell-type: cell-type,
+    keep: keep,
+  ) {
     template(
       cell,
       nb: nb,
+      template: template,
       input: input,
       output: output,
       input-args: input-args,
       output-args: output-args,
-      cmarker: cmarker,
     )
   }
 }

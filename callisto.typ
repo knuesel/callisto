@@ -1,5 +1,5 @@
-#import "input.typ"
-#import "input.typ": cells, cell, outputs, output, displays, display,
+#import "reading.typ"
+#import "reading.typ": cells, cell, outputs, output, displays, display,
                      results, result, stream-items, stream-item,
                      errors, error, streams, stream, sources, source
 #import "rendering.typ"
