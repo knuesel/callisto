@@ -12,13 +12,15 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 #import "@local/callisto:0.0.1"
 
 // Render whole notebook
-#callisto.render(nb: "notebook.ipynb")
+#callisto.render(nb: json("notebook.ipynb"))
 
 // Render all code cells named/tagged with "plot", showing only the cell output
-#callisto.render("plot", nb: "notebook.ipynb", cell-type: "code", input: false)
+#callisto.render("plot", nb: json("notebook.ipynb"), cell-type: "code", input: false)
 
 // Let's get functions preconfigured to use this notebook
-#let (render, display, Cell, In, Out) = callisto.config(nb: "notebook.ipynb")
+#let (render, display, source, Cell, In, Out) = callisto.config(
+   nb: json("notebook.ipynb"),
+)
 
 // Render only the first 10 cells
 #render(range(10))
