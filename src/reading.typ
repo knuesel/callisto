@@ -1,19 +1,21 @@
 #import "@preview/based:0.2.0": base64
 #import "@preview/cmarker:0.1.3"
-#import "@preview/mitex:0.2.5": mitex
+#import "@preview/mitex:0.2.5"
 
 #let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
 #let handler-str-image(data) = image(bytes(data))
 #let handler-text(data) = raw(data, block: true)
-#let handler-markdown(data) = cmarker.render(data, math: mitex)
+#let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+#let handler-latex(data) = mitex.mitext(data)
 
 #let cell-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$")
-#let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/plain")
+#let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
   "image/svg+xml": handler-str-image,
   "image/png": handler-base64-image,
   "image/jpeg": handler-base64-image,
   "text/markdown": handler-markdown,
+  "text/latex": handler-latex,
   "text/plain": handler-text,
 )
 #let default-names = ("metadata.label", "id", "tags")

@@ -1,4 +1,4 @@
-#import "/callisto.typ": *
+#import "/src/callisto.typ": *
 #import reading: pick-format
 
 #pick-format(("xyz", "text/plain", "abc"))
@@ -8,7 +8,7 @@
   precedence: ("gif", "abc", "text/plain", "xml"),
 )
 
-#let (cells, cell, source) = config(nb: "tests/notebooks/python.ipynb")
+#let (cells, cell, source) = config(nb: "/tests/notebooks/python.ipynb")
 
 #cells(cell-type: "markdown")
 
@@ -19,7 +19,7 @@
 #source(0)
 
 
-#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "tests/notebooks/julia.ipynb")
+#let (outputs, displays, display, results, result, error, streams, stream) = config(nb: "/tests/notebooks/julia.ipynb")
 
 #displays().join()
 

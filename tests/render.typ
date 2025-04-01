@@ -1,4 +1,4 @@
-#import "/callisto.typ" as callisto: *
+#import "/src/callisto.typ" as callisto: *
 
 #[
   #let (Cell, In, Out) = callisto.config(
@@ -15,17 +15,17 @@
 
 = Julia
 #render(
-  nb: "tests/notebooks/julia.ipynb",
+  nb: "/tests/notebooks/julia.ipynb",
   cell-type: ("markdown", "code"),
   // output-args: (output-type: "execute_result"),
 )
 
 = Python
-#render(nb: "tests/notebooks/python.ipynb")
+#render(nb: "/tests/notebooks/python.ipynb")
 
 == Plain template
 
 #show: callisto.templates.doc-template
 
-#render(nb: "tests/notebooks/python.ipynb", template: callisto.templates.plain)
+#render(nb: "/tests/notebooks/python.ipynb", template: callisto.templates.plain)
 

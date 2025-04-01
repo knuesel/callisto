@@ -1,3 +1,3 @@
-#import "/callisto.typ" as callisto: *
+#import "/src/callisto.typ" as callisto: *
 
-#callisto.render(nb: "tests/notebooks/Typesetting Equations.ipynb")
+#callisto.render(nb: "/tests/notebooks/Typesetting Equations.ipynb")
