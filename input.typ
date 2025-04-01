@@ -122,12 +122,12 @@
   panic("invalid cell specification: " + repr(spec))
 }
 
-#let _filter-cells(cells, type: "all", keep: "all") = {
-  if type == "all" {
-    type = ("code", "markdown", "raw")
+#let _filter-cells(cells, cell-type: "all", keep: "all") = {
+  if cell-type == "all" {
+    cell-type = ("code", "markdown", "raw")
   }
-  let types = ensure-array(type)
-  cells = cells.filter(x => x.cell_type in types)
+  let cell-types = ensure-array(cell-type)
+  cells = cells.filter(x => x.cell_type in cell-types)
   if keep == "all" {
     return cells
   }
@@ -137,13 +137,13 @@
     }
     return cells
   }
-  if std.type(keep) == int {
+  if type(keep) == int {
     return (cells.at(keep),)
   }
-  if std.type(keep) == array {
+  if type(keep) == array {
     return keep.map(i => cells.at(i))
   }
-  if std.type(keep) == function {
+  if type(keep) == function {
     return cells.filter(keep)
   }
   panic("invalid keep value: " + repr(keep))
@@ -155,7 +155,7 @@
     return read-notebook(nb).cells
   }
   let specs = ensure-array(spec)
-  if specs.all(x => std.type(x) == dictionary) {
+  if specs.all(x => type(x) == dictionary) {
     // No need to read the notebook
     return specs
   }
@@ -167,13 +167,13 @@
   return cells
 }
 
-// Cell selector. The type and keep parameters are filters applied at the end.
+// Cell selector. The cell-type and keep parameters are filters applied at the end.
 #let cells(
   ..args,
   nb: none,
   count: "position",
   name: auto,
-  type: "all",
+  cell-type: "all",
   keep: "all",
 ) = {
   if args.named().len() > 0 {
@@ -184,7 +184,7 @@
   }
   let spec = args.pos().at(0, default: none)
   let cs = _cells-from-spec(spec, nb, count, name)
-  return _filter-cells(cs, type: type, keep: keep)
+  return _filter-cells(cs, cell-type: cell-type, keep: keep)
 }
 
 #let cell = cells.with(keep: "unique")
@@ -303,46 +303,46 @@
   type: cell.cell_type,
 )
 
-#let final-output(cell, output-spec, dict) = { 
-  if output-spec == "value" {
+#let final-output(cell, result-spec, dict) = { 
+  if result-spec == "value" {
     return dict.value
   }
-  if output-spec == "dict" {
+  if result-spec == "dict" {
     dict.cell = cell-output-dict(cell)
     return dict
   }
-  panic("invalid output specification: " + repr(output))
+  panic("invalid result specification: " + repr(result))
 }
 
 // For outputs, the cell type is always code, and the type parameter selects
 // the output type.
 #let outputs(
   ..cell-args,
-  type: "all",
+  output-type: "all",
   format: default-formats,
   handlers: auto,
   ignore-wrong-format: false,
   stream: "all",
-  output: "value",
+  result: "value",
 ) = {
-  if type == "all" {
-    type = ("display_data", "execute_result", "stream", "error")
+  if output-type == "all" {
+    output-type = ("display_data", "execute_result", "stream", "error")
   }
-  let types = ensure-array(type)
+  let output-types = ensure-array(output-type)
   let process-args = (
     format: format,
     handlers: handlers,
     ignore-wrong-format: ignore-wrong-format,
     stream: stream,
   )
-  let cs = cells(..cell-args, type: "code")
+  let cs = cells(..cell-args, cell-type: "code")
   let outs = ()
   for cell in cs {
     outs += cell.outputs
-      .filter(x => x.output_type in types)
+      .filter(x => x.output_type in output-types)
       .map(x => (processors.at(x.output_type))(x, ..process-args))
       .filter(x => x != none)
-      .map(final-output.with(cell, output))
+      .map(final-output.with(cell, result))
   }
   return outs
 }
@@ -359,23 +359,23 @@
 
 #let output(..args, item: "unique") = single-item(outputs(..args), item: item)
 
-#let displays     = outputs.with(type: "display_data")
-#let results      = outputs.with(type: "execute_result")
-#let errors       = outputs.with(type: "error")
-#let stream-items = outputs.with(type: "stream")
+#let displays     = outputs.with(output-type: "display_data")
+#let results      = outputs.with(output-type: "execute_result")
+#let errors       = outputs.with(output-type: "error")
+#let stream-items = outputs.with(output-type: "stream")
 
-#let display     = output.with(type: "display_data")
-#let result      = output.with(type: "execute_result")
-#let error       = output.with(type: "error")
-#let stream-item = output.with(type: "stream")
+#let display     = output.with(output-type: "display_data")
+#let result      = output.with(output-type: "execute_result")
+#let error       = output.with(output-type: "error")
+#let stream-item = output.with(output-type: "stream")
 
-// Same as stream-items, but merges all streams (matching `type`) of the same cell, and always returns an item (possibly with an empty string as value) for each selected cell (of code type).
+// Same as stream-items, but merges all streams (matching `stream`) of the same cell, and always returns an item (possibly with an empty string as value) for each selected cell (of code type).
 #let streams(
   ..cell-args,
   stream: "all",
-  output: "value",
+  result: "value",
 ) = {
-  let cs = cells(..cell-args, type: "code")
+  let cs = cells(..cell-args, cell-type: "code")
   let outs = ()
   for cell in cs {
     // Start value
@@ -385,17 +385,17 @@
       value: "",
     )
     // Append all stream items to value
-    for item in outputs(cell, type: "stream", stream: stream, output: "value") {
+    for item in outputs(cell, output-type: "stream", stream: stream, result: "value") {
       out.value += item
     }
-    outs.push(final-output(cell, output, out))
+    outs.push(final-output(cell, result, out))
   }
   return outs
 }
 
 #let stream(..args, item: "unique") = single-item(streams(..args), item: item)
 
-#let sources(..args, output: "value", lang: auto) = {
+#let sources(..args, result: "value", lang: auto) = {
   if lang == auto {
     let nb = args.named().at("nb", default: none)
     lang = notebook-lang(nb)
@@ -404,7 +404,7 @@
   let srcs = ()
   for cell in cs {
     let value = raw(cell.source, lang: lang, block: true)
-    srcs.push(final-output(cell, output, (value: value)))
+    srcs.push(final-output(cell, result, (value: value)))
   }
   return srcs
 }

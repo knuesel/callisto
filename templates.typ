@@ -16,7 +16,7 @@
 }
 #let plain-input(cell, input-args: (:), ..args) = source(cell, ..input-args)
 #let plain-output(cell, output-args: (:), ..args) = {
-  outputs(cell, ..output-args, output: "value").join()
+  outputs(cell, ..output-args, result: "value").join()
 }
 
 #let notebook-raw = plain-raw
@@ -40,7 +40,7 @@
   width: 100%,
 )
 #let notebook-output(cell, output-args: (:), ..args) = {
-  let outs = outputs(cell, ..output-args, output: "dict")
+  let outs = outputs(cell, ..output-args, result: "dict")
   if outs.len() == 0 { return }
   block(
     spacing: 0em,

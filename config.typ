@@ -15,7 +15,7 @@
   handlers: auto,
   ignore-wrong-format: false,
   stream: "all",
-  output: "value", // doesn't apply to errors and streams
+  result: "value", // doesn't apply to errors and streams
   // Render args
   cmarker: (:),
   template: "notebook",
@@ -31,7 +31,7 @@
     handlers: handlers,
     ignore-wrong-format: ignore-wrong-format,
     stream: stream,
-    output: output,
+    result: result,
   )
   let render-args = (
     input-args: input-args,
@@ -54,8 +54,8 @@
     error:        input.error.with(..cell-args),
     streams:      input.streams.with(..cell-args),
     stream:       input.stream.with(..cell-args),
-    sources:      input.sources.with(..cell-args, ..input-args, output: output),
-    source:       input.source.with(..cell-args, ..input-args, output: output),
+    sources:      input.sources.with(..cell-args, ..input-args, result: result),
+    source:       input.source.with(..cell-args, ..input-args, result: result),
     template:     templates.doc-template,
     render:       rendering.render.with(..cell-args, ..render-args),
     Cell:         rendering.Cell.with(..cell-args, ..render-args),

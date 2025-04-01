@@ -10,7 +10,7 @@
 
 #let (cells, cell, source) = config(nb: "tests/notebooks/python.ipynb")
 
-#cells(type: "markdown")
+#cells(cell-type: "markdown")
 
 #cell(4)
 
@@ -33,13 +33,13 @@
 
 #result("plots", name: "metadata.name")
 
-#result("plots", name: "metadata.name", output: "dict")
+#result("plots", name: "metadata.name", result: "dict")
 
 #error(5)
 
 #streams()
 
-#stream(5, output: "dict")
+#stream(5, result: "dict")
 
 #result(7)
 

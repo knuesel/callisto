@@ -10,14 +10,14 @@
   == Input
   #In(2, template: "plain")
   == Output
-  #Out(2, output-args: (type: "error"), template: "plain")
+  #Out(2, output-args: (output-type: "error"), template: "plain")
 ]
 
 = Julia
 #render(
   nb: "tests/notebooks/julia.ipynb",
-  type: ("markdown", "code"),
-  // output-args: (type: "execute_result"),
+  cell-type: ("markdown", "code"),
+  // output-args: (output-type: "execute_result"),
 )
 
 = Python
