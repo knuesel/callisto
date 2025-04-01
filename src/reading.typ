@@ -150,9 +150,6 @@
   if type(keep) == array {
     return keep.map(i => cells.at(i))
   }
-  if type(keep) == function {
-    return cells.filter(keep)
-  }
   panic("invalid keep value: " + repr(keep))
 }
 
@@ -194,7 +191,7 @@
   return _filter-cells(cs, cell-type: cell-type, keep: keep)
 }
 
-#let cell = cells.with(keep: "unique")
+#let cell(..args) = cells(..args, keep: "unique").first()
 
 #let normalize-formats(formats) = {
   formats = ensure-array(formats)
