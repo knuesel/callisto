@@ -22,12 +22,12 @@
 #let notebook-raw = plain-raw
 #let notebook-markdown = plain-markdown
 #let notebook-input(cell, input-args: (:), ..args) = {
-  let src = source(cell, ..input-args) // TODO: make sure input-args includes lang, defaulting to kernel lang if unspecified`
+  let src = source(cell, ..input-args)
   block(
     above: 2em,
     width: 100%,
     inset: 0.5em,
-    fill: luma(235),
+    fill: luma(240),
     {
       _in-out-num("In ", cell.execution_count)
       src
