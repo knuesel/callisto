@@ -31,6 +31,15 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 // Force using the PNG version of that output
 #display(2, format: "image/png")
 
+// Change the width of an image read from the noteboo
+#{
+   set image(width: 100%)
+   display(2)
+}
+
+// Another way to do the same thing
+#image(display(2).source, width: 100%)
+
 // Get the source of that cell as a raw block, then get the text of it
 #source(2).text
 
@@ -41,6 +50,8 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 #In("abc")
 #Out("abc")
 ```
+
+The manual call to `json(...)` is currently required to avoid issues with relative file paths between the user root and the package root. This should be solved once Typst gets a `path` type.
 
 ### Main functions
 
@@ -130,7 +141,31 @@ The package also provides many functions that are mostly aliases of the main fun
 
 `In` and `Out:` same as `Cell` but preconfigured to render only the cell input and output respectively.
 
-## Features
+## Markdown and LaTeX rendering configuration
+
+By default Markdown and LaTeX are rendered using [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex). These cannot (yet) render everything.
+
+The Markdown and LaTeX processing can be configured by changing the handlers for `text/markdown` and `text/latex`. For example to get working rendering of image files references in Markdown, the following can be used:
+
+   ```typ
+   #import "@preview/cmarker:0.1.3"
+   #import "@preview/mitex:0.2.5": mitex
+
+   #callisto.render(
+     nb: "notebook.ipynb",
+     handlers: (
+       "text/markdown": cmarker.render.with(
+           math: mitex,
+           scope: (image: (path, alt: none) => image(path, alt: alt)),
+       ),
+     ),
+   )
+   ```
+
+(This should become unnecessary once Typst adds a `path` type for file paths.)
+   
+
+## Current features and roadmap
 
 - [x] Easy reading of cell source and outputs from notebooks
 
@@ -153,33 +188,3 @@ The package also provides many functions that are mostly aliases of the main fun
    - [ ] text/html
 
 - [ ] Export, e.g. for round-tripping similar to prequery
-
-Limitations:
-
-- By default Markdown and LaTeX are rendered using [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex). These cannot (yet) render everything. Note that the Markdown and LaTex processing can be configured by setting different `handlers` for `text/markdown` and `text/latex`. For example to get working rendering of image files references in Markdown, the following can be used:
-
-   ```typ
-   #import "@preview/cmarker:0.1.3"
-   #import "@preview/mitex:0.2.5": mitex
-
-   #callisto.render(
-     nb: "notebook.ipynb",
-     handlers: (
-       "text/markdown": cmarker.render.with(
-           math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
-       ),
-     ),
-   )
-   ```
-   
-
-## Related projects
-
-- [pandoc](https://pandoc.org/): a universal markup converter that can translate Jupyter notebooks.
-
-- [Quarto](https://quarto.org/): a publishing system that can read Jupyter notebooks and render with Typst as backend.
-
-- [Jlyfish](https://github.com/andreasKroepelin/TypstJlyfish.jl/): a package for Julia and Typst to integrate Julia computations in Typst documents.
-
-- [typst_of_jupyter](https://github.com/dermesser/typst_of_jupyter): an OCaml project to render Jupyter notebooks using Typst.
