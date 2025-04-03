@@ -108,6 +108,7 @@
     template(
       cell,
       template: template,
+      handlers: handlers,
       input: input,
       output: output,
       input-args: input-args,

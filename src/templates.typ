@@ -8,10 +8,10 @@
 }
 
 #let plain-raw(cell, ..args) = source(cell)
-#let plain-markdown(cell, output-args: none, ..args) = read-mime(
+#let plain-markdown(cell, handlers: default-handlers, ..args) = read-mime(
   source(cell).text,
   format: "text/markdown",
-  handlers: output-args.handlers,
+  handlers: handlers,
 )
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
 #let plain-output(cell, output-args: none, ..args) = {
