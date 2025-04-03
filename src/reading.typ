@@ -27,6 +27,7 @@
   if "id" not in cell {
     cell.id = str(i)
   }
+  cell.position = i
   let source = cell.at("source", default: "")
   if type(source) == array {
     // Normalize source field to a single string
@@ -307,6 +308,7 @@
 )
 
 #let cell-output-dict(cell) = (
+  position: cell.position,
   id: cell.id,
   execution-count: cell.execution_count,
   metadata: cell.metadata,
