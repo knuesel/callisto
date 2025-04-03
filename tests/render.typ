@@ -44,5 +44,15 @@
   template: "plain",
 )
 #render()
+#pagebreak()
 
+= Python notebook with custom template for `code` cells
 
+#render(template: (
+  code: (c, ..args) => block(inset: (left: 1em), spacing: 2em)[
+    [cell #c.position]
+    #raw(block: true, c.source)
+  ],
+  markdown: "plain",
+  raw: none,
+))

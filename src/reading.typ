@@ -416,7 +416,13 @@
 
 #let stream(..args, item: "unique") = single-item(streams(..args), item: item)
 
-#let sources(..args, result: "value", lang: auto) = {
+#let _cell-lang(cell, lang, raw-lang) = (
+  markdown: "markdown",
+  raw: raw-lang,
+  code: lang,
+).at(cell.cell_type)
+
+#let sources(..args, result: "value", lang: auto, raw-lang: none) = {
   if lang == auto {
     let nb = args.named().at("nb", default: none)
     lang = notebook-lang(nb)
@@ -424,7 +430,8 @@
   let cs = cells(..args)
   let srcs = ()
   for cell in cs {
-    let value = raw(cell.source, lang: lang, block: true)
+    let cell-lang = _cell-lang(cell, lang, raw-lang)
+    let value = raw(cell.source, lang: cell-lang, block: true)
     srcs.push(final-output(cell, result, (value: value)))
   }
   return srcs

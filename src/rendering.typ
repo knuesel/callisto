@@ -57,6 +57,7 @@
   keep: "all",
   // Other args
   lang: auto,
+  raw-lang: none,
   result: "value", // unused but accepted to have more uniform API
   stream: "all",
   format: auto,
@@ -76,7 +77,8 @@
   if nb != none {
     nb = read-notebook(nb)
   }
-  // Get lang from notebook if auto
+  // Get lang from notebook if auto, so that the value can be passed to
+  // templates (which don't receive the notebook itself)
   if lang == auto {
     lang = notebook-lang(nb)
   }
@@ -84,6 +86,7 @@
   // Arguments for rendering cell inputs
   let input-args = (
     lang: lang,
+    raw-lang: raw-lang,
   )
   // Arguments for rendering cell outputs
   let output-args = (

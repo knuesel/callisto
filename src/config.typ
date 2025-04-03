@@ -11,6 +11,7 @@
   keep: "all",
   // Other args
   lang: auto,
+  raw-lang: none,
   result: "value",
   stream: "all",
   format: auto,
@@ -31,6 +32,7 @@
   )
   let input-args = (
     lang: lang,
+    raw-lang: none,
     result: result,
   )
   let output-args = (

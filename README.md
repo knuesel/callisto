@@ -53,6 +53,21 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 
 The manual call to `json(...)` is currently required to avoid issues with relative file paths between the user root and the package root. This should be solved once Typst gets a `path` type.
 
+For more examples see the test files, in particular [api.typ](tests/api.typ) and [render.typ](tests/render.typ).
+
+
+## API
+
+The API is centered on the following main functions:
+
+- `config`: takes settings and returns functions with some parameters preconfigured.
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. Each raw block 
+- `cells`: a lower-level function to get raw cell dicts reflecting the notebook JSON structure, with minimal processing applied (see below).
+
+
+
+proc
+
 ### Main functions
 
 -  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
@@ -123,7 +138,7 @@ The manual call to `json(...)` is currently required to avoid issues with relati
 
    `output` specifies if cell outputs should be rendered.
 
-   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function that can handle all cell types, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`. When a function is passed, it should accept a literal cell (a dict) as positional argument for the cell to render, `input` and `output` keyword arguments (booleans) that specify if the input and/or output of code cells should be rendered and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell or cell component; For code cells the `code` template is used if specified, and this template should honor the `input` and `output` keyword arguments. Otherwise the `input` and/or `output` templates are called (depending on the values of these keyword arguments). The `intput` and `output` templates also receive the `input` and `output` keyword arguments and can use this information for example to produce smaller spacing between input and output when both components are rendered.
+   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function that can handle all cell types, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`, or the value `none`. When a function is passed, it should accept a literal cell (a dict) as positional argument for the cell to render, `input` and `output` keyword arguments (booleans) that specify if the input and/or output of code cells should be rendered and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell or cell component; For code cells the `code` template is used if specified, and this template should honor the `input` and `output` keyword arguments. Otherwise the `input` and/or `output` templates are called (depending on the values of these keyword arguments). The `intput` and `output` templates also receive the `input` and `output` keyword arguments and can use this information for example to produce smaller spacing between input and output when both components are rendered.
 
 ### Auxiliary functions
 

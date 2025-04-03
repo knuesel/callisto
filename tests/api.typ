@@ -70,4 +70,3 @@
 
 === First error in the notebook, in dict form
 #errors(result: "dict").first()
-
