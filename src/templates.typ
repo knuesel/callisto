@@ -20,10 +20,11 @@
 
 #let notebook-raw = plain-raw
 #let notebook-markdown = plain-markdown
-#let notebook-input(cell, input-args: none, ..args) = {
+#let notebook-input(cell, output: true, input-args: none, ..args) = {
   let src = source(cell, ..input-args)
   block(
     above: 2em,
+    below: if output { 0pt } else { 2em },
     width: 100%,
     inset: 0.5em,
     fill: luma(240),
@@ -42,7 +43,8 @@
   let outs = outputs(cell, ..output-args, result: "dict")
   if outs.len() == 0 { return }
   block(
-    spacing: 0em,
+    above: 0pt,
+    below: 2em,
     width: 100%,
     inset: 0.5em,
     {
