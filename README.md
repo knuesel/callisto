@@ -1,49 +1,49 @@
 # Callisto
 
-A Typst package for reading from Jupyter notebooks. It currently adresses the following use cases:
+A Typst package for reading from Jupyter notebooks. It currently addresses the following use cases:
 
 - Extracting specific cell sources and cell outputs, for example to include a plot in a Typst document.
 
 - Rendering a notebook in Typst (embedding selected cells or the whole notebook).
 
-<img src="resources/lorenz.png" width="500px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
+<img src="resources/lorenz.png" width="600px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
 
 ## Usage example
 
 ```typst
-#import "@local/callisto:0.0.1"
+#import "@preview/callisto:0.1.0"
 
 // Render whole notebook
-#callisto.render(nb: json("notebook.ipynb"))
+#callisto.render(nb: json("notebooks/julia.ipynb"))
 
 // Render all code cells named/tagged with "plot", showing only the cell output
-#callisto.render("plot", nb: json("notebook.ipynb"), cell-type: "code", input: false)
+#callisto.render("plot", nb: json("notebooks/julia.ipynb"), cell-type: "code", input: false)
 
 // Let's get functions preconfigured to use this notebook
-#let (render, display, source, Cell, In, Out) = callisto.config(
-   nb: json("notebook.ipynb"),
+#let (render, result, source, Cell, In, Out) = callisto.config(
+   nb: json("notebooks/julia.ipynb"),
 )
 
-// Render only the first 10 cells
-#render(range(10))
+// Render only the first 3 cells
+#render(range(3))
 
-// Get the only display output of the third cell
-#display(2)
+// Get the result of cell with label "plot2"
+#result("plot2")
 
-// Force using the PNG version of that output
-#display(2, format: "image/png")
+// Force using the PNG version of this output
+#result("plot2", format: "image/png")
 
-// Change the width of an image read from the noteboo
+// Change the width of an image read from the notebook
 #{
    set image(width: 100%)
-   display(2)
+   result("plot2")
 }
 
 // Another way to do the same thing
-#image(display(2).source, width: 100%)
+#image(result("plot2").source, width: 100%)
 
 // Get the source of that cell as a raw block, then get the text of it
-#source(2).text
+#source("plot2").text
 
 // Render the cell with execution number 4 (count can also be set by config())
 #Cell(4, count: "execution")
@@ -64,7 +64,7 @@ The API is centered on the following main functions:
 
 - `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
 
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source lanugage can be accessed as fields.
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source language can be accessed as fields.
 
 - `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
@@ -73,7 +73,7 @@ For convenience, many additional functions are derived from these functions by p
 
 All the functions can be further preconfigured by calling `config`, which returns a dict of preconfigured functions. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
 
-Note that preconfigured arguments can always be overriden when a function is called. For example `#let (Cell, In, Out) = config(nb: "file.ipynb", count: "execution")` followed with `#Cell(0, nb: "another-file.ipynb")` will use the "global" `count` setting with the `another-file.ipynb` notebook.
+Note that preconfigured arguments can always be overridden when a function is called. For example `#let (Cell, In, Out) = config(nb: "file.ipynb", count: "execution")` followed with `#Cell(0, nb: "another-file.ipynb")` will use the "global" `count` setting with the `another-file.ipynb` notebook.
 
 Another important, lower-level function is `cells` (and its `cell` alias): it ca be used to retrieve raw cell dicts reflecting the notebook JSON structure, with minimal processing applied:
 
@@ -159,7 +159,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
    `output` specifies if cell outputs should be rendered.
 
-   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function that can handle all cell types, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`, or the value `none`. When a function is passed, it should accept a literal cell (a dict) as positional argument for the cell to render, a `handlers` keyword arugment for the configured handlers, `input` and `output` keyword arguments (booleans) that specify if the input and/or output of code cells should be rendered and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell or cell component; For code cells the `code` template is used if specified, and this template should honor the `input` and `output` keyword arguments. Otherwise the `input` and/or `output` templates are called (depending on the values of these keyword arguments). The `intput` and `output` templates also receive the `input` and `output` keyword arguments and can use this information for example to produce smaller spacing between input and output when both components are rendered.
+   `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function that can handle all cell types, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`, or the value `none`. When a function is passed, it should accept a literal cell (a dict) as positional argument for the cell to render, a `handlers` keyword argument for the configured handlers, `input` and `output` keyword arguments (booleans) that specify if the input and/or output of code cells should be rendered and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell or cell component; For code cells the `code` template is used if specified, and this template should honor the `input` and `output` keyword arguments. Otherwise the `input` and/or `output` templates are called (depending on the values of these keyword arguments). The `input` and `output` templates also receive the `input` and `output` keyword arguments and can use this information for example to produce smaller spacing between input and output when both components are rendered.
 
 ### Alias functions
 
