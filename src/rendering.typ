@@ -52,7 +52,7 @@
   ..cell-spec,
   nb: none,
   count: "position",
-  name: auto,
+  name-path: auto,
   cell-type: "all",
   keep: "all",
   // Other args
@@ -98,7 +98,7 @@
     ..cell-spec,
     nb: nb,
     count: count,
-    name: name,
+    name-path: name-path,
     cell-type: cell-type,
     keep: keep,
   ) {

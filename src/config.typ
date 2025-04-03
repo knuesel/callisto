@@ -6,7 +6,7 @@
   // Cell selection args
   nb: none,
   count: "position",
-  name: auto,
+  name-path: auto,
   cell-type: "all",
   keep: "all",
   // Other args
@@ -25,7 +25,7 @@
   let cell-args = (
     nb: nb,
     count: count,
-    name: name,
+    name-path: name-path,
     cell-type: cell-type,
     keep: keep,
   )

@@ -97,7 +97,7 @@
 }
 
 // Get cells for a single specification
-#let _cells(spec, nb-cells, count, name) = {
+#let _cells(spec, nb-cells, count, name-path) = {
   if type(spec) == dictionary {
     // Literal cell. We must still return an array.
     return (spec,)
@@ -108,10 +108,10 @@
   }
   if type(spec) == str {
     // Match on any of the specified names
-    let names = if name == auto {
+    let names = if name-path == auto {
       default-names
     } else {
-      ensure-array(name)
+      ensure-array(name-path)
     }
     return nb-cells.filter(x => names.any(name-matches.with(x, spec)))
   }
@@ -153,7 +153,7 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(spec, nb, count, name) = {
+#let _cells-from-spec(spec, nb, count, name-path) = {
   if spec == none {
     // No spec means select all cells
     return read-notebook(nb).cells
@@ -166,7 +166,7 @@
   let nb-cells = read-notebook(nb).cells
   let cells = ()
   for s in specs {
-    cells += _cells(s, nb-cells, count, name)
+    cells += _cells(s, nb-cells, count, name-path)
   }
   return cells
 }
@@ -176,7 +176,7 @@
   ..args,
   nb: none,
   count: "position",
-  name: auto,
+  name-path: auto,
   cell-type: "all",
   keep: "all",
 ) = {
@@ -187,7 +187,7 @@
     panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
   let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(spec, nb, count, name)
+  let cs = _cells-from-spec(spec, nb, count, name-path)
   return _filter-cells(cs, cell-type: cell-type, keep: keep)
 }
 
@@ -356,6 +356,9 @@
 }
 
 #let single-item(items, item: "unique") = {
+  if items.len() == 0 {
+    panic("No matching item found")
+  }
   if item == "unique" {
     if items.len() != 1 {
       panic("expected 1 item, found " + str(items.len()))

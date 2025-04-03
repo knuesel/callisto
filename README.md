@@ -57,21 +57,21 @@ The manual call to `json(...)` is currently required to avoid issues with relati
 
 -  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
 
--  `cells([spec], nb: none, count: "position", name: auto, cell-type: "all", keep: "all")`
+-  `cells([spec], nb: none, count: "position", name-path: auto, cell-type: "all", keep: "all")`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
    The optional `spec` argument is used to select cells: if omitted, all cells are selected. Possible values:
 
    -  An integer: by default this refers to the cell position in the notebook, but `count: "execution"` can be used to have this refer to the execution count.
-   -  A string: by default this can be either a cell label, ID, or tag. Cell labels must be set as a "label" field in the cell metadata, or on the first line of cell code:
+   -  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell metadata. This field can be defined by adding a special header at the top of the cell source:
 
       ```
       #| label: xyz
       ...
       ```
 
-      The `name` parameter can be used to change how the string is matched to cells.
+      The `name-path` parameter of the `cells` function can be used to change how the string is matched to cells.
 
    -  A function which is passed a cell dict and must return `true` for desired cells, `false` otherwise.
 
@@ -79,7 +79,7 @@ The manual call to `json(...)` is currently required to avoid issues with relati
 
    `count` can be `"position"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count.
 
-   `name` can be a string or an array of strings, or `auto` for the default names: `("metadata.label", "id", "metadata.tags")`. Each name in the array will be tried in order to check if a particular cell should be selected. A name of the form `x.y` refers to field `y` in field `x` of the cell.
+   `name-path` can be a string or an array of strings, or `auto` for the default paths: `("metadata.label", "id", "metadata.tags")`. Each string in the array specifies a path in the cell dict. The strings will be tried in order to check if a particular cell should be selected. A string of the form `x.y` refers to path `y` in path `x` of the cell.
 
    `cell-type` can be `"markdown"`, `"raw"`, `"code"`, an array of these values, or `"all"`.
 
