@@ -8,11 +8,16 @@
 }
 
 #let plain-raw(cell, ..args) = source(cell)
-#let plain-markdown(cell, handlers: default-handlers, ..args) = read-mime(
-  source(cell).text,
-  format: "text/markdown",
-  handlers: handlers,
-)
+#let plain-markdown(cell, handlers: default-handlers, ..args) = {
+  block(
+    spacing: 1em,
+    read-mime(
+      source(cell).text,
+      format: "text/markdown",
+      handlers: handlers,
+    ),
+  )
+}
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
 #let plain-output(cell, output-args: none, ..args) = {
   outputs(cell, ..output-args, result: "value").join()

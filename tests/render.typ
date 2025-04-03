@@ -25,6 +25,7 @@
 #pagebreak()
 
 = Julia notebook: Markdown and code cells (only results)
+#v(1em)
 #render(
   nb: "/tests/notebooks/julia.ipynb",
   cell-type: ("markdown", "code"),

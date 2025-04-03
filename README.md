@@ -6,6 +6,8 @@ A Typst package for reading from Jupyter notebooks. It currently adresses the fo
 
 - Rendering a notebook in Typst (embedding selected cells or the whole notebook).
 
+<img src="resources/lorenz.png" width="500px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
+
 ## Usage example
 
 ```typst
@@ -67,9 +69,11 @@ The API is centered on the following main functions:
 - `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
 
-For convenience, many additional functions are derived from these three functions by preconfiguring some of their parameters. For example, `render` has `Cell`, `In` and `Out` as preconfigured aliases to render a single cell, either in entirety or just the input or output. And `outputs` has aliases such as `result` and `displays` to get a single cell's result, or an array of display outputs for the selected cells. Most aliases have a singular and a plural form, e.g. `result` and `results`: the singular form will return a single value (which can often be used directly as content), while plural form always returns an array. By default the singular form also checks that there is a single value to return: for example `result("figure1")` will raise an error if the call matches more than one cell.
+For convenience, many additional functions are derived from these functions by preconfiguring some of their parameters. For example, `render` has `Cell`, `In` and `Out` as preconfigured aliases to render a single cell, either in entirety or just the input or output. And `outputs` has aliases such as `result` and `displays` to get a single cell's result, or an array of display outputs for the selected cells. Most aliases have a singular and a plural form, e.g. `result` and `results`: the singular form will return a single value (which can often be used directly as content), while a plural form always returns an array. By default the singular form also checks that there is a single value to return: for example `result("figure1")` will raise an error if the call matches more than one cell.
 
 All the functions can be further preconfigured by calling `config`, which returns a dict of preconfigured functions. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
+
+Note that preconfigured arguments can always be overriden when a function is called. For example `#let (Cell, In, Out) = config(nb: "file.ipynb", count: "execution")` followed with `#Cell(0, nb: "another-file.ipynb")` will use the "global" `count` setting with the `another-file.ipynb` notebook.
 
 Another important, lower-level function is `cells` (and its `cell` alias): it ca be used to retrieve raw cell dicts reflecting the notebook JSON structure, with minimal processing applied:
 
@@ -85,7 +89,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
 ### Main functions
 
--  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
+-  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and alias functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
 
 -  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all")`
 
@@ -157,7 +161,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
    `template` can be one of the built-in template names: `"notebook"` or `"plain"`, or a function that can handle all cell types, or a dict with keys among `raw`, `markdown`, `code`, `input` and `output`, or the value `none`. When a function is passed, it should accept a literal cell (a dict) as positional argument for the cell to render, a `handlers` keyword arugment for the configured handlers, `input` and `output` keyword arguments (booleans) that specify if the input and/or output of code cells should be rendered and `input-args` and `output-args` keyword arguments (dicts) which the function can forward to other functions such as `outputs` and `sources` respectively. When a dict is passed, each value can be a function, or a built-in template name to use that template for that type of cell or cell component; For code cells the `code` template is used if specified, and this template should honor the `input` and `output` keyword arguments. Otherwise the `input` and/or `output` templates are called (depending on the values of these keyword arguments). The `intput` and `output` templates also receive the `input` and `output` keyword arguments and can use this information for example to produce smaller spacing between input and output when both components are rendered.
 
-### Auxiliary functions
+### Alias functions
 
 The package also provides many functions that are mostly aliases of the main functions but with some parameters preconfigured:
 
