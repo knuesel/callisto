@@ -14,7 +14,7 @@
     return (..args) => none
   }
   if type(f) == str {
-    return from-name(f).at(name)
+    return _template-from-name(f).at(name)
   }
   if type(f) != function {
     panic("unsupported template type for " + name + ": " + type(f))

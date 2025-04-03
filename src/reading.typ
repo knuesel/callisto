@@ -313,10 +313,11 @@
 #let cell-output-dict(cell) = (
   position: cell.position,
   id: cell.id,
-  execution-count: cell.execution_count,
   metadata: cell.metadata,
   type: cell.cell_type,
-)
+) + if cell.cell_type == "code" {
+  (execution-count: cell.execution_count)
+}
 
 #let final-output(cell, result-spec, dict) = { 
   if result-spec == "value" {
