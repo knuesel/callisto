@@ -60,25 +60,40 @@ For more examples see the test files, in particular [api.typ](tests/api.typ) and
 
 The API is centered on the following main functions:
 
-- `config`: takes settings and returns functions with some parameters preconfigured.
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. Each raw block 
-- `cells`: a lower-level function to get raw cell dicts reflecting the notebook JSON structure, with minimal processing applied (see below).
+- `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
+
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source lanugage can be accessed as fields.
+
+- `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
 
+For convenience, many additional functions are derived from these three functions by preconfiguring some of their parameters. For example, `render` has `Cell`, `In` and `Out` as preconfigured aliases to render a single cell, either in entirety or just the input or output. And `outputs` has aliases such as `result` and `displays` to get a single cell's result, or an array of display outputs for the selected cells. Most aliases have a singular and a plural form, e.g. `result` and `results`: the singular form will return a single value (which can often be used directly as content), while plural form always returns an array. By default the singular form also checks that there is a single value to return: for example `result("figure1")` will raise an error if the call matches more than one cell.
 
-proc
+All the functions can be further preconfigured by calling `config`, which returns a dict of preconfigured functions. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
+
+Another important, lower-level function is `cells` (and its `cell` alias): it ca be used to retrieve raw cell dicts reflecting the notebook JSON structure, with minimal processing applied:
+
+- A cell ID is generated if missing (this field is mandatory since nbformat 4.5).
+
+- An `index` field is added with the cell index in the notebook, starting at 0.
+
+- The cell source is normalized to be a simple string (nbformat also allows an array of strings).
+
+- For code cells, a metadata header is processed and removed if present: if the first source lines are of the form `#| key: value`, they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source.
+
+
 
 ### Main functions
 
 -  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and auxiliary functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
 
--  `cells([spec], nb: none, count: "position", name-path: auto, cell-type: "all", keep: "all")`
+-  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all")`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
    The optional `spec` argument is used to select cells: if omitted, all cells are selected. Possible values:
 
-   -  An integer: by default this refers to the cell position in the notebook, but `count: "execution"` can be used to have this refer to the execution count.
+   -  An integer: by default this refers to the cell index in the notebook, but `count: "execution"` can be used to have this refer to the execution count.
    -  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell metadata. This field can be defined by adding a special header at the top of the cell source:
 
       ```
@@ -92,7 +107,7 @@ proc
 
    -  A literal cell (a dictionary as returned by another `cells` call).
 
-   `count` can be `"position"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count.
+   `count` can be `"index"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count.
 
    `name-path` can be a string or an array of strings, or `auto` for the default paths: `("metadata.label", "id", "metadata.tags")`. Each string in the array specifies a path in the cell dict. The strings will be tried in order to check if a particular cell should be selected. A string of the form `x.y` refers to path `y` in path `x` of the cell.
 
@@ -100,13 +115,15 @@ proc
 
    `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above.
 
--  `sources(..cell-args, result: "value", lang: auto)`
+-  `sources(..cell-args, result: "value", lang: auto, raw-lang: none)`
 
    Retrieves the source from selected cells. The `cell-args` are the same as for the `cells` function.
 
    `result`: how the function should return its result: `"value"` to return a list of values that can be inserted, or `"dict"` to return a dictionary that contains a `"value"` field as well as metadata.
 
-   `lang`: the language to set on the returned raw blocks. By default this is inferred from the notebook metadata.
+   `lang`: the language to set on the returned raw blocks for code cells. By default this is inferred from the notebook metadata.
+
+   `raw-lang`: the language to set on the returned raw blocks for raw cells.
 
 -  `outputs(..cell-args, output-type: "all", format: default-formats, handlers: auto, ignore-wrong-format: false, stream: "all", result: "value")`
 

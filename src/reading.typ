@@ -27,7 +27,7 @@
   if "id" not in cell {
     cell.id = str(i)
   }
-  cell.position = i
+  cell.index = i
   let source = cell.at("source", default: "")
   if type(source) == array {
     // Normalize source field to a single string
@@ -117,7 +117,7 @@
     return cells-of-type.filter(x => names.any(name-matches.with(x, spec)))
   }
   if type(spec) == int {
-    if count == "position" {
+    if count == "index" {
       // Cell specified by its index. We must still return an array.
       return (all-cells.at(spec),)
     }
@@ -179,7 +179,7 @@
 #let cells(
   ..args,
   nb: none,
-  count: "position",
+  count: "index",
   name-path: auto,
   cell-type: "all",
   keep: "all",
@@ -311,7 +311,7 @@
 )
 
 #let cell-output-dict(cell) = (
-  position: cell.position,
+  index: cell.index,
   id: cell.id,
   metadata: cell.metadata,
   type: cell.cell_type,

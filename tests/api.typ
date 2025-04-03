@@ -20,11 +20,11 @@
 === All markdown cells
 #cells(cell-type: "markdown")
 
-=== Position of cell with id `"288d448a-380a-4fdd-a907-f5b149f87456"`
-#cell("288d448a-380a-4fdd-a907-f5b149f87456").position
+=== Index of cell with id `"288d448a-380a-4fdd-a907-f5b149f87456"`
+#cell("288d448a-380a-4fdd-a907-f5b149f87456").index
 
-=== Merged stream for each code cell, with cell position
-#streams(result: "dict").map(x => (cell: x.cell.position, value: x.value))
+=== Merged stream for each code cell, with cell index
+#streams(result: "dict").map(x => (cell: x.cell.index, value: x.value))
 
 === Source of cell 5
 #source(5)
@@ -70,3 +70,4 @@
 
 === First error in the notebook, in dict form
 #errors(result: "dict").first()
+

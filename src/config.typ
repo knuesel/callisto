@@ -5,7 +5,7 @@
 #let config(
   // Cell selection args
   nb: none,
-  count: "position",
+  count: "index",
   name-path: auto,
   cell-type: "all",
   keep: "all",

@@ -51,7 +51,7 @@
   // Cell args
   ..cell-spec,
   nb: none,
-  count: "position",
+  count: "index",
   name-path: auto,
   cell-type: "all",
   keep: "all",

@@ -50,7 +50,7 @@
 
 #render(template: (
   code: (c, ..args) => block(inset: (left: 1em), spacing: 2em)[
-    [cell #c.position]
+    [cell #c.index]
     #raw(block: true, c.source)
   ],
   markdown: "plain",
