@@ -1,31 +1,48 @@
 #import "/src/callisto.typ" as callisto: *
 
-#[
-  #let (Cell, In, Out) = callisto.config(
-    nb: "/tests/notebooks/julia.ipynb",
-    count: "execution",
-  )
+= Julia notebook
+#let (Cell, In, Out) = callisto.config(
+  nb: "/tests/notebooks/julia.ipynb",
+)
 
-  #Cell(2)
-  == Input
-  #In(2, template: "plain")
-  == Output
-  #Out(2, output-type: "error", template: "plain")
-]
+== Cell 2
+#Cell(2)
 
-= Julia
+=== Rendered input
+#In(2, template: "plain")
+
+=== Rendered output (framed)
+#block(stroke: 1pt, Out(2))
+
+==  Cell with execution count = 3
+
+=== Rendered error
+#Out(3, count: "execution", output-type: "error")
+
+=== Same but with `plain` template
+#Out(3, count: "execution", output-type: "error", template: "plain")
+
+#pagebreak()
+
+= Julia notebook: Markdown and code cells (only results)
 #render(
   nb: "/tests/notebooks/julia.ipynb",
   cell-type: ("markdown", "code"),
-  // output-args: (output-type: "execute_result"),
+  output-type: "execute_result",
 )
+#pagebreak()
 
-= Python
+= Python notebook
 #render(nb: "/tests/notebooks/python.ipynb")
 
-== Plain template
+#pagebreak()
 
-#show: callisto.templates.doc-template
+= Python notebook with `plain` template and doc template
 
-#render(nb: "/tests/notebooks/python.ipynb", template: callisto.templates.plain)
+#let (template, render) = callisto.config(
+  nb: "/tests/notebooks/python.ipynb",
+  template: "plain",
+)
+#render()
+
 
