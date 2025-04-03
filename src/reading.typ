@@ -98,14 +98,14 @@
 }
 
 // Get cells for a single specification
-#let _cells(spec, nb-cells, count, name-path) = {
+#let _cells(spec, cells-of-type, all-cells, count, name-path) = {
   if type(spec) == dictionary {
     // Literal cell. We must still return an array.
     return (spec,)
   }
   if type(spec) == function {
     // Filter with given predicate
-    return nb-cells.filter(spec)
+    return cells-of-type.filter(spec)
   }
   if type(spec) == str {
     // Match on any of the specified names
@@ -114,15 +114,15 @@
     } else {
       ensure-array(name-path)
     }
-    return nb-cells.filter(x => names.any(name-matches.with(x, spec)))
+    return cells-of-type.filter(x => names.any(name-matches.with(x, spec)))
   }
   if type(spec) == int {
     if count == "position" {
       // Cell specified by its index. We must still return an array.
-      return (nb-cells.at(spec),)
+      return (all-cells.at(spec),)
     }
     if count == "execution" {
-      return nb-cells
+      return cells-of-type
         .filter(x => x.at("execution_count", default: none) == spec)
     }
     panic("invalid cell count mode:" + repr(count))
@@ -130,12 +130,7 @@
   panic("invalid cell specification: " + repr(spec))
 }
 
-#let _filter-cells(cells, cell-type: "all", keep: "all") = {
-  if cell-type == "all" {
-    cell-type = ("code", "markdown", "raw")
-  }
-  let cell-types = ensure-array(cell-type)
-  cells = cells.filter(x => x.cell_type in cell-types)
+#let _apply-keep(cells, keep) = {
   if keep == "all" {
     return cells
   }
@@ -154,25 +149,33 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(spec, nb, count, name-path) = {
+#let _filter-type(cells, cell-type) = {
+  if cell-type == "all" {
+    cell-type = ("code", "markdown", "raw")
+  }
+  cells.filter(x => x.cell_type in ensure-array(cell-type))
+}
+
+#let _cells-from-spec(spec, nb, count, name-path, cell-type) = {
+  if type(spec) == dictionary or (
+     type(spec) == array and spec.all(x => type(x) == dictionary)) {
+    // No need to read the notebook
+    return _filter-type(ensure-array(spec), cell-type)
+  }
+  let all-cells = read-notebook(nb).cells
+  let cells-of-type = _filter-type(all-cells, cell-type)
   if spec == none {
     // No spec means select all cells
-    return read-notebook(nb).cells
+    return cells-of-type
   }
-  let specs = ensure-array(spec)
-  if specs.all(x => type(x) == dictionary) {
-    // No need to read the notebook
-    return specs
-  }
-  let nb-cells = read-notebook(nb).cells
   let cells = ()
-  for s in specs {
-    cells += _cells(s, nb-cells, count, name-path)
+  for s in ensure-array(spec) {
+    cells += _cells(s, cells-of-type, all-cells, count, name-path)
   }
   return cells
 }
 
-// Cell selector. The cell-type and keep parameters are filters applied at the end.
+// Cell selector
 #let cells(
   ..args,
   nb: none,
@@ -188,8 +191,8 @@
     panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
   let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(spec, nb, count, name-path)
-  return _filter-cells(cs, cell-type: cell-type, keep: keep)
+  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type)
+  return _apply-keep(cs, keep)
 }
 
 #let cell(..args, keep: "unique") = cells(..args, keep: keep).first()
