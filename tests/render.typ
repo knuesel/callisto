@@ -43,7 +43,10 @@
   nb: "/tests/notebooks/python.ipynb",
   template: "plain",
 )
-#render()
+#[
+  #show: template
+  #render()
+]
 #pagebreak()
 
 = Python notebook with custom template for `code` cells

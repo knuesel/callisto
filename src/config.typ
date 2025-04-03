@@ -2,6 +2,10 @@
 #import "templates.typ"
 #import "rendering.typ"
 
+#let _doc-template(template) = {
+  templates.doc-templates.at(template, default: it => it)
+}
+
 #let config(
   // Cell selection args
   nb: none,
@@ -78,6 +82,6 @@
     Cell:         rendering.Cell    .with(..cell-args, ..all-render-args),
     In:           rendering.In      .with(..cell-args, ..render-args),
     Out:          rendering.Out     .with(..cell-args, ..render-args),
-    template:     templates.doc-template,
+    template:     _doc-template(template),
   )
 }

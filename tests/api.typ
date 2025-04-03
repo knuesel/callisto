@@ -20,23 +20,25 @@
 === All markdown cells
 #cells(cell-type: "markdown")
 
-=== Index of cell with id `"288d448a-380a-4fdd-a907-f5b149f87456"`
-#cell("288d448a-380a-4fdd-a907-f5b149f87456").index
+=== Index of cell with id `"19cdb152-021b-4811-83de-3610ec97fc5b"`
+#cell("19cdb152-021b-4811-83de-3610ec97fc5b").index
 
 === Merged stream for each code cell, with cell index
 #streams(result: "dict").map(x => (cell: x.cell.index, value: x.value))
 
-=== Source of cell 5
-#source(5)
+=== Source of cell 4
+#source(4)
 
-=== Rendering of cell 5
-#Cell(5)
+#pagebreak()
 
-=== Stream names of stream items of cell 5
-#stream-items(5, result: "dict").map(x => x.name)
+=== Rendering of cell 4
+#Cell(4)
 
-=== Last stderr item of cell 5
-#stream-item(5, stream: "stderr", item: -1)
+=== Stream names of stream items of cell 4
+#stream-items(4, result: "dict").map(x => x.name)
+
+=== Last stderr item of cell 4
+#stream-item(4, stream: "stderr", item: -1)
 
 == Using `julia.ipynb`
 
@@ -54,13 +56,15 @@
 // #display("plots", name-path: "metadata.name", format: "x")
 // #display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)
 
+#pagebreak()
+
 === All cell results
 #results().join()
 
 === Result of cell matching `"plot1"`
 #result("plot1")
 
-=== Results of cells with execution count over 3
+=== Results of cells with execution count larger than 3
 #results(c => c.execution_count > 3)
 
 === The only Markdown display, shown using a custom handler (`repr`)

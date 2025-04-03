@@ -66,29 +66,39 @@
   )
 }
 
-// Default templates
-#let plain = (
+// Templates
+
+#let plain-cell = (
   raw: plain-raw,
   markdown: plain-markdown,
   input: plain-input,
   output: plain-output,
 )
-#let notebook = (
+#let notebook-cell = (
   raw: notebook-raw,
   markdown: notebook-markdown,
   input: notebook-input,
   output: notebook-output,
 )
-// Dict of default templates
-#let dict = (
-  plain: plain,
-  notebook: notebook,
+
+// Dict of default cell templates
+#let cell-templates = (
+  plain: plain-cell,
+  notebook: notebook-cell,
 )
 
-#let doc-template(it) = {
+#let plain-doc(it) = {
   show raw.where(block: true): set block(
     inset: (left: 1.2em, y: 1em),
     stroke: (left: 3pt+luma(96%)),
   )
   it
 }
+
+#let notebook-doc(it) = it
+
+// Dict of default doc templates
+#let doc-templates = (
+  plain: plain-doc,
+  notebook: notebook-doc,
+)

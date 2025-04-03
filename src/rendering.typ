@@ -2,10 +2,10 @@
 #import "templates.typ"
 
 #let _template-from-name(name) = {
-  if name not in templates.dict {
+  if name not in templates.cell-templates {
     panic("template name not found: " + name)
   }
-  return templates.dict.at(name)
+  return templates.cell-templates.at(name)
 }
 
 #let _subtemplate(dict, name) = {
