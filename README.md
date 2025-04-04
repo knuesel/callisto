@@ -11,21 +11,26 @@ A Typst package for reading from Jupyter notebooks. It currently addresses the f
 ## Usage example
 
 ```typst
-#import "@preview/callisto:0.1.0"
+#import "@preview/callisto:0.2.0"
 
 // Render whole notebook
 #callisto.render(nb: json("notebooks/julia.ipynb"))
 
-// Render all code cells named/tagged with "plot", showing only the cell output
-#callisto.render("plot", nb: json("notebooks/julia.ipynb"), cell-type: "code", input: false)
+// Render code cells named/tagged with "plots", showing only the cell output
+#callisto.render(
+   "plots",
+   nb: json("notebooks/julia.ipynb"),
+   cell-type: "code",
+   input: false,
+)
 
 // Let's get functions preconfigured to use this notebook
 #let (render, result, source, Cell, In, Out) = callisto.config(
    nb: json("notebooks/julia.ipynb"),
 )
 
-// Render only the first 3 cells
-#render(range(3))
+// Render only the first 3 cells using the plain template
+#render(range(3), template: "plain")
 
 // Get the result of cell with label "plot2"
 #result("plot2")
@@ -51,6 +56,10 @@ A Typst package for reading from Jupyter notebooks. It currently addresses the f
 // Render separately the input and output of cell "plot2"
 #In("plot2")
 #Out("plot2")
+
+// Use notebook template for code inputs, custom template for markdown cells
+#let my-template(cell, ..args) = repr(cell.source)
+#render(template: (input: "notebook", markdown: my-template))
 ```
 
 The manual call to `json(...)` is currently required to avoid issues with relative file paths between the user root and the package root. This should be solved once Typst gets a `path` type.
