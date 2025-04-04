@@ -10,18 +10,20 @@
    ..args,
 ) = {
   if input and input-func != none {
-    input-func(input: input, ..args)
+    input-func(input: true, output: false, ..args)
   }
-  if output and input-func != none {
-    output-func(output: output, ..args)
+  if output and output-func != none {
+    output-func(input: false, output: true, ..args)
   }
 }
 
 // A template function that delegates to a dict field for each cell type
-#let _merged-template(dict, cell, ..args) = {
+#let _merged-template(dict,  cell, ..args) = {
   let f = dict.at(cell.cell_type)
   f(cell, ..args)
 }
+
+#let _null-template(..args) = none
 
 // Normalize a template name/function/dict/none to a function
 #let _normalize-template(value) = {
@@ -29,7 +31,7 @@
     return value
   }
   if value == none {
-    return (..args) => none
+    return _null-template
   }
   if type(value) == str {
     if value not in templates.cell-templates {
