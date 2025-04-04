@@ -4,7 +4,7 @@
 
 #let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
 #let handler-str-image(data) = image(bytes(data))
-#let handler-text(data) = raw(data, block: true, lang: "txt")
+#let handler-text(data) = data
 #let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
 #let handler-latex(data) = mitex.mitext(data)
 

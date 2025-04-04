@@ -40,16 +40,22 @@
     },
   )
 }
-#let normal-block(it) = block(
-  width: 100%,
-  raw(it, block: true),
-)
-#let error-block(it) = block(
+#let normal-block = block.with(width: 100%)
+#let error-block = normal-block.with(
   fill: red.lighten(90%),
   outset: 0.5em,
-  width: 100%,
-  raw(it, block: true),
 )
+
+// Wrap some outputs in a raw block
+#let _notebook-output-value(out) = {
+  if out.type == "error" {
+    return raw(block: true, lang: "txt", out.traceback.join("\n"))
+  }
+  if out.type == "stream" or out.format == "text/plain" {
+    return raw(block: true, lang: "txt", out.value)
+  }
+  return out.value
+}
 
 #let notebook-output(cell, output-args: none, ..args) = {
   let outs = outputs(cell, ..output-args, result: "dict")
@@ -61,19 +67,20 @@
     inset: 0.5em,
     {
       for out in outs {
+        let value = _notebook-output-value(out)
         if out.type == "execute_result" { 
           block({
             _in-out-num("Out", cell.execution_count)
-            out.value
+            value
           })
         } else if out.type == "error" {
-          error-block(out.traceback.join("\n"))
+          error-block(value)
         } else if out.type == "stream" and out.name == "stderr" {
-          error-block(out.value)
+          error-block(value)
         } else if out.type == "stream" {
-          normal-block(out.value)
+          normal-block(value)
         } else {
-          out.value
+          value
         }
       }
     },
