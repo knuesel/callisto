@@ -16,8 +16,8 @@
    nb: json("notebooks/julia.ipynb"),
 )
 
-// Render only the first 3 cells
-#render(range(3))
+// Render only the first 3 cells using the plain template
+#render(range(3), template: "plain")
 
 // Get the result of cell with label "plot2"
 #result("plot2")
@@ -44,3 +44,6 @@
 #In("plot2")
 #Out("plot2")
 
+// Use notebook template for code cells, custom template for markdown cells
+#let my-template(cell, ..args) = repr(cell.source)
+#render(template: (input: "notebook", markdown: my-template))

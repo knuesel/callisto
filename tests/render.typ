@@ -38,16 +38,13 @@
 
 #pagebreak()
 
-= Python notebook with `plain` template and doc template
+= Python notebook with `plain` template
 
-#let (template, render) = callisto.config(
+#let (render,) = callisto.config(
   nb: "/tests/notebooks/python.ipynb",
   template: "plain",
 )
-#[
-  #show: template
-  #render()
-]
+#render()
 #pagebreak()
 
 = Python notebook with custom template for `code` cells

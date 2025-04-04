@@ -92,19 +92,3 @@
   plain: plain-cell,
   notebook: notebook-cell,
 )
-
-#let plain-doc(it) = {
-  show raw.where(block: true): set block(
-    inset: (left: 1.2em, y: 1em),
-    stroke: (left: 3pt+luma(96%)),
-  )
-  it
-}
-
-#let notebook-doc(it) = it
-
-// Dict of default doc templates
-#let doc-templates = (
-  plain: plain-doc,
-  notebook: notebook-doc,
-)

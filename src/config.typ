@@ -2,15 +2,6 @@
 #import "templates.typ"
 #import "rendering.typ"
 
-#let _noop(it) = it
-
-#let _doc-template(template) = {
-  if type(template) == str {
-    return templates.doc-templates.at(template, default: _noop)
-  }
-  return _noop
-}
-
 #let config(
   // Cell selection args
   nb: none,
@@ -89,6 +80,5 @@
     Cell:         rendering.Cell      .with(..cell-args, ..all-render-args),
     In:           rendering.In        .with(..cell-args, ..render-args),
     Out:          rendering.Out       .with(..cell-args, ..render-args),
-    template:     _doc-template(template),
   )
 }

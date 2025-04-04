@@ -89,7 +89,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
 ### Main functions
 
--  `config`: accepts almost all the parameters of the other main functions, and returns a dict with all main and alias functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
+-  `config`: accepts almost all the parameters of the other main functions, and returns a dict with all main and alias functions preconfigured accordingly.
 
 -  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all")`
 
