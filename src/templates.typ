@@ -8,7 +8,7 @@
 }
 
 #let plain-raw(cell, ..args) = source(cell)
-#let plain-markdown(cell, handlers: default-handlers, ..args) = {
+#let plain-markdown(cell, handlers: auto, ..args) = {
   block(
     width: 100%,
     spacing: 1em,

@@ -224,7 +224,7 @@
   return default-handlers + handlers
 }
 
-#let read-mime(data, format: default-formats, handlers: default-handlers) = {
+#let read-mime(data, format: default-formats, handlers: auto) = {
   if type(data) == array {
     data = data.join()
   }
