@@ -75,3 +75,7 @@
 === First error in the notebook, in dict form
 #errors(result: "dict").first()
 
+=== Allow multiple items in singular functions, pick the first
+#let (cell, cells, display, result) = config(nb: "/tests/notebooks/julia.ipynb", item: 0)
+#display("plot1")
+#result("scatter", name-path: "metadata.type")

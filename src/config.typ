@@ -27,6 +27,7 @@
   handlers: auto,
   ignore-wrong-format: false,
   template: "notebook",
+  item: "unique",
   // Special args (should not override args set in pre-configured functions)
   output-type: "all",
   input: true,
@@ -55,6 +56,9 @@
     ..output-args,
     output-type: output-type,
   )
+  let item-args = (
+    item: item,
+  )
   let render-args = (
     ..input-args,
     ..output-args,
@@ -70,23 +74,23 @@
     cells:        reading.cells       .with(..cell-args),
     cell:         reading.cell        .with(..cell-args),
     outputs:      reading.outputs     .with(..cell-args, ..all-output-args),
-    output:       reading.output      .with(..cell-args, ..all-output-args),
+    output:       reading.output      .with(..cell-args, ..all-output-args, ..item-args),
     displays:     reading.displays    .with(..cell-args, ..output-args),
-    display:      reading.display     .with(..cell-args, ..output-args),
+    display:      reading.display     .with(..cell-args, ..output-args, ..item-args),
     results:      reading.results     .with(..cell-args, ..output-args),
-    result:       reading.result      .with(..cell-args, ..output-args),
+    result:       reading.result      .with(..cell-args, ..output-args, ..item-args),
     stream-items: reading.stream-items.with(..cell-args, ..output-args),
-    stream-item:  reading.stream-item .with(..cell-args, ..output-args),
+    stream-item:  reading.stream-item .with(..cell-args, ..output-args, ..item-args),
     errors:       reading.errors      .with(..cell-args, ..output-args),
-    error:        reading.error       .with(..cell-args, ..output-args),
+    error:        reading.error       .with(..cell-args, ..output-args, ..item-args),
     streams:      reading.streams     .with(..cell-args, ..output-args),
-    stream:       reading.stream      .with(..cell-args, ..output-args),
+    stream:       reading.stream      .with(..cell-args, ..output-args, ..item-args),
     sources:      reading.sources     .with(..cell-args, ..input-args),
-    source:       reading.source      .with(..cell-args, ..input-args),
-    render:       rendering.render  .with(..cell-args, ..all-render-args),
-    Cell:         rendering.Cell    .with(..cell-args, ..all-render-args),
-    In:           rendering.In      .with(..cell-args, ..render-args),
-    Out:          rendering.Out     .with(..cell-args, ..render-args),
+    source:       reading.source      .with(..cell-args, ..input-args, ..item-args),
+    render:       rendering.render    .with(..cell-args, ..all-render-args),
+    Cell:         rendering.Cell      .with(..cell-args, ..all-render-args),
+    In:           rendering.In        .with(..cell-args, ..render-args),
+    Out:          rendering.Out       .with(..cell-args, ..render-args),
     template:     _doc-template(template),
   )
 }
