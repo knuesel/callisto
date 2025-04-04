@@ -48,9 +48,9 @@ A Typst package for reading from Jupyter notebooks. It currently addresses the f
 // Render the cell with execution number 4 (count can also be set by config())
 #Cell(4, count: "execution")
 
-// Render separately the input and output of cell named/tagged "abc"
-#In("abc")
-#Out("abc")
+// Render separately the input and output of cell "plot2"
+#In("plot2")
+#Out("plot2")
 ```
 
 The manual call to `json(...)` is currently required to avoid issues with relative file paths between the user root and the package root. This should be solved once Typst gets a `path` type.
