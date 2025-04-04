@@ -24,7 +24,7 @@
 
 #pagebreak()
 
-= Julia notebook: Markdown and code cells (only results)
+= Julia notebook: Markdown and code cells\ (only source and result, no display)
 #v(1em)
 #render(
   nb: "/tests/notebooks/julia.ipynb",
@@ -38,13 +38,19 @@
 
 #pagebreak()
 
-= Python notebook with `plain` template
+= Python notebook with `plain` template, styled raw blocks
 
 #let (render,) = callisto.config(
   nb: "/tests/notebooks/python.ipynb",
   template: "plain",
 )
-#render()
+#[
+  #show raw.where(block: true, lang: "python"): set block(
+    inset: (left: 1.2em, y: 1em),
+    stroke: (left: 3pt+luma(96%)),
+  )
+  #render()
+]
 #pagebreak()
 
 = Python notebook with custom template for `code` cells

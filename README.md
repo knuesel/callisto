@@ -212,6 +212,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    - [x] displays (basic types)
    - [x] stdout and stderr
    - [x] errors
+   - [ ] ANSI escape sequences in text outputs
 
 - Supported output types
 

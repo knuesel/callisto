@@ -40,11 +40,17 @@
     },
   )
 }
-#let error-block = block.with(
+#let normal-block(it) = block(
+  width: 100%,
+  raw(it, block: true),
+)
+#let error-block(it) = block(
   fill: red.lighten(90%),
   outset: 0.5em,
   width: 100%,
+  raw(it, block: true),
 )
+
 #let notebook-output(cell, output-args: none, ..args) = {
   let outs = outputs(cell, ..output-args, result: "dict")
   if outs.len() == 0 { return }
@@ -61,9 +67,11 @@
             out.value
           })
         } else if out.type == "error" {
-            error-block(out.traceback.join("\n"))
+          error-block(out.traceback.join("\n"))
         } else if out.type == "stream" and out.name == "stderr" {
-            error-block(out.value)
+          error-block(out.value)
+        } else if out.type == "stream" {
+          normal-block(out.value)
         } else {
           out.value
         }
