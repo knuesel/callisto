@@ -10,6 +10,7 @@
 #let plain-raw(cell, ..args) = source(cell)
 #let plain-markdown(cell, handlers: default-handlers, ..args) = {
   block(
+    width: 100%,
     spacing: 1em,
     read-mime(
       source(cell).text,
