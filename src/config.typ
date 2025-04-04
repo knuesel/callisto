@@ -2,8 +2,13 @@
 #import "templates.typ"
 #import "rendering.typ"
 
+#let _noop(it) = it
+
 #let _doc-template(template) = {
-  templates.doc-templates.at(template, default: it => it)
+  if type(template) == str {
+    return templates.doc-templates.at(template, default: _noop)
+  }
+  return _noop
 }
 
 #let config(
