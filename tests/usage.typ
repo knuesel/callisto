@@ -3,8 +3,13 @@
 // Render whole notebook
 #callisto.render(nb: json("notebooks/julia.ipynb"))
 
-// Render all code cells named/tagged with "plot", showing only the cell output
-#callisto.render("plot", nb: json("notebooks/julia.ipynb"), cell-type: "code", input: false)
+// Render code cells named/tagged with "plot", showing only the cell output
+#callisto.render(
+   "plot",
+   nb: json("notebooks/julia.ipynb"),
+   cell-type: "code",
+   input: false,
+)
 
 // Let's get functions preconfigured to use this notebook
 #let (render, result, source, Cell, In, Out) = callisto.config(
@@ -39,3 +44,17 @@
 #In("abc")
 #Out("abc")
 
+// // Use notebook template for code cells, custom template for markdown cells
+// // We use the render function that had the notebook preconfigured above
+// #let markdown-template(cell, ..args) = repr(cell.source)
+// #render(template: (code: "notebook", markdown: markdown-template))
+
+// // Render notebook with plain template, using the matching document template
+// #let (template, render) = callisto.config(
+//    nb: json("notebooks/julia.ipynb"),
+//    template: "plain",
+// )
+
+// #show: template
+// #render()
+   

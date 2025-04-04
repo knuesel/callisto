@@ -1,50 +1,62 @@
 #import "reading.typ": *
 #import "templates.typ"
 
-#let _template-from-name(name) = {
-  if name not in templates.cell-templates {
-    panic("template name not found: " + name)
-  }
-  return templates.cell-templates.at(name)
-}
-
-#let _subtemplate(dict, name) = {
-  let f = dict.at(name, default: none)
-  if f == none {
-    return (..args) => none
-  }
-  if type(f) == str {
-    return _template-from-name(f).at(name)
-  }
-  if type(f) != function {
-    panic("unsupported template type for " + name + ": " + type(f))
-  }
-  return f
-}
-
-// Render a cell by using the sub-templates specified in the
-// `templates` dictionary, with fields: raw, markdown, code, input, output.
-#let cell-template(
-  cell,
-  templates: (:),
+// A code template function that uses input and output template functions
+#let _code-template(
+  input-func,
+  output-func,
   input: true,
   output: true,
    ..args,
 ) = {
-  if cell.cell_type != "code" or "code" in templates {
-    let f = _subtemplate(templates, cell.cell_type)
-    return f(cell, ..args, input: input, output: output)
+  if input and input-func != none {
+    input-func(input: input, ..args)
   }
-  // We have a code cell and no code template
-  // -> render input and output separately
-  if input {
-    let f = _subtemplate(templates, "input")
-    f(cell, ..args)
+  if output and input-func != none {
+    output-func(output: output, ..args)
   }
-  if output {
-    let f = _subtemplate(templates, "output")
-    f(cell, ..args)
+}
+
+// A template function that delegates to a dict field for each cell type
+#let _merged-template(dict, cell, ..args) = {
+  let f = dict.at(cell.cell_type)
+  f(cell, ..args)
+}
+
+// Normalize a template name/function/dict/none to a function
+#let _normalize-template(value) = {
+  if type(value) == function {
+    return value
   }
+  if value == none {
+    return (..args) => none
+  }
+  if type(value) == str {
+    if value not in templates.cell-templates {
+      panic("template name not found: " + value)
+    }
+    let resolved = templates.cell-templates.at(value)
+    return _normalize-template(resolved)
+  }
+  if type(value) != dictionary {
+    panic("invalid template type: " + str(type(value)))
+  }
+  let dict = value
+  // For a dict, we normalize the fields and then make a template function.
+  // We must normalize the input and output fields before the code field.
+  dict.input = _normalize-template(dict.at("input", default: none))
+  dict.output = _normalize-template(dict.at("output", default: none))
+  if "code" in dict or (dict.input == none and dict.output == none) {
+    // We can normalize the existing subtemplate, or fall back on none
+    dict.code = _normalize-template(dict.at("code", default: none))
+  } else {
+    // No code subtemplate defined, but input/output is defined
+    dict.code = _code-template.with(dict.input, dict.output)
+  }
+  dict.markdown = _normalize-template(dict.at("markdown", default: none))
+  dict.raw = _normalize-template(dict.at("raw", default: none))
+
+  return _merged-template.with(dict)
 }
 
 #let render(
@@ -68,12 +80,7 @@
   input: true,
   output: true,
 ) = {
-  if type(template) == str {
-    template = _template-from-name(template)
-  }
-  if type(template) == dictionary {
-    template = cell-template.with(templates: template)
-  }
+  template = _normalize-template(template)
   if nb != none {
     nb = read-notebook(nb)
   }
