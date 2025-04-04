@@ -6,7 +6,7 @@ A Typst package for reading from Jupyter notebooks. It currently addresses the f
 
 - Rendering a notebook in Typst (embedding selected cells or the whole notebook).
 
-<img src="resources/lorenz.png" width="600px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
+<img src="resources/lorenz-extract.png" width="600px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
 
 ## Usage example
 
