@@ -75,7 +75,7 @@ All the functions can be further preconfigured by calling `config`, which return
 
 Note that preconfigured arguments can always be overridden when a function is called. For example `#let (Cell, In, Out) = config(nb: "file.ipynb", count: "execution")` followed with `#Cell(0, nb: "another-file.ipynb")` will use the "global" `count` setting with the `another-file.ipynb` notebook.
 
-Another important, lower-level function is `cells` (and its `cell` alias): it ca be used to retrieve raw cell dicts reflecting the notebook JSON structure, with minimal processing applied:
+Another important, lower-level function is `cells` (and its `cell` alias): it can be used to retrieve raw cell dicts reflecting the notebook JSON structure, with minimal processing applied:
 
 - A cell ID is generated if missing (this field is mandatory since nbformat 4.5).
 
@@ -89,7 +89,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
 ### Main functions
 
--  `config`: accepts all the parameters of the other main functions, and returns a dict with all main and alias functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
+-  `config`: accepts almost all the parameters of the other main functions, and returns a dict with all main and alias functions preconfigured accordingly. Also returns a `template` function for the whole document, to be used together with `render(template: "plain")`.
 
 -  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all")`
 
@@ -117,7 +117,7 @@ Another important, lower-level function is `cells` (and its `cell` alias): it ca
 
    `cell-type` can be `"markdown"`, `"raw"`, `"code"`, an array of these values, or `"all"`.
 
-   `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above.
+   `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. This parameter cannot be set in `config`: it has meaning only in conjunction with the other `cells` arguments.
 
 -  `sources(..cell-args, result: "value", lang: auto, raw-lang: none)`
 

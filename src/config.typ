@@ -17,7 +17,6 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
-  keep: "all",
   // Other args
   lang: auto,
   raw-lang: none,
@@ -38,7 +37,6 @@
     count: count,
     name-path: name-path,
     cell-type: cell-type,
-    keep: keep,
   )
   let input-args = (
     lang: lang,
