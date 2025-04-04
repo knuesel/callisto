@@ -44,6 +44,6 @@
 #In("plot2")
 #Out("plot2")
 
-// Use notebook template for code cells, custom template for markdown cells
+// Use notebook template for code inputs, custom template for markdown cells
 #let my-template(cell, ..args) = repr(cell.source)
 #render(template: (input: "notebook", markdown: my-template))

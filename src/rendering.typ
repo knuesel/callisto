@@ -1,7 +1,10 @@
 #import "reading.typ": *
 #import "templates.typ"
 
-// A code template function that uses input and output template functions
+// A code template function that uses input and output template functions.
+// Both input and output keywords are forwarded to the input/output templates to
+// let them use this information for example to produce smaller spacing between
+// input and output when both components are rendered.
 #let _code-template(
   input-func,
   output-func,
@@ -10,20 +13,44 @@
    ..args,
 ) = {
   if input and input-func != none {
-    input-func(input: true, output: false, ..args)
+    input-func(input: input, output: output, ..args)
   }
   if output and output-func != none {
-    output-func(input: false, output: true, ..args)
+    output-func(input: input, output: output, ..args)
   }
 }
 
 // A template function that delegates to a dict field for each cell type
 #let _merged-template(dict,  cell, ..args) = {
-  let f = dict.at(cell.cell_type)
-  f(cell, ..args)
+  let f = dict.at(cell.cell_type, default: none)
+  if f != none {
+    f(cell, ..args)
+  }
 }
 
 #let _null-template(..args) = none
+
+#let _resolve-template(name) = {
+  if name not in templates.cell-templates {
+    panic("template name not found: " + name)
+  }
+  return templates.cell-templates.at(name)
+}
+
+// Normalize a subtemplate name/function/dict/none to a function or none
+#let _normalize-subtemplate(dict, name) = {
+  let value = dict.at(name, default: none)
+  if type(value) == str {
+    value = _resolve-template(value)
+  }
+  if type(value) == dictionary {
+    return _normalize-subtemplate(value, name)
+  }
+  if type(value) == function or value == none {
+    return value
+  }
+  panic("invalid subtemplate type: " + str(type(value)))
+}
 
 // Normalize a template name/function/dict/none to a function
 #let _normalize-template(value) = {
@@ -46,17 +73,17 @@
   let dict = value
   // For a dict, we normalize the fields and then make a template function.
   // We must normalize the input and output fields before the code field.
-  dict.input = _normalize-template(dict.at("input", default: none))
-  dict.output = _normalize-template(dict.at("output", default: none))
+  dict.input = _normalize-subtemplate(dict, "input")
+  dict.output = _normalize-subtemplate(dict, "output")
   if "code" in dict or (dict.input == none and dict.output == none) {
     // We can normalize the existing subtemplate, or fall back on none
-    dict.code = _normalize-template(dict.at("code", default: none))
+    dict.code = _normalize-subtemplate(dict, "code")
   } else {
     // No code subtemplate defined, but input/output is defined
     dict.code = _code-template.with(dict.input, dict.output)
   }
-  dict.markdown = _normalize-template(dict.at("markdown", default: none))
-  dict.raw = _normalize-template(dict.at("raw", default: none))
+  dict.markdown = _normalize-subtemplate(dict, "markdown")
+  dict.raw = _normalize-subtemplate(dict, "raw")
 
   return _merged-template.with(dict)
 }
