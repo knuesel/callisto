@@ -19,6 +19,7 @@
   "text/plain": handler-text,
 )
 #let default-names = ("metadata.label", "id", "metadata.tags")
+#let all-output-types = ("display_data", "execute_result", "stream", "error")
 
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
@@ -340,9 +341,14 @@
   result: "value",
 ) = {
   if output-type == "all" {
-    output-type = ("display_data", "execute_result", "stream", "error")
+    output-type = all-output-types
   }
   let output-types = ensure-array(output-type)
+  for typ in output-types {
+    if typ not in all-output-types {
+      panic("invalid output type: " + typ)
+    }
+  }
   let process-args = (
     format: format,
     handlers: handlers,
