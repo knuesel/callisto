@@ -46,8 +46,8 @@
   nb: "/tests/notebooks/julia.ipynb",
 )
 
-=== Cell with label `"plot1"`
-#display("plot1", item: 0)
+=== Cell with label `"plot3"`
+#display("plot3", item: 0)
 
 === Cell with `"scatter"` type (custom metadata)
 #display("scatter", name-path: "metadata.type", item: 1)
@@ -61,8 +61,8 @@
 === All cell results
 #results().join()
 
-=== Result of cell matching `"plot1"`
-#result("plot1")
+=== Result of cell matching `"plot3"`
+#result("plot3")
 
 === Results of cells with execution count larger than 3
 #results(c => c.execution_count > 3)
@@ -77,5 +77,5 @@
 
 === Allow multiple items in singular functions, pick the first
 #let (cell, cells, display, result) = config(nb: "/tests/notebooks/julia.ipynb", item: 0)
-#display("plot1")
+#display("plot3")
 #result("scatter", name-path: "metadata.type")
