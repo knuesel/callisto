@@ -143,7 +143,7 @@
   ) {
     template(
       cell,
-      template: template,
+      unused: none, // to check the template accepts extra arguments
       handlers: handlers,
       input: input,
       output: output,
