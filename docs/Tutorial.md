@@ -7,7 +7,7 @@ Let's see how we can use Callisto to render a Jupyter notebook, or to extract th
 We start by importing the latest version of the package:
 
 ```typst
-#import "@preview/callisto:0.2.0"
+#import "@preview/callisto:0.2.1"
 ```
 
 We can now configure the package to work with a particular notebook. For this we call `config`:
