@@ -158,6 +158,9 @@
 }
 
 #let _cells-from-spec(spec, nb, count, name-path, cell-type) = {
+  if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
+    panic("invalid literal cell, did you forget the `nb:` keyword while passing a notebook?")
+  }
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
