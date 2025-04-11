@@ -98,8 +98,15 @@
   return value == spec or (type(value) == array and spec in value)
 }
 
+#let _filter-type(cells, cell-type) = {
+  if cell-type == "all" {
+    cell-type = ("code", "markdown", "raw")
+  }
+  cells.filter(x => x.cell_type in ensure-array(cell-type))
+}
+
 // Get cells for a single specification
-#let _cells(spec, cells-of-type, all-cells, count, name-path) = {
+#let _cells(spec, cell-type, cells-of-type, all-cells, count, name-path) = {
   if type(spec) == dictionary {
     // Literal cell. We must still return an array.
     return (spec,)
@@ -120,7 +127,8 @@
   if type(spec) == int {
     if count == "index" {
       // Cell specified by its index. We must still return an array.
-      return (all-cells.at(spec),)
+      // And we access all-cells for performance but must still check the type
+      return _filter-type((all-cells.at(spec),), cell-type)
     }
     if count == "execution" {
       return cells-of-type
@@ -150,13 +158,6 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _filter-type(cells, cell-type) = {
-  if cell-type == "all" {
-    cell-type = ("code", "markdown", "raw")
-  }
-  cells.filter(x => x.cell_type in ensure-array(cell-type))
-}
-
 #let _cells-from-spec(spec, nb, count, name-path, cell-type) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
     panic("invalid literal cell, did you forget the `nb:` keyword while passing a notebook?")
@@ -174,7 +175,7 @@
   }
   let cells = ()
   for s in ensure-array(spec) {
-    cells += _cells(s, cells-of-type, all-cells, count, name-path)
+    cells += _cells(s, cell-type, cells-of-type, all-cells, count, name-path)
   }
   return cells
 }
