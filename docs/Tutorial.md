@@ -7,7 +7,7 @@ Let's see how we can use Callisto to render a Jupyter notebook, or to extract th
 We start by importing the latest version of the package:
 
 ```typst
-#import "@preview/callisto:0.2.1"
+#import "@preview/callisto:0.2.2"
 ```
 
 We can now call functions such as `callisto.render(nb: json("example.ipynb"))`, but it is more convenient to configure them to work with a particular notebook:
