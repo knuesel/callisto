@@ -1,4 +1,4 @@
-#import "../common.typ": ensure-array, parse-main-args
+#import "../common.typ": ensure-array, parse-main-args, disabled
 
 #import "notebook.typ"
 
@@ -138,6 +138,7 @@
 // The function accepts one optional position argument, plus any config
 #let cells(..args, keep: "all") = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

@@ -1,3 +1,5 @@
+#import "../common.typ": all-handlers
+
 // A regex that matches every character that is special in a regex
 #let _metachar-regex = regex(`[.*+?|(){}^$\[\]\\]`.text)
 // A function that replaces a special regex character by its escaped version
@@ -108,12 +110,23 @@
   return cell
 }
 
-#let read(nb, cfg: none) = {
-  if nb == none { return none }
+#let _nb-json(nb, cfg: none) = {
   if type(nb) not in (str, bytes, dictionary) {
     panic("invalid notebook type: " + str(type(nb)))
   }
-  let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
+  if type(nb) == bytes {
+    return json(nb)
+  }
+  if type(nb) == str {
+    let handlers = all-handlers(cfg: cfg)
+    return json(handlers.at("path")(nb, ctx: none))
+  }
+  return nb
+}
+
+#let read(nb, cfg: none) = {
+  if nb == none { return none }
+  let nb-json = _nb-json(nb, cfg: cfg)
   nb-json.cells = nb-json.cells.enumerate().map(
     ((i, c)) => _process-cell(i, c, cfg: cfg)
   )

@@ -39,11 +39,9 @@
 
 // Generic image handler that supports image path and image bytes, used by
 // several others to actually render the image.
-// Must be redefined by the user to support images specified by path.
 #let handler-image-generic(data, ctx: none, ..args) = {
   if type(data) == str {
-    panic("image specified by path (" + data + ") requires a user-defined " +
-      "handler for MIME type \"image-generic\"")
+    return handle(data, mime: "path", ctx: ctx, ..args)
   }
   std.image(data, ..args)
 }
@@ -274,6 +272,11 @@
   )
 }
 
+// Default handler for path: raise an error
+#let handler-path(cell, ctx: none, ..args) = {
+  panic("\"path\" handler undefined. You can define it with callisto.config(..., handler: (path: (x, ..args)=>read(x)))")
+}
+
 // Generic stream handler
 #let handler-stream-generic(data, ctx: none, ..args) = data
 
@@ -398,7 +401,11 @@
   "code-cell-output": handler-code-cell-output,
   "code-cell": handler-code-cell,
   "cell": handler-cell, // called before the cell-type-specific handler
+  // Handlers for content missing from notebook
+  "missing-input": none,
+  "missing-output": none,
   // Other handlers
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
+  "path": handler-path,
 )
