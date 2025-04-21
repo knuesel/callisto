@@ -1,6 +1,6 @@
 #import "/src/callisto.typ"
 
-#let (render, Cell, In, Out) = callisto.config(nb: json("../docs/example.ipynb"))
+#let (render, Cell, In, Out) = callisto.config(nb: json("../../docs/example.ipynb"))
 #render()
 #render(template: "plain")
 #block(stroke: red)[
@@ -14,7 +14,7 @@
 #Out("plot3")
 #Cell("plot3")
 #let (source, display, result, output, outputs) = callisto.config(
-   nb: json("../docs/example.ipynb"),
+   nb: json("../../docs/example.ipynb"),
 )
 #source(0)
 #source("plot1")
@@ -40,13 +40,12 @@
 #let img-data = output("plot1").source
 #let img = image(img-data, width: 75%)
 #align(center, img)
-// Get the PNG version of this plot instead of the SVG
 #output("plot1", format: "image/png")
 #output("plot1", format: ("image/png", "image/svg+xml"))
 #output("plot1", format: ("image/png", auto))
 #output(2, count: "execution")
 #let (render, result) = callisto.config(
-   nb: json("../docs/example.ipynb"),
+   nb: json("../../docs/example.ipynb"),
    count: "execution",
 )
 #render(2)

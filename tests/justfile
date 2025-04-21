@@ -1,11 +1,17 @@
-run-all:
+all-pdf:
     #!/usr/bin/env bash
     shopt -s nullglob
     set -eu
-    for file in *.typ; do
-        just run-test "$file"
+    for file in */*.typ; do
+        just make-pdf "$file"
     done
 
-run-test filename:
-    typst c --root=.. {{filename}} output/{{file_stem(filename)}}.pdf
+make-pdf filename:
+    typst c --root=.. {{filename}} pdf/{{parent_directory(filename)}}.pdf
 
+test:
+    tt run --root=.. -j8
+    
+clean:
+    #!/usr/bin/env bash
+    rm -r */.ipynb_checkpoints

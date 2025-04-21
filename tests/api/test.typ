@@ -14,7 +14,7 @@
 == Using `python.ipynb`
 
 #let (cells, cell, source, Cell, streams, stream-item, stream-items) = config(
-  nb: "/tests/notebooks/python.ipynb",
+  nb: "/tests/render/python.ipynb",
 )
 
 === All markdown cells
@@ -43,7 +43,7 @@
 == Using `julia.ipynb`
 
 #let (display, results, result, errors) = config(
-  nb: "/tests/notebooks/julia.ipynb",
+  nb: json("julia.ipynb"),
 )
 
 === Cell with label `"plot3"`
@@ -76,6 +76,6 @@
 #errors(result: "dict").first()
 
 === Allow multiple items in singular functions, pick the first
-#let (cell, cells, display, result) = config(nb: "/tests/notebooks/julia.ipynb", item: 0)
+#let (cell, cells, display, result) = config(nb: json("julia.ipynb"), item: 0)
 #display("plot3")
 #result("scatter", name-path: "metadata.type")

@@ -2,7 +2,7 @@
 
 = Julia notebook
 #let (Cell, In, Out) = callisto.config(
-  nb: "/tests/notebooks/julia.ipynb",
+  nb: "/tests/api/julia.ipynb",
 )
 
 == Cell 2
@@ -27,21 +27,21 @@
 = Julia notebook: Markdown and code cells\ (only source and result, no display)
 #v(1em)
 #render(
-  nb: "/tests/notebooks/julia.ipynb",
+  nb: "/tests/api/julia.ipynb",
   cell-type: ("markdown", "code"),
   output-type: "execute_result",
 )
 #pagebreak()
 
 = Python notebook
-#render(nb: "/tests/notebooks/python.ipynb")
+#render(nb: json("python.ipynb"))
 
 #pagebreak()
 
 = Python notebook with `plain` template, styled raw blocks
 
 #let (render,) = callisto.config(
-  nb: "/tests/notebooks/python.ipynb",
+  nb: json("python.ipynb"),
   template: "plain",
 )
 #[

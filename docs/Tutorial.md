@@ -253,7 +253,7 @@ Finally we might want to include a plot in a particular format. In a Jupyter not
 In Callisto we can request a particular format using the `format` argument:
 
 ```typst
-// Get the PNG version of this plot instead of the SVG
+// Get the PNG version of this plot
 #output("plot1", format: "image/png")
 ```
 

@@ -4,7 +4,7 @@
 #import "/src/callisto.typ" as callisto: *
 
 #callisto.render(
-  nb: "/tests/notebooks/Cpp.ipynb",
+  nb: json("Cpp.ipynb"),
   handlers: (
     "text/markdown": cmarker.render.with(
         math: mitex,
