@@ -332,11 +332,11 @@ The `render` function always returns a `content` value, but it also has an alias
    #Cell("plot1")
    ```
 
-The `Cell` function itself has aliases to render only the cell input or output:
+The `Cell` function itself has aliases to render only the input or output of a code cell:
 
--  `In` renders the input of one cell,
+-  `In` renders the input of one code cell,
 
--  `Out` renders the output of one cell.
+-  `Out` renders the output of one code cell.
 
 Example:
 

@@ -158,5 +158,5 @@
 }
 
 #let Cell = render.with(keep: "unique")
-#let In = Cell.with(output: false)
-#let Out = Cell.with(input: false)
+#let In = Cell.with(cell-type: "code", output: false)
+#let Out = Cell.with(cell-type: "code", input: false)

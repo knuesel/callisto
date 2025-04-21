@@ -170,3 +170,5 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    - [ ] text/html
 
 - [ ] Export, e.g. for round-tripping similar to prequery
+
+- [ ] Some way to convert the first heading to a title
