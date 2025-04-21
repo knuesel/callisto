@@ -172,6 +172,27 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(handlers: ("text/plain": upper))
       ```
 
+      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
+
+      The default handlers for Markdown and LaTeX use [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex) respectively. These handlers can be redefined to apply custom cmarker/mitex settings. For example, to fix the rendering of image file references in Markdown, the following can be used:
+
+      ```typ
+      #import "@preview/cmarker:0.1.3"
+      #import "@preview/mitex:0.2.5": mitex
+
+      #callisto.render(
+        nb: json("notebook.ipynb"),
+        handlers: (
+          "text/markdown": cmarker.render.with(
+              math: mitex,
+              scope: (image: (path, alt: none) => image(path, alt: alt)),
+          ),
+        ),
+      )
+      ```
+
+      (This should become unnecessary once Typst adds a `path` type for file paths.)
+
    -  `ignore-wrong-format`: by default an error is raised if a selected output has no format matching the list of desired formats (see `format`). Set to `true` to skip the output silently. Example:
 
       ```typst
