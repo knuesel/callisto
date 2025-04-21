@@ -28,8 +28,6 @@
   }
 }
 
-#let _null-template(..args) = none
-
 #let _resolve-template(name) = {
   if name not in templates.cell-templates {
     panic("template name not found: " + name)
@@ -37,35 +35,45 @@
   return templates.cell-templates.at(name)
 }
 
-// Normalize a subtemplate name/function/dict/none to a function or none
-#let _normalize-subtemplate(dict, name) = {
-  let value = dict.at(name, default: none)
+// Return a normalized value for the given key of the given template dict,
+// returning a function or none.
+// Unlike _normalize-template, this doesn't create a new template function to
+// handle various cell types: it only resolves a single field, possibly by
+// digging recursively in dictionaries. When the key is `code`, the dict must
+// have `input` and `output` keys with values already resolved to functions or
+// none: these values might be used for the code template.
+#let _normalize-subtemplate(dict, key) = {
+  // Handle case where "code" is requested but not explictly defined
+  if key == "code" and "code" not in dict {
+    if dict.input == none and dict.output == none {
+      return none
+    }
+    return _code-template.with(dict.input, dict.output)
+  }
+
+  let value = dict.at(key, default: none)
   if type(value) == str {
     value = _resolve-template(value)
-  }
-  if type(value) == dictionary {
-    return _normalize-subtemplate(value, name)
   }
   if type(value) == function or value == none {
     return value
   }
+  if type(value) == dictionary {
+    return _normalize-subtemplate(value, key)
+  }
   panic("invalid subtemplate type: " + str(type(value)))
 }
 
-// Normalize a template name/function/dict/none to a function
+// Normalize a template name/function/dict/none to a function or none
 #let _normalize-template(value) = {
+  if value == none {
+    return none
+  }
   if type(value) == function {
     return value
   }
-  if value == none {
-    return _null-template
-  }
   if type(value) == str {
-    if value not in templates.cell-templates {
-      panic("template name not found: " + value)
-    }
-    let resolved = templates.cell-templates.at(value)
-    return _normalize-template(resolved)
+    return _normalize-template(_resolve-template(value))
   }
   if type(value) != dictionary {
     panic("invalid template type: " + str(type(value)))
@@ -75,16 +83,9 @@
   // We must normalize the input and output fields before the code field.
   dict.input = _normalize-subtemplate(dict, "input")
   dict.output = _normalize-subtemplate(dict, "output")
-  if "code" in dict or (dict.input == none and dict.output == none) {
-    // We can normalize the existing subtemplate, or fall back on none
-    dict.code = _normalize-subtemplate(dict, "code")
-  } else {
-    // No code subtemplate defined, but input/output is defined
-    dict.code = _code-template.with(dict.input, dict.output)
-  }
+  dict.code = _normalize-subtemplate(dict, "code")
   dict.markdown = _normalize-subtemplate(dict, "markdown")
   dict.raw = _normalize-subtemplate(dict, "raw")
-
   return _merged-template.with(dict)
 }
 
@@ -110,6 +111,9 @@
   output: true,
 ) = {
   template = _normalize-template(template)
+  if template == none {
+    return
+  }
   if nb != none {
     nb = read-notebook(nb)
   }
