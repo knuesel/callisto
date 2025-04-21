@@ -133,7 +133,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    #import "@preview/mitex:0.2.5": mitex
 
    #callisto.render(
-     nb: "notebook.ipynb",
+     nb: json("notebook.ipynb"),
      handlers: (
        "text/markdown": cmarker.render.with(
            math: mitex,

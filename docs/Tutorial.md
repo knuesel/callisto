@@ -94,7 +94,7 @@ We can also specify multiple cells by position:
 #render(range(4))
 ```
 
-Note: All the `render` calls above render cells from `example.ipynb`, but we can work with other notebooks at anytime, either by calling `config` again, or by overriding the configuration when we call a function, as in `#render(0, nb: "other-notebook.ipynb")`.
+Note: All the `render` calls above render cells from `example.ipynb`, but we can work with other notebooks at anytime, either by calling `config` again, or by overriding the configuration when we call a function, as in `#render(0, nb: json("other-notebook.ipynb"))`.
 
 ### Rendering a cell input or output
 
