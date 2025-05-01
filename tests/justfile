@@ -6,9 +6,12 @@ all-pdf:
         just make-pdf "$file"
     done
 
-make-pdf filename:
+make-pdf filename: pdf-dir
     typst c --root=.. {{filename}} pdf/{{parent_directory(filename)}}.pdf
 
+pdf-dir:
+    @mkdir -p pdf
+    
 test:
     tt run --root=.. -j8
     
