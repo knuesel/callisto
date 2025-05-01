@@ -1,84 +1,80 @@
-#import "/src/callisto.typ": *
-#import reading: pick-format
+#import "/src/callisto.typ"
 
-== Function `pick-format`
-=== Preferred format among `xyz`, `text/plain`, `abc`
-#pick-format(("xyz", "text/plain", "abc"))
-
-=== Same with `precedence: ("abc", "text/plain")`
-#pick-format(
-  ("xyz", "text/plain", "abc"),
-  precedence: ("abc", "text/plain"),
+// Preferred format among `xyz`, `text/plain`, `abc`
+#assert.eq(
+  callisto.reading.pick-format(("xyz", "text/plain", "abc")),
+  "text/plain",
 )
 
-== Using `python.ipynb`
-
-#let (cells, cell, source, Cell, streams, stream-item, stream-items) = config(
-  nb: "/tests/render/python.ipynb",
+// Same with `precedence: ("abc", "text/plain")`
+#assert.eq(
+  callisto.reading.pick-format(
+    ("xyz", "text/plain", "abc"),
+    precedence: ("abc", "text/plain"),
+  ),
+  "abc",
 )
+
+// With julia.ipynb
+#let (
+  cells,
+  cell,
+  error,
+  results,
+  result,
+  display,
+) = callisto.config(nb: "/tests/julia/julia.ipynb")
 
 // Check for cell deduplication
 #assert.eq(cells((..range(2), 0)).len(), 2)
 
-=== All markdown cells
-#cells(cell-type: "markdown")
+#assert("`aa` not defined" in error(result: "dict").value)
 
-=== Index of cell with id `"19cdb152-021b-4811-83de-3610ec97fc5b"`
-#cell("19cdb152-021b-4811-83de-3610ec97fc5b").index
-
-=== Merged stream for each code cell, with cell index
-#streams(result: "dict").map(x => (cell: x.cell.index, value: x.value))
-
-=== Source of cell 4
-#source(4)
-
-#pagebreak()
-
-=== Rendering of cell 4
-#Cell(4)
-
-=== Stream names of stream items of cell 4
-#stream-items(4, result: "dict").map(x => x.name)
-
-=== Last stderr item of cell 4
-#stream-item(4, stream: "stderr", item: -1)
-
-== Using `julia.ipynb`
-
-#let (display, results, result, errors) = config(
-  nb: json("julia.ipynb"),
+#assert.eq(
+  catch(() => display("plots", name-path: "metadata.name", format: "x")),
+  "panicked with: \"No matching item found\"",
+)
+#assert.eq(
+  catch(() => display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)),
+  "panicked with: \"No matching item found\"",
 )
 
-=== Cell with label `"plot3"`
-#display("plot3", item: 0)
+#assert.eq(results(c => c.execution_count > 3).len(), 2)
 
-=== Cell with `"scatter"` type (custom metadata)
-#display("scatter", name-path: "metadata.type", item: 1)
+#assert.eq(result("plot3"), "5")
 
-// Must fail with nice error messages
-// #display("plots", name-path: "metadata.name", format: "x")
-// #display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)
+#assert.eq(display("plot3", item: 0).func(), image)
 
-#pagebreak()
+#assert.eq(display("scatter", name-path: "metadata.type", item: 1).func(), image)
 
-=== All cell results
-#results().join()
+// Allow multiple items in singular functions, pick the first
+#[
+  #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
+  #assert.eq(display("plot3").func(), image)
+  #assert.eq(result("scatter", name-path: "metadata.type").func(), image)
+]
 
-=== Result of cell matching `"plot3"`
-#result("plot3")
+// With python.ipynb
+#let (
+  cells,
+  cell,
+  streams,
+  stream-items,
+  stream-item,
+) = callisto.config(nb: "/tests/python/python.ipynb")
 
-=== Results of cells with execution count larger than 3
-#results(c => c.execution_count > 3)
 
-=== The only Markdown display, shown using a custom handler (`repr`)
-#display(format: "text/markdown", ignore-wrong-format: true, handlers: (
-  "text/markdown": repr,
-))
+#assert.eq(cells(cell-type: "markdown").len(), 2)
 
-=== First error in the notebook, in dict form
-#errors(result: "dict").first()
+#assert.eq(cell("19cdb152-021b-4811-83de-3610ec97fc5b").index, 3)
 
-=== Allow multiple items in singular functions, pick the first
-#let (cell, cells, display, result) = config(nb: json("julia.ipynb"), item: 0)
-#display("plot3")
-#result("scatter", name-path: "metadata.type")
+#assert.eq(streams(result: "dict").map(x => x.cell.index), (1, 3, 4, 5, 6))
+#assert.eq(
+  streams((4, 5), result: "dict").map(x => x.value),
+  ("Error 1\nMessage 1\nError 2\nMessage 2\n", ""),
+)
+#assert.eq(
+  stream-items(4, result: "dict").map(x => x.name),
+  ("stderr", "stdout", "stderr", "stdout"),
+)
+#assert.eq(stream-item(4, stream: "stderr", item: -1), "Error 2\n")

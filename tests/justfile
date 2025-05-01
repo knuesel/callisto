@@ -2,8 +2,9 @@ all-pdf:
     #!/usr/bin/env bash
     shopt -s nullglob
     set -eu
-    for file in */*.typ; do
-        just make-pdf "$file"
+    # Make PDF for all persistent tests (those that have a ref/ dir)
+    for file in */ref/; do
+        just make-pdf "${file%/ref/}/test.typ"
     done
 
 make-pdf filename: pdf-dir
