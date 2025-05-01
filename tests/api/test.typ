@@ -17,6 +17,9 @@
   nb: "/tests/render/python.ipynb",
 )
 
+// Check for cell deduplication
+#assert.eq(cells((..range(2), 0)).len(), 2)
+
 === All markdown cells
 #cells(cell-type: "markdown")
 

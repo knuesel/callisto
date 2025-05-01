@@ -98,22 +98,32 @@
   return value == spec or (type(value) == array and spec in value)
 }
 
-#let _filter-type(cells, cell-type) = {
+#let _cell-type-array(cell-type) = {
   if cell-type == "all" {
     cell-type = ("code", "markdown", "raw")
   }
-  cells.filter(x => x.cell_type in ensure-array(cell-type))
+  return ensure-array(cell-type)
 }
 
-// Get cells for a single specification
-#let _cells(spec, cell-type, cells-of-type, all-cells, count, name-path) = {
+#let _filter-type(cells, cell-type) = {
+  let types = _cell-type-array(cell-type)
+  cells.filter(x => x.cell_type in types)
+}
+
+// Get cell indices for a single specification.
+// If no cell matches, an empty array is returned.
+// The cells-of-type array contains cells already filtered to match cell-type.
+// The all-cells array contains all cells and can be used for performance for
+// cells specified by their index.
+#let _cell-indices(spec, cell-type, cells-of-type, all-cells, count, name-path) = {
   if type(spec) == dictionary {
-    // Literal cell. We must still return an array.
-    return (spec,)
+    // TODO: check cell type
+    // Literal cell
+    return (spec.index,)
   }
   if type(spec) == function {
     // Filter with given predicate
-    return cells-of-type.filter(spec)
+    return cells-of-type.filter(spec).map(c => c.index)
   }
   if type(spec) == str {
     // Match on any of the specified names
@@ -122,17 +132,21 @@
     } else {
       ensure-array(name-path)
     }
-    return cells-of-type.filter(x => names.any(name-matches.with(x, spec)))
+    return cells-of-type
+      .filter(x => names.any(name-matches.with(x, spec)))
+      .map(c => c.index)
   }
   if type(spec) == int {
     if count == "index" {
-      // Cell specified by its index. We must still return an array.
-      // And we access all-cells for performance but must still check the type
-      return _filter-type((all-cells.at(spec),), cell-type)
+      let type-ok = all-cells.at(spec).cell_type in _cell-type-array(cell-type)
+      return if type-ok { (spec,) } else { () }
     }
     if count == "execution" {
+      // Different cells can have the same execution_count, e.g. when evaluating
+      // only some cells after a kernel restart.
       return cells-of-type
         .filter(x => x.at("execution_count", default: none) == spec)
+        .map(c => c.index)
     }
     panic("invalid cell count mode:" + repr(count))
   }
@@ -173,11 +187,11 @@
     // No spec means select all cells
     return cells-of-type
   }
-  let cells = ()
+  let indices = ()
   for s in ensure-array(spec) {
-    cells += _cells(s, cell-type, cells-of-type, all-cells, count, name-path)
+    indices += _cell-indices(s, cell-type, cells-of-type, all-cells, count, name-path)
   }
-  return cells
+  return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
 // Cell selector
