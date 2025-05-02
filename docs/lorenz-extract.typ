@@ -4,7 +4,7 @@
 
 #callisto.render(
   range(5),
-  nb: "/tests/notebooks/Lorenz.ipynb",
+  nb: "/tests/lorenz/Lorenz.ipynb",
   output-type: "display_data",
 )
  

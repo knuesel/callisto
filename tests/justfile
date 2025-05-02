@@ -1,11 +1,21 @@
-run-all:
+all-pdf:
     #!/usr/bin/env bash
     shopt -s nullglob
     set -eu
-    for file in *.typ; do
-        just run-test "$file"
+    # Make PDF for all persistent tests (those that have a ref/ dir)
+    for file in */ref/; do
+        just make-pdf "${file%/ref/}/test.typ"
     done
 
-run-test filename:
-    typst c --root=.. {{filename}} output/{{file_stem(filename)}}.pdf
+make-pdf filename: pdf-dir
+    typst c --root=.. {{filename}} pdf/{{parent_directory(filename)}}.pdf
 
+pdf-dir:
+    @mkdir -p pdf
+    
+test:
+    tt run --root=.. -j8
+    
+clean:
+    #!/usr/bin/env bash
+    rm -r */.ipynb_checkpoints

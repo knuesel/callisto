@@ -36,6 +36,8 @@ This *renders* the notebook; the cells are inserted in the Typst document:
 
 -  the output of each code cell is inserted as a Typst image or text.
 
+### Using templates
+
 By default the cells are rendered with the `"notebook"` template, which adds some styling to get a notebook look. We can choose the `"plain"` template to get elements without styling:
 
 ```typst
@@ -43,6 +45,20 @@ By default the cells are rendered with the `"notebook"` template, which adds som
 ```
 
 We could also have applied this setting globally in the `config` call with `callisto.config(nb: json("example.ipynb"), template: "plain")`. This would affect all `render` calls.
+
+Different templates can be specified for the different cell types: `"markdown"`, `"code"` and `"raw"`. And instead of a name, a template can also be specified as a function that accepts a cell as argument (as well as keyword arguments for various settings, see the [reference](Reference.md#Templates)).
+
+For example, we might want to write Typst math in our Jupyter notebook, since the syntax is nicer than LaTeX. One way to do that is to write Typst formulas in raw cells, and use a template that renders raw cells by evaluating their source as Typst markup:
+
+```typst
+#render(
+  template: (
+    code: "notebook",
+    markdown: "notebook",
+    raw: (cell, ..args) => eval(cell.source, mode: "markup"),
+  ),
+)
+```
 
 Note: Markdown and LaTeX are rendered using [cmarker](https://typst.app/universe/package/cmarker/) and [mitex](https://typst.app/universe/package/mitex/) (awesome packages, though they don't support everything yet). It is possible to configure these packages or replace them with something else by setting custom handlers for `"text/markdown"` and `"text/latex"` (see the `handlers` keyword argument in the [reference](Reference.md)).
 
@@ -94,7 +110,7 @@ We can also specify multiple cells by position:
 #render(range(4))
 ```
 
-Note: All the `render` calls above render cells from `example.ipynb`, but we can work with other notebooks at anytime, either by calling `config` again, or by overriding the configuration when we call a function, as in `#render(0, nb: "other-notebook.ipynb")`.
+Note: All the `render` calls above render cells from `example.ipynb`, but we can work with other notebooks at anytime, either by calling `config` again, or by overriding the configuration when we call a function, as in `#render(0, nb: json("other-notebook.ipynb"))`.
 
 ### Rendering a cell input or output
 
@@ -253,7 +269,7 @@ Finally we might want to include a plot in a particular format. In a Jupyter not
 In Callisto we can request a particular format using the `format` argument:
 
 ```typst
-// Get the PNG version of this plot instead of the SVG
+// Get the PNG version of this plot
 #output("plot1", format: "image/png")
 ```
 

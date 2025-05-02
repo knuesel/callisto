@@ -1,19 +1,19 @@
 #import "/src/callisto.typ"
 
 // Render whole notebook
-#callisto.render(nb: json("../docs/example.ipynb"))
+#callisto.render(nb: json("../../docs/example.ipynb"))
 
 // Render code cells named/tagged with "plots", showing only the cell output
 #callisto.render(
    "plots",
-   nb: json("../docs/example.ipynb"),
+   nb: json("../../docs/example.ipynb"),
    cell-type: "code",
    input: false,
 )
 
 // Get functions preconfigured to use this notebook
 #let (render, Cell, In, Out) = callisto.config(
-   nb: json("../docs/example.ipynb"),
+   nb: json("../../docs/example.ipynb"),
 )
 
 // Render the first 3 cells using the plain template
@@ -39,7 +39,7 @@
 
 // Get more functions preconfigured for this notebook
 #let (display, result, source, output, outputs) = callisto.config(
-   nb: json("../docs/example.ipynb"),
+   nb: json("../../docs/example.ipynb"),
 )
 
 // Get the result of cell with label "some-code"

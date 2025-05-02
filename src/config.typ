@@ -78,7 +78,8 @@
     source:       reading.source      .with(..cell-args, ..input-args, ..item-args),
     render:       rendering.render    .with(..cell-args, ..all-render-args),
     Cell:         rendering.Cell      .with(..cell-args, ..all-render-args),
-    In:           rendering.In        .with(..cell-args, ..render-args),
-    Out:          rendering.Out       .with(..cell-args, ..render-args),
+    // For In and Out we make sure `cell-args` don't misconfigure the cell type
+    In:           rendering.In        .with(..cell-args, cell-type: "code", ..render-args),
+    Out:          rendering.Out       .with(..cell-args, cell-type: "code", ..render-args),
   )
 }
