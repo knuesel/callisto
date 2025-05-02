@@ -117,9 +117,8 @@
 // cells specified by their index.
 #let _cell-indices(spec, cell-type, cells-of-type, all-cells, count, name-path) = {
   if type(spec) == dictionary {
-    // TODO: check cell type
     // Literal cell
-    return (spec.index,)
+    return _filter-type((spec,), cell-type).map(c => c.index)
   }
   if type(spec) == function {
     // Filter with given predicate

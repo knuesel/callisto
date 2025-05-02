@@ -28,6 +28,9 @@
 // Check for cell deduplication
 #assert.eq(cells((..range(2), 0)).len(), 2)
 
+// Check that cell type is considered for literal cells mixed with other cell specs
+#assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
+
 #assert("`aa` not defined" in error(result: "dict").value)
 
 #assert.eq(

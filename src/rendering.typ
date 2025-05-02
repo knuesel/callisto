@@ -43,7 +43,7 @@
 // have `input` and `output` keys with values already resolved to functions or
 // none: these values might be used for the code template.
 #let _normalize-subtemplate(dict, key) = {
-  // Handle case where "code" is requested but not explictly defined
+  // Handle case where "code" is requested but not explicitly defined
   if key == "code" and "code" not in dict {
     if dict.input == none and dict.output == none {
       return none
