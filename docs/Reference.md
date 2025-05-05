@@ -60,11 +60,17 @@ Most functions accept a cell specification as positional argument. Below we use 
    render(c, cell-type: "code")
    ```
 
--  An array of the above. Example:
+-  An array of the above. Cells that match any of the array elements are included in the result. Examples:
 
    ```typst
    // Render the first 10 cells
    #render(range(10))
+   // Render first cell, "plot1" cell and all cells that have an error
+   #render((
+      0,
+      "plot1",
+      c => c.at("outputs", default: ()).any(x => x.output_type == "error"),
+   ))
    ```
 
 ## Main functions
