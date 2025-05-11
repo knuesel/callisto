@@ -96,6 +96,7 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
+  header-pattern: auto,
   keep: "all",
   // Other args
   lang: auto,
@@ -114,13 +115,19 @@
   if template == none {
     return
   }
-  if nb != none {
-    nb = read-notebook(nb)
+  let processed-nb = if nb == none {
+    none
+  } else {
+    read-notebook(nb, header-pattern)
   }
   // Get lang from notebook if auto, so that the value can be passed to
   // templates (which don't receive the notebook itself)
   if lang == auto {
-    lang = notebook-lang(nb)
+    if processed-nb == none {
+      lang = none
+    } else {
+      lang = _notebook-lang(processed-nb)
+    }
   }
 
   // Arguments for rendering cell inputs
@@ -139,10 +146,11 @@
 
   for cell in cells(
     ..cell-spec,
-    nb: nb,
+    nb: processed-nb,
     count: count,
     name-path: name-path,
     cell-type: cell-type,
+    header-pattern: header-pattern,
     keep: keep,
   ) {
     template(

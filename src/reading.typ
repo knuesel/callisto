@@ -8,7 +8,7 @@
 #let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
 #let handler-latex(data) = mitex.mitext(data)
 
-#let cell-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$")
+#let default-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
   "image/svg+xml": handler-str-image,
@@ -23,8 +23,11 @@
 
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
-// metadata.
-#let process-cell(i, cell) = {
+// metadata, using header-pattern to recognize and parse cell header lines.
+#let _process-cell(i, cell, header-pattern) = {
+  if header-pattern == auto {
+    header-pattern = default-header-pattern
+  }
   if "id" not in cell {
     cell.id = str(i)
   }
@@ -40,7 +43,7 @@
     // Convert metadata in code header to cell metadata
     let n = 0
     for line in source_lines {
-      let m = line.match(cell-header-pattern)
+      let m = line.match(header-pattern)
       if m == none {
         break
       }
@@ -59,25 +62,20 @@
   )
 }
 
-#let read-notebook(nb) = {
+#let read-notebook(nb, header-pattern) = {
   if type(nb) not in (str, bytes, dictionary) {
     panic("invalid notebook type: " + str(type(nb)))
   }
-  if type(nb) in (str, bytes) {
-    nb = json(nb)
+  let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
+  if not nb-json.metadata.at("nbio-processed", default: false) {
+    nb-json.cells = nb-json.cells
+      .enumerate().map( ((i, c)) => _process-cell(i, c, header-pattern) )
   }
-  if not nb.metadata.at("nbio-processed", default: false) {
-    nb.cells = nb.cells.enumerate().map( ((i, c)) => process-cell(i, c) )
-  }
-  return nb
+  return nb-json
 }
 
-#let notebook-lang(nb) = {
-  if nb == none {
-    return none
-  }
-  return read-notebook(nb).metadata.language_info.name
-}
+// Return the language name of the given notebook json
+#let _notebook-lang(nb-json) = nb-json.metadata.language_info.name
 
 // Get value at given path in recursive dict.
 // The path can be a string of the form `key1.key2....`, or an array
@@ -171,7 +169,7 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(spec, nb, count, name-path, cell-type) = {
+#let _cells-from-spec(spec, nb, count, name-path, cell-type, header-pattern) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
     panic("invalid literal cell, did you forget the `nb:` keyword while passing a notebook?")
   }
@@ -180,7 +178,7 @@
     // No need to read the notebook
     return _filter-type(ensure-array(spec), cell-type)
   }
-  let all-cells = read-notebook(nb).cells
+  let all-cells = read-notebook(nb, header-pattern).cells
   let cells-of-type = _filter-type(all-cells, cell-type)
   if spec == none {
     // No spec means select all cells
@@ -200,6 +198,7 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
+  header-pattern: auto,
   keep: "all",
 ) = {
   if args.named().len() > 0 {
@@ -209,7 +208,7 @@
     panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
   let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type)
+  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type, header-pattern)
   return _apply-keep(cs, keep)
 }
 
@@ -445,12 +444,15 @@
   code: lang,
 ).at(cell.cell_type)
 
-#let sources(..args, result: "value", lang: auto, raw-lang: none) = {
+#let sources(..args, nb: none, header-pattern: auto, result: "value", lang: auto, raw-lang: none) = {
   if lang == auto {
-    let nb = args.named().at("nb", default: none)
-    lang = notebook-lang(nb)
+    if nb == none {
+      lang = none
+    } else {
+      lang = _notebook-lang(read-notebook(nb, header-pattern))
+    }
   }
-  let cs = cells(..args)
+  let cs = cells(..args, nb: nb, header-pattern: header-pattern)
   let srcs = ()
   for cell in cs {
     let cell-lang = _cell-lang(cell, lang, raw-lang)

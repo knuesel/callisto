@@ -8,6 +8,7 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
+  header-pattern: auto,
   // Other args
   lang: auto,
   raw-lang: none,
@@ -28,6 +29,7 @@
     count: count,
     name-path: name-path,
     cell-type: cell-type,
+    header-pattern: header-pattern,
   )
   let input-args = (
     lang: lang,
