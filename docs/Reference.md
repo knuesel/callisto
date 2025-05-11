@@ -25,7 +25,7 @@ Most functions accept a cell specification as positional argument. Below we use 
    render(1, count: "execution") // render cell with execution_count equal to 1
    ```
 
--  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell metadata. This field can be defined by adding a special header at the top of the cell source:
+-  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell metadata. This field can be defined by adding a special [header](#cell-data-and-cell-header) at the top of the cell source:
 
    ```
    #| label: xyz
@@ -75,7 +75,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
 ## Main functions
 
--  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all")`
+-  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", header-pattern: auto, keep: "all")`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
@@ -109,6 +109,17 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"))
       ```
 
+   -  `header-pattern` can be a string or regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
+
+      For example the following will change the format to `//| key: value` (with optional space before the pipe symbol):
+
+      ```typst
+      #let (render,) = callisto.config(
+         nb: json("notebook.ipynb"),
+         header-pattern: regex("^// ?\|\s+(.*?):\s+(.*?)\s*$"),
+      )
+      ```
+
    -  `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. This parameter cannot be set in `config`: it has meaning only in conjunction with the other `cells` arguments. Example:
 
       ```typst
@@ -120,7 +131,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
    Retrieves the source from selected cells. The `cell-args` are the same as for the `cells` function.
 
-   -  `result`: how the function should return its result: `"value"` to return a list of values that can be inserted, or `"dict"` to return a dictionary that contains a `"value"` field and a `"cell"` field with the cell index, ID, type, execution count (for code cells) and metadata.
+   -  `result`: how the function should return its result: `"value"` to return a list of values that can be inserted, or `"dict"` to return a dictionary that contains a `"value"` field and a `"cell"` field with the cell index, ID, type, execution count (for code cells) and metadata. Example:
 
       ```typst
       // Get a dict with source and various metadata for each code cell
@@ -134,7 +145,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #sources(lang: "python")
       ```
 
-   -  `raw-lang`: the language to set on the returned raw blocks for raw cells.
+   -  `raw-lang`: the language to set on the returned raw blocks for raw cells. Example:
 
       ```typst
       // Get source of all cells, setting `lang` to `typ` for raw cells
@@ -412,15 +423,17 @@ The lower-level `cells` function (and its `cell` alias) can be used to retrieve 
 
 -  The cell source is normalized to be a simple string (nbformat also allows an array of strings).
 
--  For code cells, a **metadata header** is processed and removed if present: if the first source lines are of the form `#| key: value`, they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source. For example, a code cell `c` containing the following source:
+-  For code cells, a **metadata header** is processed and removed if present: by default, if the first source lines are of the form `#| key: value` (optionally with an extra space between `#` and `|`), they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source. For example, a code cell `c` containing the following source:
 
    ```
    #| label: plot1
-   #| type: scatter
+   # | type: scatter
    scatter(x)
    ```
 
    will have the first two lines replaced by two entries in the cell dict: `c.metadata.label = "plot1"` and `c.metadata.type = "scatter"`.
+
+   The format of header lines can be changed using the `header-pattern` keyword.
 
 Cell dicts can be used in two ways:
 

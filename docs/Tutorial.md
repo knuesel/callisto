@@ -76,7 +76,7 @@ This is the second cell:
 #render(1)
 ```
 
-We can also select cells by "label": Code cells can start with a **header** that defines metadata, and this can be used to specify a cell label. A header line is a line of the form `#| key: value`. Consider for example this cell source:
+We can also select cells by "label": Code cells can start with a **header** that defines metadata, and this can be used to specify a cell label. A header line is a line of the form `#| key: value` (this pattern can be configured). Consider for example this cell source:
 
 ```python
 #| label: plot3
