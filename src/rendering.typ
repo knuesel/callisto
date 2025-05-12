@@ -96,7 +96,7 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
-  header-pattern: auto,
+  cell-header-pattern: auto,
   keep: "all",
   // Other args
   lang: auto,
@@ -118,7 +118,7 @@
   let processed-nb = if nb == none {
     none
   } else {
-    read-notebook(nb, header-pattern)
+    read-notebook(nb, cell-header-pattern)
   }
   // Get lang from notebook if auto, so that the value can be passed to
   // templates (which don't receive the notebook itself)
@@ -150,7 +150,7 @@
     count: count,
     name-path: name-path,
     cell-type: cell-type,
-    header-pattern: header-pattern,
+    cell-header-pattern: cell-header-pattern,
     keep: keep,
   ) {
     template(

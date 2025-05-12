@@ -31,15 +31,15 @@
 // Check that cell type is considered for literal cells mixed with other cell specs
 #assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
 
-// Test header-pattern
+// Test cell-header-pattern
 #let strict-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$") // doesn't allow space between `#` and `|`
 #let cell-spec = arguments("pattern-test", name-path: "metadata.name")
 #assert.eq(cells(..cell-spec).len(), 1)
-#assert.eq(cells(..cell-spec, header-pattern: strict-header-pattern).len(), 0)
+#assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
 #let cpp-pattern = regex("^//\|\s+(.*?):\s+(.*?)\s*$")
 #let cpp-cell-spec = arguments("calc", nb: "/tests/markdown-images/Cpp.ipynb")
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
-#assert.eq(cells(..cpp-cell-spec, header-pattern: cpp-pattern).len(), 1)
+#assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
 #assert("`aa` not defined" in error(result: "dict").value)
 

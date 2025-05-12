@@ -75,7 +75,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
 ## Main functions
 
--  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", header-pattern: auto, keep: "all")`
+-  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", cell-header-pattern: auto, keep: "all")`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
@@ -109,14 +109,14 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"))
       ```
 
-   -  `header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
+   -  `cell-header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
 
       The default header pattern is appropriate for kernels that recognize `#` as starting a line comment. For other kernels the pattern must be set manually. For example the following will change the header format to `//| key: value`, for use with kernels that use `//` for line comments:
 
       ```typst
       #let (render,) = callisto.config(
          nb: json("notebook.ipynb"),
-         header-pattern: regex("^//\|\s+(.*?):\s+(.*?)\s*$"),
+         cell-header-pattern: regex("^//\|\s+(.*?):\s+(.*?)\s*$"),
       )
       ```
 
@@ -433,7 +433,7 @@ The lower-level `cells` function (and its `cell` alias) can be used to retrieve 
 
    will have the first two lines replaced by two entries in the cell dict: `c.metadata.label = "plot1"` and `c.metadata.type = "scatter"`.
 
-   The format of header lines can be changed using the `header-pattern` keyword.
+   The format of header lines can be changed using the `cell-header-pattern` keyword.
 
 Cell dicts can be used in two ways:
 
