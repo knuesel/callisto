@@ -36,6 +36,10 @@
 #let cell-spec = arguments("pattern-test", name-path: "metadata.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, header-pattern: strict-header-pattern).len(), 0)
+#let cpp-pattern = regex("^//\|\s+(.*?):\s+(.*?)\s*$")
+#let cpp-cell-spec = arguments("calc", nb: "/tests/markdown-images/Cpp.ipynb")
+#assert.eq(cells(..cpp-cell-spec).len(), 0)
+#assert.eq(cells(..cpp-cell-spec, header-pattern: cpp-pattern).len(), 1)
 
 #assert("`aa` not defined" in error(result: "dict").value)
 
