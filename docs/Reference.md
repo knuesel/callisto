@@ -116,7 +116,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"), keep: (0, -1))
       ```
 
-   -  `cell-header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
+   -  `cell-header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The pattern must define two capture groups: one for the key, one for the value. The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
 
       The default header pattern is appropriate for kernels that recognize `#` as starting a line comment. For other kernels the pattern must be set manually. For example the following will change the header format to `//| key: value`:
 
