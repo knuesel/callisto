@@ -23,6 +23,7 @@
   results,
   result,
   display,
+  source,
 ) = callisto.config(nb: "/tests/julia/julia.ipynb")
 
 // Check for cell deduplication
@@ -40,6 +41,10 @@
 #let cpp-cell-spec = arguments("calc", nb: "/tests/markdown-images/Cpp.ipynb")
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
+
+// Test keep-cell-header
+#assert.eq(source("plot3").text.split("\n").first(), "a = 2")
+#assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
 
 #assert("`aa` not defined" in error(result: "dict").value)
 

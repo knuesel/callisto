@@ -22,7 +22,7 @@
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
 
 // Convert metadata in code header to cell metadata
-#let _process-cell-header(cell, cell-header-pattern) = {
+#let _process-cell-header(cell, cell-header-pattern, keep-cell-header) = {
   if cell-header-pattern == none {
     return cell
   }
@@ -43,8 +43,8 @@
     let (key, value) = m.captures
     cell.metadata.insert(key, value)
   }
-  // If there was a header, remove it from the source
-  if n > 0 {
+  // Remove header from source if necessary
+  if not keep-cell-header and n > 0 {
     cell.source = source_lines.slice(n).join("\n")
   }
   return cell
@@ -53,7 +53,7 @@
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
 // metadata, using cell-header-pattern to recognize and parse cell header lines.
-#let _process-cell(i, cell, cell-header-pattern) = {
+#let _process-cell(i, cell, cell-header-pattern, keep-cell-header) = {
   if "id" not in cell {
     cell.id = str(i)
   }
@@ -66,19 +66,21 @@
     cell.source = ""
   }
   if cell.cell_type == "code" {
-    cell = _process-cell-header(cell, cell-header-pattern)
+    cell = _process-cell-header(cell, cell-header-pattern, keep-cell-header)
   }
   return cell
 }
 
-#let read-notebook(nb, cell-header-pattern) = {
+#let _read-notebook(nb, cell-header-pattern, keep-cell-header) = {
   if type(nb) not in (str, bytes, dictionary) {
     panic("invalid notebook type: " + str(type(nb)))
   }
   let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
   if not nb-json.metadata.at("nbio-processed", default: false) {
     nb-json.cells = nb-json.cells
-      .enumerate().map( ((i, c)) => _process-cell(i, c, cell-header-pattern) )
+      .enumerate().map(
+        ((i, c)) => _process-cell(i, c, cell-header-pattern, keep-cell-header)
+      )
   }
   return nb-json
 }
@@ -178,7 +180,7 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern) = {
+#let _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern, keep-cell-header) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
     panic("invalid literal cell, did you forget the `nb:` keyword while passing a notebook?")
   }
@@ -187,7 +189,7 @@
     // No need to read the notebook
     return _filter-type(ensure-array(spec), cell-type)
   }
-  let all-cells = read-notebook(nb, cell-header-pattern).cells
+  let all-cells = _read-notebook(nb, cell-header-pattern, keep-cell-header).cells
   let cells-of-type = _filter-type(all-cells, cell-type)
   if spec == none {
     // No spec means select all cells
@@ -207,8 +209,9 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
-  cell-header-pattern: auto,
   keep: "all",
+  cell-header-pattern: auto,
+  keep-cell-header: false,
 ) = {
   if args.named().len() > 0 {
     panic("invalid named arguments: " + repr(args.named()))
@@ -217,7 +220,7 @@
     panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
   let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern)
+  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern, keep-cell-header)
   return _apply-keep(cs, keep)
 }
 
@@ -453,15 +456,23 @@
   code: lang,
 ).at(cell.cell_type)
 
-#let sources(..args, nb: none, cell-header-pattern: auto, result: "value", lang: auto, raw-lang: none) = {
+#let sources(
+  ..args,
+  nb: none,
+  cell-header-pattern: auto,
+  keep-cell-header: false,
+  result: "value",
+  lang: auto,
+  raw-lang: none,
+) = {
   if lang == auto {
     if nb == none {
       lang = none
     } else {
-      lang = _notebook-lang(read-notebook(nb, cell-header-pattern))
+      lang = _notebook-lang(_read-notebook(nb, cell-header-pattern, keep-cell-header))
     }
   }
-  let cs = cells(..args, nb: nb, cell-header-pattern: cell-header-pattern)
+  let cs = cells(..args, nb: nb, cell-header-pattern: cell-header-pattern, keep-cell-header: keep-cell-header)
   let srcs = ()
   for cell in cs {
     let cell-lang = _cell-lang(cell, lang, raw-lang)

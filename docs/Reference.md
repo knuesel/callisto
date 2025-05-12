@@ -75,7 +75,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
 ## Main functions
 
--  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", cell-header-pattern: auto, keep: "all")`
+-  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all", cell-header-pattern: auto, keep-cell-header: false)`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
@@ -109,22 +109,30 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"))
       ```
 
-   -  `cell-header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
-
-      The default header pattern is appropriate for kernels that recognize `#` as starting a line comment. For other kernels the pattern must be set manually. For example the following will change the header format to `//| key: value`, for use with kernels that use `//` for line comments:
-
-      ```typst
-      #let (render,) = callisto.config(
-         nb: json("notebook.ipynb"),
-         cell-header-pattern: regex("^//\|\s+(.*?):\s+(.*?)\s*$"),
-      )
-      ```
-
    -  `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. This parameter cannot be set in `config`: it has meaning only in conjunction with the other `cells` arguments. Example:
 
       ```typst
       // Get first and last non-raw cells with index between 0 and 9
       #cells(range(10), cell-type: ("markdown", "code"), keep: (0, -1))
+      ```
+
+   -  `cell-header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
+
+      The default header pattern is appropriate for kernels that recognize `#` as starting a line comment. For other kernels the pattern must be set manually. For example the following will change the header format to `//| key: value`:
+
+      ```typst
+      #let (render,) = callisto.config(
+         nb: json("notebook.ipynb"),
+         // Header pattern for languages that start line comments with //
+         cell-header-pattern: regex("^//\|\s+(.*?):\s+(.*?)\s*$"),
+      )
+      ```
+
+   -  `keep-cell-header` is a boolean: when `true`, the [metadata header](#cell-data-and-cell-header) is not removed from the cell source. The default is `false`. Example:
+
+      ```typst
+      // Render cells while preserving the cell metadata headers
+      #render(keep-cell-header: true)
       ```
 
 -  `sources(..cell-args, result: "value", lang: auto, raw-lang: none)`
@@ -423,7 +431,7 @@ The lower-level `cells` function (and its `cell` alias) can be used to retrieve 
 
 -  The cell source is normalized to be a simple string (nbformat also allows an array of strings).
 
--  For code cells, a **metadata header** is processed and removed if present: by default, if the first source lines are of the form `#| key: value` (optionally with an extra space between `#` and `|`), they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source. For example, a code cell `c` containing the following source:
+-  For code cells, a **metadata header** is processed and removed if present: by default, if the first source lines are of the form `#| key: value` (optionally with an extra space between `#` and `|`), they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source (unless `keep-cell-header` is set to `true`). For example, a code cell `c` containing the following source:
 
    ```
    #| label: plot1

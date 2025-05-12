@@ -9,6 +9,7 @@
   name-path: auto,
   cell-type: "all",
   cell-header-pattern: auto,
+  keep-cell-header: false,
   // Other args
   lang: auto,
   raw-lang: none,
@@ -30,6 +31,7 @@
     name-path: name-path,
     cell-type: cell-type,
     cell-header-pattern: cell-header-pattern,
+    keep-cell-header: keep-cell-header,
   )
   let input-args = (
     lang: lang,
