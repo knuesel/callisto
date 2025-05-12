@@ -21,45 +21,54 @@
 #let default-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
 
+// Convert metadata in code header to cell metadata
+#let _process-cell-header(cell, header-pattern) = {
+  if header-pattern == none {
+    return cell
+  }
+  if header-pattern == auto {
+    header-pattern = default-header-pattern
+  }
+  if type(header-pattern) != regex {
+    panic("header-pattern must be a regular expression or auto or none")
+  }
+  let source_lines = cell.source.split("\n")
+  let n = 0
+  for line in source_lines {
+    let m = line.match(header-pattern)
+    if m == none {
+      break
+    }
+    n += 1
+    let (key, value) = m.captures
+    cell.metadata.insert(key, value)
+  }
+  // If there was a header, remove it from the source
+  if n > 0 {
+    cell.source = source_lines.slice(n).join("\n")
+  }
+  return cell
+}
+
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
 // metadata, using header-pattern to recognize and parse cell header lines.
 #let _process-cell(i, cell, header-pattern) = {
-  if header-pattern == auto {
-    header-pattern = default-header-pattern
-  }
   if "id" not in cell {
     cell.id = str(i)
   }
   cell.index = i
-  let source = cell.at("source", default: "")
-  if type(source) == array {
     // Normalize source field to a single string
-    source = if source.len() == 0 { "" } else { source.join() }
+  if "source" in cell and type(cell.source) == array {
+    cell.source = cell.source.join() // will be none if array is empty
+  }
+  if "source" not in cell or cell.source == none {
+    cell.source = ""
   }
   if cell.cell_type == "code" {
-    let source_lines = source.split("\n")
-
-    // Convert metadata in code header to cell metadata
-    let n = 0
-    for line in source_lines {
-      let m = line.match(header-pattern)
-      if m == none {
-        break
-      }
-      n += 1
-      let (key, value) = m.captures
-      cell.metadata.insert(key, value)
-    }
-    // If there was a header, remove it from the source
-    if n > 0 {
-      source = source_lines.slice(n).join("\n")
-    }
+    cell = _process-cell-header(cell, header-pattern)
   }
-  return (
-    ..cell,
-    source: source,
-  )
+  return cell
 }
 
 #let read-notebook(nb, header-pattern) = {

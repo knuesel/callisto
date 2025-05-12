@@ -109,7 +109,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"))
       ```
 
-   -  `header-pattern` can be a string or regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
+   -  `header-pattern` can be a regular expression, or `auto` for the default regular expression: `^# ?\|\s+(.*?):\s+(.*?)\s*$`, or `none`. This pattern specifies which lines at the start of code cells constitute a [metadata header](#cell-data-and-cell-header). The default pattern matches lines of the form `#| key: value` and `# | key: value` (a space between `#` and `|` is allowed as it might be added by code formatters and expected by linters).
 
       For example the following will change the format to `//| key: value` (with optional space before the pipe symbol):
 
