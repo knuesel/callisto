@@ -2,10 +2,15 @@
 #import "@preview/cmarker:0.1.3"
 #import "@preview/mitex:0.2.5"
 
+// Handler for base64-encoded images
 #let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
+// Handler for text-encoded images, for example svg+xml
 #let handler-str-image(data) = image(bytes(data))
+// Handler for simple text
 #let handler-text(data) = data
+// Handler for Markdown markup
 #let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+// Handler for LaTeX markup
 #let handler-latex(data) = mitex.mitext(data)
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
