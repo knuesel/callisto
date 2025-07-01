@@ -258,7 +258,9 @@
   return default-handlers + handlers
 }
 
-#let read-mime(data, format: default-formats, handlers: auto) = {
+// Interpret data according to the given MIME format string, using the given
+// handlers dict for decoding.
+#let read-mime(data, format: none, handlers: auto) = {
   if type(data) == array {
     data = data.join()
   }
