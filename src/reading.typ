@@ -9,6 +9,34 @@
 #let handler-str-image(data, ..args) = image(bytes(data), alt: args.at("alt", default: none))
 // Handler for simple text
 #let handler-text(data) = data
+/// Handle images in markdown cells. Returns 'image' element for attachments,
+/// else the path is returned. (Should be fixed when Typst has a path type)
+/// - path (str): The path of the image. Can start with 'attachment:', in which case
+///   the extra arguments 'attachments' and 'process-rich-function' must be provided.
+/// - alt (str): The alt text of the image.
+/// -> content
+#let markdown-cell-image(path, alt: none, ..args) = {
+  if path.starts-with("attachment:") {
+    let filename = path.trim("attachment:", at: start)
+    let attachments = args.at("attachments", default: (:))
+    if filename in attachments {
+      let file = attachments.at(filename)
+      // Needed for mutual recursion: https://github.com/typst/typst/issues/744
+      let process-rich = args.at("process-rich-function")
+      // Profit from the existing image handlers. As a consequence, this will
+      // return 'image' elements.
+      process-rich(file, handlers: (
+        // When embedding svg images, these get base64 encoded -\_(¨)_/-
+        "image/svg+xml": handler-base64-image.with(alt: alt),
+      )).value
+    } else {
+      panic("Jupyter notebook attachment not found")
+    }
+  } else {
+    path
+    //image(path, alt: alt) // TODO: enable when path type available
+  }
+}
 // Handler for Markdown markup
 #let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
 // Handler for LaTeX markup
