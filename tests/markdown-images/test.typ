@@ -6,9 +6,18 @@
 #callisto.render(
   nb: json("Cpp.ipynb"),
   handlers: (
-    "text/markdown": cmarker.render.with(
+    "text/markdown": (data, ..args) => cmarker.render(data,
         math: mitex,
-        scope: (image: (path, alt: none) => image(path, alt: alt)),
+        scope: (image: (path, alt: none) => {
+          if path.starts-with("attachment:") {
+            markdown-cell-image(path, alt: alt, ..args)
+          } else {
+            image(path, alt: alt)
+          }
+          // Alternative:
+          //let img = markdown-cell-image(path, alt: alt, ..args)
+          //if type(img) == str { image(img, alt: alt) } else { img }
+        }),
     ),
   ),
 )
