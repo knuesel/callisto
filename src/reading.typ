@@ -261,7 +261,7 @@
 
 // Interpret data according to the given MIME format string, using the given
 // handlers dict for decoding.
-#let read-mime(data, format: none, handlers: auto) = {
+#let read-mime(data, format: none, handlers: auto, ..args-handler) = {
   if type(data) == array {
     data = data.join()
   }
@@ -273,7 +273,7 @@
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
-  return handler(data)
+  return handler(data, ..args-handler)
 }
 
 // Process a "rich" item, which can have various formats.
