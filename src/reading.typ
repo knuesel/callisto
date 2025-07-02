@@ -3,15 +3,18 @@
 #import "@preview/mitex:0.2.5"
 
 // Handler for base64-encoded images
-#let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
+#let handler-base64-image(data, alt: none, ..args) = image(
+  base64.decode(data.replace("\n", "")),
+  alt: alt,
+)
 // Handler for text-encoded images, for example svg+xml
-#let handler-str-image(data) = image(bytes(data))
+#let handler-str-image(data, alt: none, ..args) = image(bytes(data), alt: alt)
 // Handler for simple text
-#let handler-text(data) = data
+#let handler-text(data, ..args) = data
 // Handler for Markdown markup
-#let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+#let handler-markdown(data, ..args) = cmarker.render(data, math: mitex.mitex)
 // Handler for LaTeX markup
-#let handler-latex(data) = mitex.mitext(data)
+#let handler-latex(data, ..args) = mitex.mitext(data)
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
