@@ -17,6 +17,7 @@
       handlers: handlers,
       // Extra arguments for handler
       attachments: cell.at("attachments", default: (:)),
+      mitex-preamble: args.at("mitex-preamble"),
     ).value,
   )
 }
