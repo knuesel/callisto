@@ -163,6 +163,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    - [x] image/png
    - [x] image/jpeg
    - [x] image/svg+xml
+   - [?] image/gif
    - [x] text/markdown
    - [x] text/latex
    - [ ] text/html

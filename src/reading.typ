@@ -65,11 +65,12 @@
 #let handler-latex(data, ..args) = mitex.mitext(data)
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
-#let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
+#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
   "image/svg+xml": handler-svg-xml,
   "image/png"    : handler-image-base64,
   "image/jpeg"   : handler-image-base64,
+  "image/gif"    : handler-image-base64,
   "text/markdown": handler-markdown,
   "text/latex"   : handler-latex,
   "text/plain"   : handler-text,
