@@ -140,11 +140,33 @@
     panic("invalid notebook type: " + str(type(nb)))
   }
   let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
+  // nbio-processed --> Only process once (destructive operation for preamble)
   if not nb-json.metadata.at("nbio-processed", default: false) {
     nb-json.cells = nb-json.cells
       .enumerate().map(
         ((i, c)) => _process-cell(i, c, cell-header-pattern, keep-cell-header)
       )
+    // Collect all \newcommand
+    // TODO: Same for \newenvironment ?
+    // Destructive, since commands should not be redefined
+    let (extracted-preamble, modified-cells) = nb-json.cells.fold(
+      ("", ()), // (preamble, modified cells)
+      (preamble, c) => if c.cell_type == "markdown" {
+        //TODO: fix when not on a separate line!!!
+        // Capture \newcommand, discard possible newline
+        let preamble-regex = regex("(\\\\newcommand.*)\n?")
+        (preamble.at(0) + c.source.matches(preamble-regex)
+                           .map((match) => match.captures.at(0) + "\n")
+                           .join(),
+         preamble.at(1) + ((..c, source: c.source.replace(preamble-regex, "")),)
+        )
+      } else {
+        (preamble.at(0), preamble.at(1) + (c,))
+      }
+    )
+    nb-json.metadata.insert("callisto-preamble-mitex", extracted-preamble)
+    nb-json.cells = modified-cells
+    nb-json.metadata.insert("nbio-processed", true)
   }
   return nb-json
 }
