@@ -61,7 +61,7 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ..args) = cmarker.render(
   data,
-  math: mitex.mitex,
+  math: mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
   // Like the std.image function, but 'preload' it with extra arguments
   // to resolve 'attachments'
   scope: (image: image-markdown-cell.with(..args)),

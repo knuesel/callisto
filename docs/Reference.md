@@ -208,9 +208,10 @@ Most functions accept a cell specification as positional argument. Below we use 
       #callisto.render(
         nb: json("notebook.ipynb"),
         handlers: (
-          "text/markdown": cmarker.render.with(
-              math: mitex,
-              scope: (image: (path, alt: none) => image(path, alt: alt)),
+          "image/x.path": (path, alt: none) => image(path, alt: alt),
+          "text/markdown": (data, ..args) => cmarker.render(data,
+              math: callisto.mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
+              scope: (image: callisto.image-markdown-cell.with(..args)),
           ),
         ),
       )
