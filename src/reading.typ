@@ -207,7 +207,8 @@
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-// Cell selector
+/// Cell selector: return an array of cells according to the 'cell specification'
+/// -> array
 #let cells(
   ..args,
   nb: none,
@@ -261,16 +262,16 @@
 // Interpret data according to the given MIME format string, using the given
 // handlers dict for decoding.
 #let read-mime(data, format: none, handlers: auto) = {
-  if type(data) == array {
-    data = data.join()
-  }
   let all-handlers = get-all-handlers(handlers)
-  if format not in all-handlers {
-    panic("format " + repr(format) + " has no registered handler")
+  if format == none or format not in all-handlers {
+    panic("format " + repr(format) + " has no registered handler (is it a valid MIME string?)")
   }
   let handler = all-handlers.at(format)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
+  }
+  if type(data) == array {
+    data = data.join()
   }
   return handler(data)
 }
@@ -355,6 +356,12 @@
   (execution-count: cell.execution_count)
 }
 
+/// Return either the 'value' key of dict or return the dict itself, with some
+/// added cell data under key 'cell'. See cell-output-dict for the added data.
+/// - cell (dict): A cell in json format
+/// - result-spec (str): Choose the output type and contents
+/// - dict (dict): Contains a key 'value' with any type.
+/// -> any | (value: any, cell: dict)
 #let final-output(cell, result-spec, dict) = { 
   if result-spec == "value" {
     return dict.value
@@ -366,6 +373,13 @@
   panic("invalid result specification: " + repr(result))
 }
 
+/// Extract the 'outputs' field from cells. Can contain multiple outputs per cell.
+/// Output type depends on the 'result' parameter.
+/// - output-type (str | array): Filter outputs on field 'output_type'
+/// - result (str): Choose the return type (type of the array contents↓)
+///                 See also the final-output function
+/// -> array of any | (value: any, cell: dict, type: str, metadata: dict, format: str)
+/// Remark that type and metadata are on the output level, not the cell level
 #let outputs(
   ..cell-args,
   output-type: "all",
@@ -463,6 +477,10 @@
   code: lang,
 ).at(cell.cell_type)
 
+/// Extract the 'source' field from cells as raw blocks.
+/// Return type depends on the 'result' parameter.
+/// - result (str): Determine the return type of the array↓ (See also the final-output function)
+/// -> array of raw | (value: raw, cell: dict)
 #let sources(
   ..args,
   nb: none,
