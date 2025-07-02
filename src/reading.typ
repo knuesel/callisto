@@ -3,9 +3,10 @@
 #import "@preview/mitex:0.2.5"
 
 // Handler for base64-encoded images
-#let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
+#let handler-base64-image(data, ..args) = image(base64.decode(data.replace("\n", "")),
+                                        alt: args.at("alt", default: none))
 // Handler for text-encoded images, for example svg+xml
-#let handler-str-image(data) = image(bytes(data))
+#let handler-str-image(data, ..args) = image(bytes(data), alt: args.at("alt", default: none))
 // Handler for simple text
 #let handler-text(data) = data
 // Handler for Markdown markup
