@@ -281,13 +281,13 @@
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let process-rich(
-  item,
+  item-data,
   format: auto,
   handlers: auto,
   ignore-wrong-format: false,
   ..args,
 ) = {
-  let item-formats = item.data.keys()
+  let item-formats = item-data.keys()
   if item-formats.len() == 0 {
     return none
   }
@@ -299,12 +299,24 @@
     }
     return none
   }
-  let value = read-mime(item.data.at(fmt), format: fmt, handlers: handlers)
+  let value = read-mime(item-data.at(fmt), format: fmt, handlers: handlers)
+  return (
+    format: fmt,
+    value: value,
+  )
+}
+/// Process rich items from the 'outputs' field in a notebook. These contain
+/// additional (meta)data besides the rich item itself.
+#let process-rich-output(item, ..args) = {
+  let processed-rich = process-rich(item.data, ..args)
+  if processed-rich == none {
+    return none
+  }
   return (
     type: item.output_type,
-    format: fmt,
-    metadata: item.metadata.at(fmt, default: none),
-    value: value,
+    // TODO: can also contain metadata NOT keyed to MIME type
+    metadata: item.metadata.at(processed-rich.format, default: none),
+    ..processed-rich,
   )
 }
 
@@ -341,8 +353,8 @@
 )
 
 #let processors = (
-  display_data: process-rich,
-  execute_result: process-rich,
+  display_data: process-rich-output,
+  execute_result: process-rich-output,
   stream: process-stream,
   error: process-error,
 )
@@ -362,7 +374,7 @@
 /// - result-spec (str): Choose the output type and contents
 /// - dict (dict): Contains a key 'value' with any type.
 /// -> any | (value: any, cell: dict)
-#let final-output(cell, result-spec, dict) = { 
+#let final-output(cell, result-spec, dict) = {
   if result-spec == "value" {
     return dict.value
   }
