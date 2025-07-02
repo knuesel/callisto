@@ -135,9 +135,16 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    #callisto.render(
      nb: json("notebook.ipynb"),
      handlers: (
-       "text/markdown": cmarker.render.with(
+       "text/markdown": (data, ..args) => cmarker.render(data,
            math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
+           scope: (image: (path, alt: none) => {
+               // Support embedded images
+               if path.starts-with("attachment:") {
+                 callisto.markdown-cell-image(path, alt: alt, ..args)
+               } else {
+                 image(path, alt: alt)
+               }
+           }),
        ),
      ),
    )

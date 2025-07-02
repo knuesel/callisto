@@ -208,9 +208,20 @@ Most functions accept a cell specification as positional argument. Below we use 
       #callisto.render(
         nb: json("notebook.ipynb"),
         handlers: (
-          "text/markdown": cmarker.render.with(
+          "text/markdown": (data, ..args) => cmarker.render(data,
               math: mitex,
-              scope: (image: (path, alt: none) => image(path, alt: alt)),
+              scope: (image: (path, alt: none) => {
+                  // Support embedded images
+                  if path.starts-with("attachment:") {
+                    callisto.markdown-cell-image(path, alt: alt, ..args)
+                  } else {
+                    // Only use this if you don't care about embedded images
+                    image(path, alt: alt)
+                  }
+                  // Shorter but equal alternative:
+                  //let img = callisto.markdown-cell-image(path, alt: alt, ..args)
+                  //if type(img) == str { image(img, alt: alt) } else { img }
+              }),
           ),
         ),
       )
