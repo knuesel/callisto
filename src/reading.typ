@@ -37,6 +37,11 @@
     //image(path, alt: alt) // TODO: enable when path type available
   }
 }
+#let mitex-with-preamble(content, mitex-preamble: "", ..mitex-args) = mitex.mitex.with(..mitex-args)({
+  // Add LaTeX preamble with all \newcommand expressions to each call
+  mitex-preamble
+  content
+})
 // Handler for Markdown markup
 #let handler-markdown(data, ..args) = cmarker.render(
   data,
