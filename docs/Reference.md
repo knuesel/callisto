@@ -197,7 +197,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(handlers: ("text/plain": upper))
       ```
 
-      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
+      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"` , `"image/gif"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
 
       The default handlers for Markdown and LaTeX use [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex) respectively. These handlers can be redefined to apply custom cmarker/mitex settings. For example, to fix the rendering of image file references in Markdown, the following can be used:
 
