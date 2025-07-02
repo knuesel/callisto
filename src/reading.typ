@@ -38,7 +38,11 @@
   }
 }
 // Handler for Markdown markup
-#let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+#let handler-markdown(data, ..args) = cmarker.render(
+  data,
+  math: mitex.mitex,
+  scope: (image: markdown-cell-image.with(..args)),
+)
 // Handler for LaTeX markup
 #let handler-latex(data) = mitex.mitext(data)
 
