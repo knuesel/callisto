@@ -25,6 +25,7 @@
       ..args-handler,
       // TODO: enable breaking change instead of ..args-handler
       //attachments: if "attachments" in cell { cell.attachments } else {(:)},
+      mitex-preamble: args.at("mitex-preamble"),
     ),
   )
 }
