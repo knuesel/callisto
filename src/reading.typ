@@ -45,7 +45,7 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ..args) = cmarker.render(
   data,
-  math: mitex.mitex,
+  math: mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
   scope: (image: markdown-cell-image.with(..args)),
 )
 // Handler for LaTeX markup

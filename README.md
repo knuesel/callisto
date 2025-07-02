@@ -136,7 +136,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
      nb: json("notebook.ipynb"),
      handlers: (
        "text/markdown": (data, ..args) => cmarker.render(data,
-           math: mitex,
+           math: callisto.mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
            scope: (image: (path, alt: none) => {
                // Support embedded images
                if path.starts-with("attachment:") {

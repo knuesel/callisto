@@ -7,7 +7,7 @@
   nb: json("Cpp.ipynb"),
   handlers: (
     "text/markdown": (data, ..args) => cmarker.render(data,
-        math: mitex,
+        math: mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
         scope: (image: (path, alt: none) => {
           if path.starts-with("attachment:") {
             markdown-cell-image(path, alt: alt, ..args)
