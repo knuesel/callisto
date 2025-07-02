@@ -207,7 +207,8 @@
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-// Cell selector
+/// Cell selector: return an array of cells according to the 'cell specification'
+/// -> array
 #let cells(
   ..args,
   nb: none,
@@ -265,7 +266,7 @@
     data = data.join()
   }
   let all-handlers = get-all-handlers(handlers)
-  if format not in all-handlers {
+  if format == none or format not in all-handlers {
     panic("format " + repr(format) + " has no registered handler")
   }
   let handler = all-handlers.at(format)
@@ -355,6 +356,12 @@
   (execution-count: cell.execution_count)
 }
 
+/// Return either the 'value' key of dict or return the dict itself, with some
+/// added cell data under key 'cell'. See cell-output-dict for the added data.
+/// - cell (dict): A cell in json format
+/// - result-spec (str): Choose the output type and contents
+/// - dict (dict): Contains a key 'value' with any type.
+/// -> any | (value: any, cell: dict)
 #let final-output(cell, result-spec, dict) = { 
   if result-spec == "value" {
     return dict.value
@@ -463,6 +470,10 @@
   code: lang,
 ).at(cell.cell_type)
 
+/// Extract the 'source' field from cells as raw blocks. Output type depends
+/// on the 'result' parameter.
+/// - result (str): See the final-output function
+/// -> raw | (value: raw, cell: dict)
 #let sources(
   ..args,
   nb: none,

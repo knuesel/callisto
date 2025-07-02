@@ -107,7 +107,7 @@ The API is centered on the following main functions:
 
 - `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
 
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source language can be accessed as fields.
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as content. Alternatively, the source text and source language can be accessed as fields.
 
 - `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
