@@ -163,6 +163,8 @@
       output: output,
       input-args: input-args,
       output-args: output-args,
+      // Pass as extra argument. Other option: hide it in the cell metadata
+      mitex-preamble: processed-nb.metadata.callisto-preamble-mitex,
     )
   }
 }

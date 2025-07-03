@@ -197,7 +197,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(handlers: ("text/plain": upper))
       ```
 
-      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
+      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"` , `"image/gif"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
 
       The default handlers for Markdown and LaTeX use [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex) respectively. These handlers can be redefined to apply custom cmarker/mitex settings. For example, to fix the rendering of image file references in Markdown, the following can be used:
 
@@ -208,9 +208,20 @@ Most functions accept a cell specification as positional argument. Below we use 
       #callisto.render(
         nb: json("notebook.ipynb"),
         handlers: (
-          "text/markdown": cmarker.render.with(
-              math: mitex,
-              scope: (image: (path, alt: none) => image(path, alt: alt)),
+          "text/markdown": (data, ..args) => cmarker.render(data,
+              math: callisto.mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
+              scope: (image: (path, alt: none) => {
+                  // Support embedded images
+                  if path.starts-with("attachment:") {
+                    callisto.markdown-cell-image(path, alt: alt, ..args)
+                  } else {
+                    // Only use this if you don't care about embedded images
+                    image(path, alt: alt)
+                  }
+                  // Shorter but equal alternative:
+                  //let img = callisto.markdown-cell-image(path, alt: alt, ..args)
+                  //if type(img) == str { image(img, alt: alt) } else { img }
+              }),
           ),
         ),
       )

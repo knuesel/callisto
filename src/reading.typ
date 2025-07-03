@@ -3,22 +3,61 @@
 #import "@preview/mitex:0.2.5"
 
 // Handler for base64-encoded images
-#let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
+#let handler-base64-image(data, ..args) = image(base64.decode(data.replace("\n", "")),
+                                        alt: args.at("alt", default: none))
 // Handler for text-encoded images, for example svg+xml
-#let handler-str-image(data) = image(bytes(data))
+#let handler-str-image(data, ..args) = image(bytes(data), alt: args.at("alt", default: none))
 // Handler for simple text
 #let handler-text(data) = data
+/// Handle images in markdown cells. Returns 'image' element for attachments,
+/// else the path is returned. (Should be fixed when Typst has a path type)
+/// - path (str): The path of the image. Can start with 'attachment:', in which case
+///   the extra arguments 'attachments' and 'process-rich-function' must be provided.
+/// - alt (str): The alt text of the image.
+/// -> content
+#let markdown-cell-image(path, alt: none, ..args) = {
+  if path.starts-with("attachment:") {
+    let filename = path.trim("attachment:", at: start)
+    let attachments = args.at("attachments", default: (:))
+    if filename in attachments {
+      let file = attachments.at(filename)
+      // Needed for mutual recursion: https://github.com/typst/typst/issues/744
+      let process-rich = args.at("process-rich-function")
+      // Profit from the existing image handlers. As a consequence, this will
+      // return 'image' elements.
+      process-rich(file, handlers: (
+        // When embedding svg images, these get base64 encoded -\_(¨)_/-
+        "image/svg+xml": handler-base64-image.with(alt: alt),
+      )).value
+    } else {
+      panic("Jupyter notebook attachment not found")
+    }
+  } else {
+    path
+    //image(path, alt: alt) // TODO: enable when path type available
+  }
+}
+#let mitex-with-preamble(content, mitex-preamble: "", ..mitex-args) = mitex.mitex.with(..mitex-args)({
+  // Add LaTeX preamble with all \newcommand expressions to each call
+  mitex-preamble
+  content
+})
 // Handler for Markdown markup
-#let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+#let handler-markdown(data, ..args) = cmarker.render(
+  data,
+  math: mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
+  scope: (image: markdown-cell-image.with(..args)),
+)
 // Handler for LaTeX markup
 #let handler-latex(data) = mitex.mitext(data)
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
-#let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
+#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
   "image/svg+xml": handler-str-image,
   "image/png": handler-base64-image,
   "image/jpeg": handler-base64-image,
+  "image/gif": handler-base64-image,
   "text/markdown": handler-markdown,
   "text/latex": handler-latex,
   "text/plain": handler-text,
@@ -81,11 +120,33 @@
     panic("invalid notebook type: " + str(type(nb)))
   }
   let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
+  // nbio-processed --> Only process once (destructive operation for preamble)
   if not nb-json.metadata.at("nbio-processed", default: false) {
     nb-json.cells = nb-json.cells
       .enumerate().map(
         ((i, c)) => _process-cell(i, c, cell-header-pattern, keep-cell-header)
       )
+    // Collect all \newcommand
+    // TODO: Same for \newenvironment ?
+    // Destructive, since commands should not be redefined
+    let (extracted-preamble, modified-cells) = nb-json.cells.fold(
+      ("", ()), // (preamble, modified cells)
+      (preamble, c) => if c.cell_type == "markdown" {
+        //TODO: fix when not on a separate line!!!
+        // Capture \newcommand, discard possible newline
+        let preamble-regex = regex("(\\\\newcommand.*)\n?")
+        (preamble.at(0) + c.source.matches(preamble-regex)
+                           .map((match) => match.captures.at(0) + "\n")
+                           .join(),
+         preamble.at(1) + ((..c, source: c.source.replace(preamble-regex, "")),)
+        )
+      } else {
+        (preamble.at(0), preamble.at(1) + (c,))
+      }
+    )
+    nb-json.metadata.insert("callisto-preamble-mitex", extracted-preamble)
+    nb-json.cells = modified-cells
+    nb-json.metadata.insert("nbio-processed", true)
   }
   return nb-json
 }
@@ -207,7 +268,8 @@
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-// Cell selector
+/// Cell selector: return an array of cells according to the 'cell specification'
+/// -> array
 #let cells(
   ..args,
   nb: none,
@@ -260,19 +322,19 @@
 
 // Interpret data according to the given MIME format string, using the given
 // handlers dict for decoding.
-#let read-mime(data, format: none, handlers: auto) = {
+#let read-mime(data, format: none, handlers: auto, ..args-handler) = {
   if type(data) == array {
     data = data.join()
   }
   let all-handlers = get-all-handlers(handlers)
-  if format not in all-handlers {
+  if format == none or format not in all-handlers {
     panic("format " + repr(format) + " has no registered handler")
   }
   let handler = all-handlers.at(format)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
-  return handler(data)
+  return handler(data, ..args-handler)
 }
 
 // Process a "rich" item, which can have various formats.
@@ -280,13 +342,13 @@
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let process-rich(
-  item,
+  item-data,
   format: auto,
   handlers: auto,
   ignore-wrong-format: false,
   ..args,
 ) = {
-  let item-formats = item.data.keys()
+  let item-formats = item-data.keys()
   if item-formats.len() == 0 {
     return none
   }
@@ -298,12 +360,23 @@
     }
     return none
   }
-  let value = read-mime(item.data.at(fmt), format: fmt, handlers: handlers)
+  let value = read-mime(item-data.at(fmt), format: fmt, handlers: handlers)
+  return (
+    format: fmt,
+    value: value,
+  )
+}
+/// Process rich items from the 'outputs' field in a notebook. These contain
+/// additional (meta)data besides the rich item itself.
+#let process-rich-output(item, ..args) = {
+  let processed-rich = process-rich(item.data, ..args)
+  if processed-rich == none {
+    return none
+  }
   return (
     type: item.output_type,
-    format: fmt,
-    metadata: item.metadata.at(fmt, default: none),
-    value: value,
+    metadata: item.metadata.at(processed-rich.format, default: none),
+    ..processed-rich,
   )
 }
 
@@ -340,8 +413,8 @@
 )
 
 #let processors = (
-  display_data: process-rich,
-  execute_result: process-rich,
+  display_data: process-rich-output,
+  execute_result: process-rich-output,
   stream: process-stream,
   error: process-error,
 )
@@ -355,7 +428,13 @@
   (execution-count: cell.execution_count)
 }
 
-#let final-output(cell, result-spec, dict) = { 
+/// Return either the 'value' key of dict or return the dict itself, with some
+/// added cell data under key 'cell'. See cell-output-dict for the added data.
+/// - cell (dict): A cell in json format
+/// - result-spec (str): Choose the output type and contents
+/// - dict (dict): Contains a key 'value' with any type.
+/// -> any | (value: any, cell: dict)
+#let final-output(cell, result-spec, dict) = {
   if result-spec == "value" {
     return dict.value
   }
@@ -463,6 +542,10 @@
   code: lang,
 ).at(cell.cell_type)
 
+/// Extract the 'source' field from cells as raw blocks. Output type depends
+/// on the 'result' parameter.
+/// - result (str): See the final-output function
+/// -> raw | (value: raw, cell: dict)
 #let sources(
   ..args,
   nb: none,

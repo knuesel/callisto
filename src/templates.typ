@@ -9,6 +9,11 @@
 
 #let plain-raw(cell, ..args) = source(cell)
 #let plain-markdown(cell, handlers: auto, ..args) = {
+  let args-handler = if "attachments" in cell {
+    (attachments: cell.attachments,
+     process-rich-function: process-rich
+    )
+  } else { (:) }
   block(
     width: 100%,
     spacing: 1em,
@@ -16,6 +21,11 @@
       source(cell).text,
       format: "text/markdown",
       handlers: handlers,
+      // Extra arguments for handler
+      ..args-handler,
+      // TODO: enable breaking change instead of ..args-handler
+      //attachments: if "attachments" in cell { cell.attachments } else {(:)},
+      mitex-preamble: args.at("mitex-preamble"),
     ),
   )
 }

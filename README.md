@@ -107,7 +107,7 @@ The API is centered on the following main functions:
 
 - `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
 
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source language can be accessed as fields.
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as content. Alternatively, the source text and source language can be accessed as fields.
 
 - `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
@@ -135,9 +135,16 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    #callisto.render(
      nb: json("notebook.ipynb"),
      handlers: (
-       "text/markdown": cmarker.render.with(
-           math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
+       "text/markdown": (data, ..args) => cmarker.render(data,
+           math: callisto.mitex-with-preamble.with(mitex-preamble: args.at("mitex-preamble", default: "")),
+           scope: (image: (path, alt: none) => {
+               // Support embedded images
+               if path.starts-with("attachment:") {
+                 callisto.markdown-cell-image(path, alt: alt, ..args)
+               } else {
+                 image(path, alt: alt)
+               }
+           }),
        ),
      ),
    )
@@ -165,6 +172,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    - [x] image/png
    - [x] image/jpeg
    - [x] image/svg+xml
+   - [?] image/gif
    - [x] text/markdown
    - [x] text/latex
    - [ ] text/html
