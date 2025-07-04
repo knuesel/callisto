@@ -344,7 +344,7 @@
   format: auto,
   handlers: auto,
   ignore-wrong-format: false,
-  ..args,
+  ..args-handler,
 ) = {
   let item-formats = item-data.keys()
   if item-formats.len() == 0 {
@@ -363,7 +363,7 @@
     panic("handlers must be auto or a dictionary mapping formats to functions")
   }
   recursive-handlers.rich-object = process-rich.with(format: format, handlers: handlers, ignore-wrong-format: ignore-wrong-format)
-  let value = read-mime(item-data.at(fmt), format: fmt, handlers: recursive-handlers)
+  let value = read-mime(item-data.at(fmt), format: fmt, handlers: recursive-handlers, ..args-handler)
   return (
     format: fmt,
     value: value,
