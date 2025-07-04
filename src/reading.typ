@@ -2,6 +2,31 @@
 #import "@preview/cmarker:0.1.3"
 #import "@preview/mitex:0.2.5"
 
+/// Function like std.image, but accepts extra arguments to 'preload'
+/// (formal term: partial application)
+/// - handlers (dict): When the path is an attachment, key "rich-object" is
+///   needed (to recurse). Otherwise key "image/x.path" is used.
+/// - attachments (dict): Dict of embedded images from the Jupyter notebook cell
+/// -> content (image)
+#let image-markdown-cell(path, alt: none, handlers: none, attachments: (:), ..args) = {
+  if handlers == none or handlers == auto {
+    panic("No valid handlers dict provided for mutual recursion (value was " + repr(handlers) + ")")
+  }
+  if path.starts-with("attachment:") {
+    let filename = path.trim("attachment:", at: start)
+    if filename in attachments {
+      let file = attachments.at(filename)
+      // Mutual recursion. Will profit fromt the existing image handlers.
+      let process-rich = handlers.at("rich-object")
+      process-rich(file, ..args).value
+    } else {
+      panic("Jupyter notebook attachment " + filename + " not found in attachments: " + repr(attachments))
+    }
+  } else {
+    handlers.at("image/x.path")(path, alt: alt)
+  }
+}
+
 // Handler for base64-encoded images
 #let handler-image-base64(data, alt: none, ..args) = image(
   base64.decode(data.replace("\n", "")),
@@ -14,7 +39,13 @@
 // Handler for simple text
 #let handler-text(data, ..args) = data
 // Handler for Markdown markup
-#let handler-markdown(data, ..args) = cmarker.render(data, math: mitex.mitex)
+#let handler-markdown(data, ..args) = cmarker.render(
+  data,
+  math: mitex.mitex,
+  // Like the std.image function, but 'preload' it with extra arguments
+  // to resolve 'attachments'
+  scope: (image: image-markdown-cell.with(..args)),
+)
 // Handler for LaTeX markup
 #let handler-latex(data, ..args) = mitex.mitext(data)
 
@@ -27,6 +58,11 @@
   "text/markdown": handler-markdown,
   "text/latex"   : handler-latex,
   "text/plain"   : handler-text,
+  // Abstract handlers to process images based on their data encoding
+  // Luckily, Typst can detect what the actual image format is (png, svg, ...)
+  "image/x.path"  : handler-image-path,   // data is a image determined by 'path' string
+  // Add handler for a rich object. Used for mutual recursion.
+  "rich-object"   : (..args) => panic("rich object handler is not replaced by a working function"),
 )
 #let default-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
