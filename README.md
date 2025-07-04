@@ -135,10 +135,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    #callisto.render(
      nb: json("notebook.ipynb"),
      handlers: (
-       "text/markdown": cmarker.render.with(
-           math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
-       ),
+       "image/x.path": (path, alt: none) => image(path, alt: alt),
      ),
    )
    ```
@@ -153,6 +150,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
 - [x] Render notebooks in Typst
 
    - [x] Markdown
+     - [x] embedded images (attachments)
    - [x] results (basic types)
    - [x] displays (basic types)
    - [x] stdout and stderr
