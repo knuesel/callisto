@@ -331,7 +331,8 @@
   if type(data) == array {
     data = data.join()
   }
-  return handler(data, ..args-handler)
+  // Pass expanded(!) handlers along for mutual recursion: https://github.com/typst/typst/issues/744
+  return handler(data, handlers: all-handlers, ..args-handler)
 }
 
 // Process a "rich" item, which can have various formats.
@@ -357,12 +358,21 @@
     }
     return none
   }
-  let value = read-mime(item-data.at(fmt), format: fmt, handlers: handlers)
+  let recursive-handlers = if handlers == auto { (:) } else { handlers }
+  if type(recursive-handlers) != dictionary {
+    panic("handlers must be auto or a dictionary mapping formats to functions")
+  }
+  recursive-handlers.rich-object = process-rich.with(format: format, handlers: handlers, ignore-wrong-format: ignore-wrong-format)
+  let value = read-mime(item-data.at(fmt), format: fmt, handlers: recursive-handlers)
   return (
     format: fmt,
     value: value,
   )
 }
+// Process-rich is the entry-point for all recursive handlers. If read-mime
+// should be an entry point too, create a convenience function get-recursive-handlers
+// here, which would create the recursive-handlers dict
+
 /// Process rich items from the 'outputs' field in a notebook. These contain
 /// additional (meta)data besides the rich item itself.
 #let process-rich-output(item, ..args) = {

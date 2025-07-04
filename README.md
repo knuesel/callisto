@@ -172,3 +172,10 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
 - [ ] Export, e.g. for round-tripping similar to prequery
 
 - [ ] Some way to convert the first heading to a title
+
+## Changelog
+
+### v0.3.0
+- **Breaking**: All handlers should now have an argument sink to accept extra arguments.
+  This can be accomplished by using for example `(data, ..args) => upper(data)`
+  instead of previously directly passing `upper`.
