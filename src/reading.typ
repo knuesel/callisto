@@ -36,6 +36,21 @@
 #let handler-image-text(data, alt: none, ..args) = image(bytes(data), alt: alt)
 // Handler for images given by path
 #let handler-image-path(data, alt: none, ..args) = image(data, alt: alt)
+// Smart svg+xml handler that handles both text and base64 data
+#let handler-svg-xml(data, handlers: none, ..args) = {
+  // Get the base64 and str handlers from the dict so the user can override them
+  if handlers == none { panic("Smart svg+xml handler needs a handlers dict to delegate, but " + repr(handlers) + " was given.") }
+  // base64 encoded version of:     "<?xml "                        "<sv"
+  let handler = if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
+    handlers.at("image/x.base64")
+  } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
+    handlers.at("image/x.text")
+  } else {
+    panic("Unrecognized svg+xml data")
+  }
+  handler(data, ..args)
+}
+
 // Handler for simple text
 #let handler-text(data, ..args) = data
 // Handler for Markdown markup
@@ -52,7 +67,7 @@
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
-  "image/svg+xml": handler-image-text,
+  "image/svg+xml": handler-svg-xml,
   "image/png"    : handler-image-base64,
   "image/jpeg"   : handler-image-base64,
   "text/markdown": handler-markdown,
@@ -60,6 +75,8 @@
   "text/plain"   : handler-text,
   // Abstract handlers to process images based on their data encoding
   // Luckily, Typst can detect what the actual image format is (png, svg, ...)
+  "image/x.base64": handler-image-base64, // data is a base64 encoded image
+  "image/x.text"  : handler-image-text,   // data is a text encoded image
   "image/x.path"  : handler-image-path,   // data is a image determined by 'path' string
   // Add handler for a rich object. Used for mutual recursion.
   "rich-object"   : (..args) => panic("rich object handler is not replaced by a working function"),
