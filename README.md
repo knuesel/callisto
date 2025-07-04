@@ -107,7 +107,7 @@ The API is centered on the following main functions:
 
 - `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
 
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as as content. Alternatively, the source text and source language can be accessed as fields.
+- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as content. Alternatively, the source text and source language can be accessed as fields.
 
 - `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
 
@@ -135,10 +135,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
    #callisto.render(
      nb: json("notebook.ipynb"),
      handlers: (
-       "text/markdown": cmarker.render.with(
-           math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
-       ),
+       "image/x.path": (path, alt: none) => image(path, alt: alt),
      ),
    )
    ```
@@ -153,6 +150,7 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
 - [x] Render notebooks in Typst
 
    - [x] Markdown
+     - [x] embedded images (attachments)
    - [x] results (basic types)
    - [x] displays (basic types)
    - [x] stdout and stderr
@@ -172,3 +170,10 @@ The Markdown and LaTeX processing can be configured by changing the handlers for
 - [ ] Export, e.g. for round-tripping similar to prequery
 
 - [ ] Some way to convert the first heading to a title
+
+## Changelog
+
+### v0.3.0
+- **Breaking**: All handlers should now have an argument sink to accept extra arguments.
+  This can be accomplished by using for example `(data, ..args) => upper(data)`
+  instead of previously directly passing `upper`.

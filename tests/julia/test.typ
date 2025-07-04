@@ -46,5 +46,5 @@
 
 == Markdown display, shown with custom handler (`repr`)
 #display(format: "text/markdown", ignore-wrong-format: true, handlers: (
-  "text/markdown": repr,
+  "text/markdown": (data, ..args) => repr(data),
 ))

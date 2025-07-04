@@ -12,11 +12,12 @@
   block(
     width: 100%,
     spacing: 1em,
-    read-mime(
-      source(cell).text,
-      format: "text/markdown",
+    process-rich(
+      ("text/markdown": source(cell).text),
       handlers: handlers,
-    ),
+      // Extra arguments for handler
+      attachments: cell.at("attachments", default: (:)),
+    ).value,
   )
 }
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
