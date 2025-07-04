@@ -3,12 +3,14 @@
 #import "@preview/mitex:0.2.5"
 
 // Handler for base64-encoded images
-#let handler-base64-image(data, alt: none, ..args) = image(
+#let handler-image-base64(data, alt: none, ..args) = image(
   base64.decode(data.replace("\n", "")),
   alt: alt,
 )
 // Handler for text-encoded images, for example svg+xml
-#let handler-str-image(data, alt: none, ..args) = image(bytes(data), alt: alt)
+#let handler-image-text(data, alt: none, ..args) = image(bytes(data), alt: alt)
+// Handler for images given by path
+#let handler-image-path(data, alt: none, ..args) = image(data, alt: alt)
 // Handler for simple text
 #let handler-text(data, ..args) = data
 // Handler for Markdown markup
@@ -19,12 +21,12 @@
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
-  "image/svg+xml": handler-str-image,
-  "image/png": handler-base64-image,
-  "image/jpeg": handler-base64-image,
+  "image/svg+xml": handler-image-text,
+  "image/png"    : handler-image-base64,
+  "image/jpeg"   : handler-image-base64,
   "text/markdown": handler-markdown,
-  "text/latex": handler-latex,
-  "text/plain": handler-text,
+  "text/latex"   : handler-latex,
+  "text/plain"   : handler-text,
 )
 #let default-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
