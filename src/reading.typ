@@ -1,5 +1,5 @@
 #import "@preview/based:0.2.0": base64
-#import "@preview/cmarker:0.1.3"
+#import "@preview/cmarker:0.1.6"
 #import "@preview/mitex:0.2.5"
 
 #let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
