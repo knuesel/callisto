@@ -439,8 +439,8 @@
 /// Return either the 'value' key of dict or return the dict itself, with some
 /// added cell data under key 'cell'. See cell-output-dict for the added data.
 /// - cell (dict): A cell in json format
-/// - result-spec (str): Choose the output type and contents
-/// - dict (dict): Contains a key 'value' with any type.
+/// - result-spec (str): Choose output mode: "value" or "dict"
+/// - dict (dict): Contains at least a 'value' key
 /// -> any | (value: any, cell: dict)
 #let final-output(cell, result-spec, dict) = {
   if result-spec == "value" {
@@ -453,13 +453,20 @@
   panic("invalid result specification: " + repr(result))
 }
 
-/// Extract the 'outputs' field from cells. Can contain multiple outputs per cell.
-/// Output type depends on the 'result' parameter.
-/// - output-type (str | array): Filter outputs on field 'output_type'
-/// - result (str): Choose the return type (type of the array contents↓)
-///                 See also the final-output function
-/// -> array of any | (value: any, cell: dict, type: str, metadata: dict, format: str)
-/// Remark that type and metadata are on the output level, not the cell level
+/// Extract outputs from cells specified by 'cell-args'.
+/// Can return several outputs per cell.
+/// - output-type (str | array): The output type(s) to include in the returned array.
+///   The valid types are "display_data", "execute_result", "stream" and "error".
+/// - format (str | array): The format, or order of preference of formats, to
+///   choose in case of "rich" outputs.
+/// - handlers (auto | dict): Handler functions for rendering various data formats
+/// - ignore-wrong-format (bool): Whether outputs without supported format should be
+///   silently ignored.
+/// - stream (str | array): The kind(s) of streams to include in the returned array
+/// - result (str): Use "value" to return just the outputs themselves, or "dict" to
+///   return for each output a dict with fields 'value', 'cell', 'type' and additional
+///   fields specific to each output type.
+/// -> array of any | array of dict
 #let outputs(
   ..cell-args,
   output-type: "all",
