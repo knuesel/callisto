@@ -4,7 +4,7 @@
 #import "/src/callisto.typ" as callisto: *
 
 #callisto.render(
-  nb: json("Cpp.ipynb"),
+  nb: json("images.ipynb"),
   handlers: (
     "image/x.path": (path, alt: none) => image(path, alt: alt),
   ),

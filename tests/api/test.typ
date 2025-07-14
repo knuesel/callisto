@@ -38,7 +38,7 @@
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
 #let cpp-pattern = regex("^//\|\s+(.*?):\s+(.*?)\s*$")
-#let cpp-cell-spec = arguments("calc", nb: "/tests/markdown-images/Cpp.ipynb")
+#let cpp-cell-spec = arguments("calc", nb: "/tests/api/cpp.ipynb")
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
