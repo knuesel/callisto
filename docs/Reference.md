@@ -208,7 +208,9 @@ Most functions accept a cell specification as positional argument. Below we use 
       #callisto.render(
         nb: json("notebook.ipynb"),
         handlers: (
-          "image/x.path": (path, alt: none) => image(path, alt: alt),
+          "text/markdown": cmarker.render.with(
+              math: mitex,
+              scope: (image: (path, alt: none) => image(path, alt: alt)),
           ),
         ),
       )
