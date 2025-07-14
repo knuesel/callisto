@@ -2,26 +2,84 @@
 #import "@preview/cmarker:0.1.3"
 #import "@preview/mitex:0.2.5"
 
+/// Function like std.image, but accepts extra arguments to 'preload'
+/// (formal term: partial application)
+/// - handlers (dict): When the path is an attachment, key "rich-object" is
+///   needed (to recurse). Otherwise key "image/x.path" is used.
+/// - attachments (dict): Dict of embedded images from the Jupyter notebook cell
+/// -> content (image)
+#let image-markdown-cell(path, alt: none, handlers: none, attachments: (:), ..args) = {
+  if handlers == none or handlers == auto {
+    panic("No valid handlers dict provided for mutual recursion (value was " + repr(handlers) + ")")
+  }
+  if path.starts-with("attachment:") {
+    let filename = path.trim("attachment:", at: start)
+    if filename in attachments {
+      let file = attachments.at(filename)
+      // Mutual recursion. Will profit fromt the existing image handlers.
+      let process-rich = handlers.at("rich-object")
+      process-rich(file, ..args).value
+    } else {
+      panic("Jupyter notebook attachment " + filename + " not found in attachments: " + repr(attachments))
+    }
+  } else {
+    handlers.at("image/x.path")(path, alt: alt)
+  }
+}
+
 // Handler for base64-encoded images
-#let handler-base64-image(data) = image(base64.decode(data.replace("\n", "")))
+#let handler-image-base64(data, alt: none, ..args) = image(
+  base64.decode(data.replace("\n", "")),
+  alt: alt,
+)
 // Handler for text-encoded images, for example svg+xml
-#let handler-str-image(data) = image(bytes(data))
+#let handler-image-text(data, alt: none, ..args) = image(bytes(data), alt: alt)
+// Handler for images given by path
+#let handler-image-path(data, alt: none, ..args) = image(data, alt: alt)
+// Smart svg+xml handler that handles both text and base64 data
+#let handler-svg-xml(data, handlers: none, ..args) = {
+  // Get the base64 and str handlers from the dict so the user can override them
+  if handlers == none { panic("Smart svg+xml handler needs a handlers dict to delegate, but " + repr(handlers) + " was given.") }
+  // base64 encoded version of:     "<?xml "                        "<sv"
+  let handler = if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
+    handlers.at("image/x.base64")
+  } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
+    handlers.at("image/x.text")
+  } else {
+    panic("Unrecognized svg+xml data")
+  }
+  handler(data, ..args)
+}
+
 // Handler for simple text
-#let handler-text(data) = data
+#let handler-text(data, ..args) = data
 // Handler for Markdown markup
-#let handler-markdown(data) = cmarker.render(data, math: mitex.mitex)
+#let handler-markdown(data, ..args) = cmarker.render(
+  data,
+  math: mitex.mitex,
+  // Like the std.image function, but 'preload' it with extra arguments
+  // to resolve 'attachments'
+  scope: (image: image-markdown-cell.with(..args)),
+)
 // Handler for LaTeX markup
-#let handler-latex(data) = mitex.mitext(data)
+#let handler-latex(data, ..args) = mitex.mitext(data)
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")
 #let default-handlers = (
-  "image/svg+xml": handler-str-image,
-  "image/png": handler-base64-image,
-  "image/jpeg": handler-base64-image,
+  "image/svg+xml": handler-svg-xml,
+  "image/png"    : handler-image-base64,
+  "image/jpeg"   : handler-image-base64,
   "text/markdown": handler-markdown,
-  "text/latex": handler-latex,
-  "text/plain": handler-text,
+  "text/latex"   : handler-latex,
+  "text/plain"   : handler-text,
+  // Abstract handlers to process images based on their data encoding
+  // Luckily, Typst can detect what the actual image format is (png, svg, ...)
+  "image/x.base64": handler-image-base64, // data is a base64 encoded image
+  "image/x.text"  : handler-image-text,   // data is a text encoded image
+  "image/x.path"  : handler-image-path,   // data is a image determined by 'path' string
+  // Add handler for a rich object. Used for mutual recursion.
+  "rich-object"   : (..args) => panic("rich object handler is not replaced by a working function"),
 )
 #let default-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
@@ -207,7 +265,8 @@
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-// Cell selector
+/// Cell selector: return an array of cells according to the 'cell specification'
+/// -> array
 #let cells(
   ..args,
   nb: none,
@@ -260,19 +319,20 @@
 
 // Interpret data according to the given MIME format string, using the given
 // handlers dict for decoding.
-#let read-mime(data, format: none, handlers: auto) = {
-  if type(data) == array {
-    data = data.join()
-  }
+#let read-mime(data, format: none, handlers: auto, ..args-handler) = {
   let all-handlers = get-all-handlers(handlers)
-  if format not in all-handlers {
-    panic("format " + repr(format) + " has no registered handler")
+  if format == none or format not in all-handlers {
+    panic("format " + repr(format) + " has no registered handler (is it a valid MIME string?)")
   }
   let handler = all-handlers.at(format)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
-  return handler(data)
+  if type(data) == array {
+    data = data.join()
+  }
+  // Pass expanded(!) handlers along for mutual recursion: https://github.com/typst/typst/issues/744
+  return handler(data, handlers: all-handlers, ..args-handler)
 }
 
 // Process a "rich" item, which can have various formats.
@@ -280,13 +340,13 @@
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let process-rich(
-  item,
+  item-data,
   format: auto,
   handlers: auto,
   ignore-wrong-format: false,
-  ..args,
+  ..args-handler,
 ) = {
-  let item-formats = item.data.keys()
+  let item-formats = item-data.keys()
   if item-formats.len() == 0 {
     return none
   }
@@ -298,12 +358,33 @@
     }
     return none
   }
-  let value = read-mime(item.data.at(fmt), format: fmt, handlers: handlers)
+  let recursive-handlers = if handlers == auto { (:) } else { handlers }
+  if type(recursive-handlers) != dictionary {
+    panic("handlers must be auto or a dictionary mapping formats to functions")
+  }
+  recursive-handlers.rich-object = process-rich.with(format: format, handlers: handlers, ignore-wrong-format: ignore-wrong-format)
+  let value = read-mime(item-data.at(fmt), format: fmt, handlers: recursive-handlers, ..args-handler)
+  return (
+    format: fmt,
+    value: value,
+  )
+}
+// Process-rich is the entry-point for all recursive handlers. If read-mime
+// should be an entry point too, create a convenience function get-recursive-handlers
+// here, which would create the recursive-handlers dict
+
+/// Process rich items from the 'outputs' field in a notebook. These contain
+/// additional (meta)data besides the rich item itself.
+#let process-rich-output(item, ..args) = {
+  let processed-rich = process-rich(item.data, ..args)
+  if processed-rich == none {
+    return none
+  }
   return (
     type: item.output_type,
-    format: fmt,
-    metadata: item.metadata.at(fmt, default: none),
-    value: value,
+    // TODO: can also contain metadata NOT keyed to MIME type
+    metadata: item.metadata.at(processed-rich.format, default: none),
+    ..processed-rich,
   )
 }
 
@@ -340,8 +421,8 @@
 )
 
 #let processors = (
-  display_data: process-rich,
-  execute_result: process-rich,
+  display_data: process-rich-output,
+  execute_result: process-rich-output,
   stream: process-stream,
   error: process-error,
 )
@@ -355,7 +436,13 @@
   (execution-count: cell.execution_count)
 }
 
-#let final-output(cell, result-spec, dict) = { 
+/// Return either the 'value' key of dict or return the dict itself, with some
+/// added cell data under key 'cell'. See cell-output-dict for the added data.
+/// - cell (dict): A cell in json format
+/// - result-spec (str): Choose the output type and contents
+/// - dict (dict): Contains a key 'value' with any type.
+/// -> any | (value: any, cell: dict)
+#let final-output(cell, result-spec, dict) = {
   if result-spec == "value" {
     return dict.value
   }
@@ -366,6 +453,13 @@
   panic("invalid result specification: " + repr(result))
 }
 
+/// Extract the 'outputs' field from cells. Can contain multiple outputs per cell.
+/// Output type depends on the 'result' parameter.
+/// - output-type (str | array): Filter outputs on field 'output_type'
+/// - result (str): Choose the return type (type of the array contents↓)
+///                 See also the final-output function
+/// -> array of any | (value: any, cell: dict, type: str, metadata: dict, format: str)
+/// Remark that type and metadata are on the output level, not the cell level
 #let outputs(
   ..cell-args,
   output-type: "all",
@@ -463,6 +557,10 @@
   code: lang,
 ).at(cell.cell_type)
 
+/// Extract the 'source' field from cells as raw blocks.
+/// Return type depends on the 'result' parameter.
+/// - result (str): Determine the return type of the array↓ (See also the final-output function)
+/// -> array of raw | (value: raw, cell: dict)
 #let sources(
   ..args,
   nb: none,

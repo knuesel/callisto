@@ -6,9 +6,6 @@
 #callisto.render(
   nb: json("Cpp.ipynb"),
   handlers: (
-    "text/markdown": cmarker.render.with(
-        math: mitex,
-        scope: (image: (path, alt: none) => image(path, alt: alt)),
-    ),
+    "image/x.path": (path, alt: none) => image(path, alt: alt),
   ),
 )
