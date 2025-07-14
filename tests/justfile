@@ -1,21 +1,27 @@
-all-pdf:
+_default:
+    @just --list --unsorted
+    
+# Run all tests
+test:
+    tt run --root=.. -j8
+
+# Make PDF of persistent tests for visual inspection
+pdf:
     #!/usr/bin/env bash
     shopt -s nullglob
     set -eu
-    # Make PDF for all persistent tests (those that have a ref/ dir)
+    # Process all persistent tests (those with a ref/ dir) 
     for file in */ref/; do
-        just make-pdf "${file%/ref/}/test.typ"
+        just _make-pdf "${file%/ref/}/test.typ"
     done
 
-make-pdf filename: pdf-dir
+_make-pdf filename: _pdf-dir
     typst c --root=.. {{filename}} pdf/{{parent_directory(filename)}}.pdf
 
-pdf-dir:
+_pdf-dir:
     @mkdir -p pdf
     
-test:
-    tt run --root=.. -j8
-    
+# Remove unnecessary files/directories such as .ipynb_checkpoints
 clean:
     #!/usr/bin/env bash
-    rm -r */.ipynb_checkpoints
+    rm -rf */.ipynb_checkpoints
