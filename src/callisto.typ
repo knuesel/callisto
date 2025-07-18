@@ -1,5 +1,5 @@
 #import "reading.typ"
-#import "reading.typ": cells, cell, outputs, output, displays, display, results, result, stream-items, stream-item, errors, error, streams, stream, sources, source, read-mime, image-markdown-cell
+#import "reading.typ": cells, cell, outputs, output, displays, display, results, result, stream-items, stream-item, errors, error, streams, stream, sources, source, read-mime, image-markdown-cell, mitex-with-preamble
 #import "rendering.typ"
 #import "rendering.typ": render, Cell, In, Out
 
