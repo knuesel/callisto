@@ -12,12 +12,7 @@
   block(
     width: 100%,
     spacing: 1em,
-    rich-object.process(
-      ("text/markdown": source(cell).text),
-      handlers: handlers,
-      // Extra arguments for handler
-      attachments: cell.at("attachments", default: (:)),
-    ).value,
+    handlers.at("text/markdown")(cell.source, handlers: handlers, attachments: cell.at("attachments", default: (:))),
   )
 }
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
