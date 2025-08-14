@@ -1,4 +1,4 @@
-#import "reading.typ": *
+#import "reading.typ": source, outputs
 
 #let _count-string(count) = if count == none { return " " } else { str(count) }
 
@@ -7,7 +7,7 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
-#let plain-raw(cell, ..args) = source(cell)
+#let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
 #let plain-markdown(cell, handlers: auto, ..args) = {
   block(
     width: 100%,

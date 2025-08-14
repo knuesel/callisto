@@ -31,6 +31,12 @@
 === Same but with `plain` template
 #Out(3, count: "execution", output-type: "error", template: "plain")
 
+== Raw cells
+#render(cell-type: "raw")
+
+=== With `plain` template
+#render(cell-type: "raw", template: "plain")
+
 #pagebreak()
 
 == Markdown and code cells\ (only source and result, no display)
