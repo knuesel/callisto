@@ -1,5 +1,5 @@
 #import "reading.typ"
-#import "reading.typ": cells, cell, outputs, output, displays, display, results, result, stream-items, stream-item, errors, error, streams, stream, sources, source, read-mime
+#import "reading.typ": cells, cell, outputs, output, displays, display, results, result, stream-items, stream-item, errors, error, streams, stream, sources, source
 #import "handlers.typ"
 #import "handlers.typ": markdown-cell-image
 #import "rendering.typ"

@@ -12,7 +12,7 @@
   block(
     width: 100%,
     spacing: 1em,
-    process-rich(
+    rich-object.process(
       ("text/markdown": source(cell).text),
       handlers: handlers,
       // Extra arguments for handler

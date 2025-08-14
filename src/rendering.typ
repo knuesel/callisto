@@ -1,5 +1,7 @@
 #import "reading.typ": *
 #import "templates.typ"
+#import "handlers.typ": get-all-handlers
+#import "rich-object.typ"
 
 // A code template function that uses input and output template functions.
 // Both input and output keywords are forwarded to the input/output templates to
@@ -130,6 +132,15 @@
       lang = _notebook-lang(processed-nb)
     }
   }
+
+  // Get all handlers
+  let handlers = get-all-handlers(
+    handlers,
+    rich-object.process.with(
+      format: format,
+      ignore-wrong-format: ignore-wrong-format,
+    ),
+  )
 
   // Arguments for rendering cell inputs
   let input-args = (

@@ -2,13 +2,13 @@
 
 // Preferred format among `xyz`, `text/plain`, `abc`
 #assert.eq(
-  callisto.reading.pick-format(("xyz", "text/plain", "abc")),
+  callisto.reading.rich-object.pick-format(("xyz", "text/plain", "abc")),
   "text/plain",
 )
 
 // Same with `precedence: ("abc", "text/plain")`
 #assert.eq(
-  callisto.reading.pick-format(
+  callisto.reading.rich-object.pick-format(
     ("xyz", "text/plain", "abc"),
     precedence: ("abc", "text/plain"),
   ),
