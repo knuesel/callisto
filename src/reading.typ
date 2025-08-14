@@ -17,7 +17,7 @@
     if filename in attachments {
       let file = attachments.at(filename)
       // Mutual recursion. Will profit fromt the existing image handlers.
-      let process-rich = handlers.at("rich-object")
+      let process-rich = handlers.at("application/x.rich-object")
       process-rich(file, ..args).value
     } else {
       panic("Jupyter notebook attachment " + filename + " not found in attachments: " + repr(attachments))
@@ -64,8 +64,9 @@
 // Handler for LaTeX markup
 #let handler-latex(data, ..args) = mitex.mitext(data)
 
-#let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
-#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
+// Default handlers.
+// All handlers must accept a positional argument for the data to handle, and
+// arbitrary keyword arguments
 #let default-handlers = (
   "image/svg+xml": handler-svg-xml,
   "image/png"    : handler-image-base64,
@@ -80,8 +81,11 @@
   "image/x.text"  : handler-image-text,   // data is a text encoded image
   "image/x.path"  : handler-image-path,   // data is a image determined by 'path' string
   // Add handler for a rich object. Used for mutual recursion.
-  "rich-object"   : (..args) => panic("rich object handler is not replaced by a working function"),
+  "application/x.rich-object": (..args) => panic("rich object handler is not replaced by a working function"),
 )
+
+#let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
+#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
 #let default-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
 
@@ -363,7 +367,14 @@
   if type(recursive-handlers) != dictionary {
     panic("handlers must be auto or a dictionary mapping formats to functions")
   }
-  recursive-handlers.rich-object = process-rich.with(format: format, handlers: handlers, ignore-wrong-format: ignore-wrong-format)
+  recursive-handlers.insert(
+    "application/x.rich-object",
+    process-rich.with(
+      format: format,
+      handlers: handlers,
+      ignore-wrong-format: ignore-wrong-format,
+    ),
+  )
   let value = read-mime(item-data.at(fmt), format: fmt, handlers: recursive-handlers, ..args-handler)
   return (
     format: fmt,
