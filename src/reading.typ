@@ -2,25 +2,32 @@
 #import "@preview/cmarker:0.1.6"
 #import "@preview/mitex:0.2.5"
 
-/// Function like std.image, but accepts extra arguments to 'preload'
+/// Function like std.image, but also supports images given by path of the form
+// "attachment:name" where 'name' refers to a cell attachment.
+// - handler-args: 
+//  in this case the image data is 
+// when the image is given by path and the path
+//
+//  but accepts extra arguments to 'preload'
 /// (formal term: partial application)
 /// - handlers (dict): When the path is an attachment, key "rich-object" is
 ///   needed (to recurse). Otherwise key "image/x.path" is used.
 /// - attachments (dict): Dict of embedded images from the Jupyter notebook cell
 /// -> content (image)
-#let image-markdown-cell(path, alt: none, handlers: none, attachments: (:), ..args) = {
+#let markdown-cell-image(path, alt: none, handlers: none, attachments: (:), ..args) = {
   if handlers == none or handlers == auto {
     panic("No valid handlers dict provided for mutual recursion (value was " + repr(handlers) + ")")
   }
   if path.starts-with("attachment:") {
-    let filename = path.trim("attachment:", at: start)
-    if filename in attachments {
-      let file = attachments.at(filename)
+    let name = path.trim("attachment:", at: start)
+    if name in attachments {
+      // Get data dict (keyed by MIME type) for this attachment
+      let data = attachments.at(name)
       // Mutual recursion. Will profit fromt the existing image handlers.
       let process-rich = handlers.at("application/x.rich-object")
-      process-rich(file, ..args).value
+      process-rich(data, ..args).value
     } else {
-      panic("Jupyter notebook attachment " + filename + " not found in attachments: " + repr(attachments))
+      panic("Jupyter notebook attachment " + name + " not found in attachments: " + repr(attachments))
     }
   } else {
     handlers.at("image/x.path")(path, alt: alt)
@@ -59,7 +66,7 @@
   math: mitex.mitex,
   // Like the std.image function, but 'preload' it with extra arguments
   // to resolve 'attachments'
-  scope: (image: image-markdown-cell.with(..args)),
+  scope: (image: markdown-cell-image.with(..args)),
 )
 // Handler for LaTeX markup
 #let handler-latex(data, ..args) = mitex.mitext(data)
@@ -340,7 +347,7 @@
   return handler(data, handlers: all-handlers, ..args-handler)
 }
 
-// Process a "rich" item, which can have various formats.
+// Process a "rich" object, which can be available in multiple formats.
 // Can return none if item is available only in unsupported formats (and
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
@@ -381,10 +388,6 @@
     value: value,
   )
 }
-// Process-rich is the entry-point for all recursive handlers. If read-mime
-// should be an entry point too, create a convenience function get-recursive-handlers
-// here, which would create the recursive-handlers dict
-
 /// Process rich items from the 'outputs' field in a notebook. These contain
 /// additional (meta)data besides the rich item itself.
 #let process-rich-output(item, ..args) = {
