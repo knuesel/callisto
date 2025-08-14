@@ -2,7 +2,7 @@
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
 #let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
-#let default-names = ("metadata.label", "id", "metadata.tags")
+#let default-cell-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
 
 // Convert metadata in code header to cell metadata
@@ -120,7 +120,7 @@
   if type(spec) == str {
     // Match on any of the specified names
     let names = if name-path == auto {
-      default-names
+      default-cell-names
     } else {
       ensure-array(name-path)
     }
