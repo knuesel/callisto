@@ -1,7 +1,6 @@
 #import "reading.typ"
 #import "templates.typ"
 #import "handlers.typ": get-all-handlers
-#import "rich-object.typ"
 
 // A code template function that uses input and output template functions.
 // Both input and output keywords are forwarded to the input/output templates to
@@ -121,7 +120,7 @@
   let processed-nb = if nb == none {
     none
   } else {
-    reading._read-notebook(nb, cell-header-pattern, keep-cell-header)
+    reading.notebook.read(nb, cell-header-pattern, keep-cell-header)
   }
   // Get lang from notebook if auto, so that the value can be passed to
   // templates (which don't receive the notebook itself)
@@ -129,7 +128,7 @@
     if processed-nb == none {
       lang = none
     } else {
-      lang = reading._notebook-lang(processed-nb)
+      lang = reading.notebook.lang(processed-nb)
     }
   }
 

@@ -2,7 +2,7 @@
 #import "@preview/cmarker:0.1.6"
 #import "@preview/mitex:0.2.5"
 
-#import "rich-object.typ"
+#import "reading/rich-object.typ"
 
 // Handlers are always called with a positional argument for the data to handle
 // and a 'ctx' keyword argument for contextual data (a dict that includes at
