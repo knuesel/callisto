@@ -11,14 +11,12 @@
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let process-rich(item, ..args) = {
-  let result = rich-object.process(item.data, ..args)
+  let result = rich-object.process(item.data, item.metadata, ..args)
   if result == none {
     return none
   }
   return (
     type: item.output_type,
-    // TODO: can also contain metadata NOT keyed to MIME type
-    metadata: item.metadata.at(result.format, default: none),
     ..result,
   )
 }
@@ -96,7 +94,7 @@
   }
   let process-args = (
     format: format,
-    handlers: get-all-handlers(handlers),
+    all-handlers: get-all-handlers(handlers),
     ignore-wrong-format: ignore-wrong-format,
     stream: stream,
   )

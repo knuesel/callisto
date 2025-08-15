@@ -4,9 +4,10 @@
 
 #import "reading/rich-object.typ"
 
-// Handlers are always called with a positional argument for the data to handle
-// and a 'ctx' keyword argument for contextual data (a dict that includes at
-// least least cell, format, handlers and ignore-wrong-format fields).
+// Handlers are always called with a positional argument for the data to
+// handle, and a 'ctx' keyword argument for contextual data: a dict that
+// includes at least least cell, format, handlers (full dict, not just the
+// user handlers or 'auto') and ignore-wrong-format fields.
 // Handlers must also accept arbitrary extra arguments for extensibility. This
 // is used for example in image handlers which can receive an 'alt' value
 // (and possibly also other values) to be forwarded to std.image.
@@ -21,7 +22,9 @@
     if name in attachments {
       // Get data dict (keyed by MIME type) for this attachment
       let data = attachments.at(name)
-      handlers.at("application/x.rich-object")(data, ctx: ctx, ..args)
+      let handler = handlers.at("application/x.rich-object")
+      // This handler accepts metadata but we have none to give
+      handler(data, ctx: ctx, metadata: (:), ..args)
     } else {
       panic("cell attachment " + name + " not found")
     }
@@ -69,7 +72,8 @@
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
     // handler delegates to the "image/x.path" handler. Users should define
-    // that handler to fix image path resolution.
+    // that handler to fix image path resolution (until Typst gets a 'path'
+    // type).
     image: ctx.handlers.at("image/x.markdown-cell").with(ctx: ctx),
   ),
   ..args,
@@ -79,13 +83,18 @@
 // Handler for LaTeX markup
 #let handler-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
 
-#let handler-rich(data, ctx: none, ..args) = {
+// Handler for rich objects, where data is a dict of possibly several available
+// formats.
+#let handler-rich(data, ctx: none, metadata: (:), ..args) = {
   let result = rich-object.process(
     data,
+    metadata,
+    cell: ctx.cell,
     format: ctx.format,
-    handlers: ctx.handlers,
+    all-handlers: ctx.handlers,
     ignore-wrong-format: ctx.ignore-wrong-format,
     handler-args: args,
+    ctx: ctx,
   )
   if result == none { return none }
   return result.value

@@ -44,18 +44,24 @@
 }
 
 // Process a "rich" object, which can be available in multiple formats.
+// The item-data and item-metadata arguments are dicts keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
-// The 'handlers' argument must be a valid dict (cannot be auto).
+// The 'all-handlers' argument must be "resolved" (cannot be auto, and must
+// include the default handlers as well as the user-specified handlers).
+// The ctx argument is optional. A new context will be created anyway,
+// but an existing context can be specified to be included as parent context.
 #let process(
   item-data,
+  item-metadata,
   cell: none,
   format: auto,
-  handlers: none,
+  all-handlers: none,
   ignore-wrong-format: false,
   stream: "all",
   handler-args: none,
+  ctx: none,
 ) = {
   let item-formats = item-data.keys()
   if item-formats.len() == 0 {
@@ -70,14 +76,28 @@
     return none
   }
   let data = item-data.at(fmt)
-  let ctx = (
+  let new-ctx = (
     cell: cell,
     format: format, // the general format spec, not the format picked here
-    handlers: handlers,
+    handlers: all-handlers,
     ignore-wrong-format: ignore-wrong-format,
+    // Item specific fields
+    item: (
+      selected-format: fmt,
+      metadata: item-metadata.at(fmt, default: (:)),
+      // Also provide whole item metadata, since the spec says "The metadata of
+      // these messages *may* be keyed by mime-type as well" (our emphasis).
+      full-metadata: item-metadata,
+    ),
+    // Parent context if any
+    parent: ctx,
   )
   return (
     format: fmt,
-    value: read-mime(data, fmt, ctx: ctx, handler-args: handler-args),
+    metadata: item-metadata.at(fmt, default: (:)),
+    // Also provide whole item metadata, since the spec says "The metadata of
+    // these messages *may* be keyed by mime-type as well" (our emphasis).
+    full-metadata: item-metadata,
+    value: read-mime(data, fmt, ctx: new-ctx, handler-args: handler-args),
   )
 }
