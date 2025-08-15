@@ -161,8 +161,7 @@
   ) {
     template(
       cell,
-      unused: none, // to check the template accepts extra arguments
-      handlers: handlers,
+      dummy: none, // to check the template accepts extra arguments
       input: input,
       output: output,
       input-args: input-args,
