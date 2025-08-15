@@ -42,4 +42,13 @@
 == Rendering of cell 4
 #Cell(4)
 
-
+== Accessing metadata from image handler
+#render(
+  6,
+  output-type: "display_data",
+  handlers: (
+    "image/png": (data, ctx: none, ..args) => {
+      block[PNG display has metadata: #ctx.item.metadata]
+    },
+  ),
+)
