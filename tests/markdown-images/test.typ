@@ -3,6 +3,11 @@
 
 #import "/src/callisto.typ" as callisto: *
 
+#show image: it => {
+  place(dx: -5em, text(0.6em)[alt: "#it.alt"])
+  it
+}
+
 #callisto.render(
   nb: json("images.ipynb"),
   handlers: (
