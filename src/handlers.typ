@@ -65,8 +65,7 @@
 #let handler-text(data, ctx: none, ..args) = data
 
 // Handler for Markdown markup
-#let handler-markdown(data, ctx: none, ..args) = {
-  cmarker.render(
+#let handler-markdown(data, ctx: none, ..args) = cmarker.render(
   data,
   math: mitex.mitex,
   scope: (
@@ -78,7 +77,6 @@
   ),
   ..args,
 )
-}
 
 // Handler for LaTeX markup
 #let handler-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
