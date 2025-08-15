@@ -1,4 +1,11 @@
-#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
+#let default-formats = (
+  "image/svg+xml",
+  "image/png",
+  "image/gif",
+  "text/markdown",
+  "text/latex",
+  "text/plain",
+)
 
 #let normalize-formats(formats) = {
   if type(formats) != array {
@@ -23,7 +30,8 @@
 // in handler-args.
 #let read-mime(data, ctx: none, handler-args: none) = {
   if ctx.format not in ctx.handlers {
-    panic("format " + repr(format) + " has no registered handler (is it a valid MIME string?)")
+    panic("format " + repr(format) +
+      " has no registered handler (is it a valid MIME string?)")
   }
   let handler = ctx.handlers.at(ctx.format)
   if type(handler) != function {

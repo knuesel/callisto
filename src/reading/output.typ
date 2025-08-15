@@ -64,17 +64,17 @@
 
 /// Extract outputs from cells specified by 'cell-args'.
 /// Can return several outputs per cell.
-/// - output-type (str | array): The output type(s) to include in the returned array.
-///   The valid types are "display_data", "execute_result", "stream" and "error".
+/// - output-type (str | array): Output type(s) to include in returned array.
+///   Valid types are "display_data", "execute_result", "stream" and "error".
 /// - format (str | array): The format, or order of preference of formats, to
 ///   choose in case of "rich" outputs.
-/// - handlers (auto | dict): Handler functions for rendering various data formats
-/// - ignore-wrong-format (bool): Whether outputs without supported format should be
-///   silently ignored.
-/// - stream (str | array): The kind(s) of streams to include in the returned array
-/// - result (str): Use "value" to return just the outputs themselves, or "dict" to
-///   return for each output a dict with fields 'value', 'cell', 'type' and additional
-///   fields specific to each output type.
+/// - handlers (auto | dict): Handler functions for rendering various formats
+/// - ignore-wrong-format (bool): Whether outputs without supported format
+///   should be silently ignored.
+/// - stream (str | array): Kind(s) of streams to include in the returned array
+/// - result (str): Use "value" to return just the outputs themselves, or
+///   "dict" to return for each output a dict with fields 'value', 'cell',
+///   'type' and additional fields specific to each output type.
 /// -> array of any | array of dict
 #let outputs(
   ..cell-args,
@@ -146,7 +146,12 @@
       value: "",
     )
     // Append all stream items to value
-    for item in outputs(cell, output-type: "stream", stream: stream, result: "value") {
+    for item in outputs(
+      cell,
+      output-type: "stream",
+      stream: stream,
+      result: "value",
+    ) {
       out.value += item
     }
     outs.push(final-result(cell, result, out))

@@ -1,5 +1,7 @@
 #let ensure-array(x) = if type(x) == array { x } else { (x,) }
 
+// A dictionary of cell-related data, to be used as one field in the result
+// dict.
 #let _cell-output-dict(cell) = (
   index: cell.index,
   id: cell.id,

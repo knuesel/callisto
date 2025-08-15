@@ -38,7 +38,14 @@
 // The cells-of-type array contains cells already filtered to match cell-type.
 // The all-cells array contains all cells and can be used for performance for
 // cells specified by their index.
-#let _cell-indices(spec, cell-type, cells-of-type, all-cells, count, name-path) = {
+#let _cell-indices(
+  spec,
+  cell-type,
+  cells-of-type,
+  all-cells,
+  count,
+  name-path,
+) = {
   if type(spec) == dictionary {
     // Literal cell
     return _filter-type((spec,), cell-type).map(c => c.index)
@@ -64,8 +71,8 @@
       return if type-ok { (spec,) } else { () }
     }
     if count == "execution" {
-      // Different cells can have the same execution_count, e.g. when evaluating
-      // only some cells after a kernel restart.
+      // Different cells can have the same execution_count, e.g. when
+      // evaluating only some cells after a kernel restart.
       return cells-of-type
         .filter(x => x.at("execution_count", default: none) == spec)
         .map(c => c.index)
@@ -94,16 +101,29 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern, keep-cell-header) = {
+#let _cells-from-spec(
+  spec,
+  nb,
+  count,
+  name-path,
+  cell-type,
+  cell-header-pattern,
+  keep-cell-header,
+) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
-    panic("invalid literal cell, did you forget the 'nb:' keyword while passing a notebook?")
+    panic("invalid literal cell, did you forget the 'nb:' keyword " +
+      "while passing a notebook?")
   }
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
     return _filter-type(ensure-array(spec), cell-type)
   }
-  let all-cells = notebook.read(nb, cell-header-pattern, keep-cell-header).cells
+  let all-cells = notebook.read(
+    nb,
+    cell-header-pattern,
+    keep-cell-header,
+  ).cells
   let cells-of-type = _filter-type(all-cells, cell-type)
   if spec == none {
     // No spec means select all cells
@@ -111,7 +131,14 @@
   }
   let indices = ()
   for s in ensure-array(spec) {
-    indices += _cell-indices(s, cell-type, cells-of-type, all-cells, count, name-path)
+    indices += _cell-indices(
+      s,
+      cell-type,
+      cells-of-type,
+      all-cells,
+      count,
+      name-path,
+    )
   }
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
@@ -135,7 +162,15 @@
     panic("expected 1 positional argument, got " + str(args.pos().len()))
   }
   let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern, keep-cell-header)
+  let cs = _cells-from-spec(
+    spec,
+    nb,
+    count,
+    name-path,
+    cell-type,
+    cell-header-pattern,
+    keep-cell-header,
+  )
   return _apply-keep(cs, keep)
 }
 
