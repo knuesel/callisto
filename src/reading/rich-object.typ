@@ -50,8 +50,6 @@
 // notebook JSON).
 // The 'all-handlers' argument must be "resolved" (cannot be auto, and must
 // include the default handlers as well as the user-specified handlers).
-// The ctx argument is optional. A new context will be created anyway,
-// but an existing context can be specified to be included as parent context.
 #let process(
   item-data,
   item-metadata,
@@ -61,7 +59,6 @@
   ignore-wrong-format: false,
   stream: "all",
   handler-args: none,
-  ctx: none,
 ) = {
   let item-formats = item-data.keys()
   if item-formats.len() == 0 {
@@ -89,8 +86,6 @@
       // these messages *may* be keyed by mime-type as well" (our emphasis).
       full-metadata: item-metadata,
     ),
-    // Parent context if any
-    parent: ctx,
   )
   return (
     format: fmt,

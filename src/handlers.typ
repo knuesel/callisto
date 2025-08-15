@@ -94,7 +94,6 @@
     all-handlers: ctx.handlers,
     ignore-wrong-format: ctx.ignore-wrong-format,
     handler-args: args,
-    ctx: ctx,
   )
   if result == none { return none }
   return result.value
