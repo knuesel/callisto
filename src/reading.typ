@@ -217,15 +217,15 @@
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let process-rich(item, ..args) = {
-  let processed-rich = rich-object.process(item.data, ..args)
-  if processed-rich == none {
+  let result = rich-object.process(item.data, ..args)
+  if result == none {
     return none
   }
   return (
     type: item.output_type,
     // TODO: can also contain metadata NOT keyed to MIME type
-    metadata: item.metadata.at(processed-rich.format, default: none),
-    ..processed-rich,
+    metadata: item.metadata.at(result.format, default: none),
+    ..result,
   )
 }
 
@@ -344,7 +344,7 @@
   for cell in cs {
     outs += cell.outputs
       .filter(x => x.output_type in output-types)
-      .map(x => (processors.at(x.output_type))(x, ..process-args))
+      .map(x => (processors.at(x.output_type))(x, cell: cell, ..process-args))
       .filter(x => x != none)
       .map(final-output.with(cell, result))
   }

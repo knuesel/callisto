@@ -8,13 +8,18 @@
 }
 
 #let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
-#let plain-markdown(cell, handlers: auto, ..args) = {
+
+#let plain-markdown(cell, output-args: none, ..args) = {
   block(
     width: 100%,
     spacing: 1em,
-    handlers.at("text/markdown")(cell.source, handlers: handlers, attachments: cell.at("attachments", default: (:))),
+    output-args.handlers.at("text/markdown")(
+      cell.source,
+      ctx: (cell: cell, ..output-args),
+    )
   )
 }
+
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
 #let plain-output(cell, output-args: none, ..args) = {
   outputs(cell, ..output-args, result: "value").join()

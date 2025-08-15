@@ -21,10 +21,12 @@
 
 // Interpret data according to the given MIME format string, using the given
 // handlers dict for decoding.
-#let read-mime(data, format: none, handlers: none, ..args-handler) = {
+// - handler-args: extra arguments to pass to the handler
+#let read-mime(data, ctx: none, handler-args: none) = {
   // let all-handlers = get-all-handlers(handlers)
-  let all-handlers = handlers // TODO: fix
-  if format == none or format not in all-handlers {
+  let all-handlers = ctx.handlers // TODO: fix
+  let format = ctx.format
+  if format not in all-handlers {
     panic("format " + repr(format) + " has no registered handler (is it a valid MIME string?)")
   }
   let handler = all-handlers.at(format)
@@ -34,8 +36,7 @@
   if type(data) == array {
     data = data.join()
   }
-  // Pass expanded(!) handlers along for mutual recursion: https://github.com/typst/typst/issues/744
-  return handler(data, handlers: all-handlers, ..args-handler)
+  return handler(data, ctx: ctx, ..handler-args)
 }
 
 // Process a "rich" object, which can be available in multiple formats.
@@ -45,10 +46,12 @@
 // The 'handlers' argument must be a valid dict (cannot be auto).
 #let process(
   item-data,
+  cell: none,
   format: auto,
   handlers: none,
   ignore-wrong-format: false,
-  ..args-handler,
+  stream: "all",
+  handler-args: none,
 ) = {
   let item-formats = item-data.keys()
   if item-formats.len() == 0 {
@@ -62,19 +65,25 @@
     }
     return none
   }
+  let ctx = (
+    cell: cell,
+    format: fmt,
+    handlers: handlers,
+    ignore-wrong-format: ignore-wrong-format,
+  )
   // Add rich object handler (this must be done in every call to this function
   // since the handlers dict cannot refer to itself, so the 'handlers' argument
   // received by this function and pre-applied below in process.with(...)
   // contains no rich object handler.
-  handlers.insert(
-    "application/x.rich-object",
-    process.with(
-      format: format,
-      handlers: handlers,
-      ignore-wrong-format: ignore-wrong-format,
-    ),
-  )
-  let value = read-mime(item-data.at(fmt), format: fmt, handlers: handlers, ..args-handler)
+  // handlers.insert(
+  //   "application/x.rich-object",
+  //   process.with(
+  //     format: format,
+  //     handlers: handlers,
+  //     ignore-wrong-format: ignore-wrong-format,
+  //   ),
+  // )
+  let value = read-mime(item-data.at(fmt), ctx: ctx, handler-args: handler-args)
   return (
     format: fmt,
     value: value,
