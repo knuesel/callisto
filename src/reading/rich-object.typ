@@ -28,12 +28,12 @@
 // Interpret data according to MIME format and handlers specified in ctx.
 // The appropriate handler will be called with the data, ctx, and all arguments
 // in handler-args.
-#let read-mime(data, ctx: none, handler-args: none) = {
-  if ctx.format not in ctx.handlers {
-    panic("format " + repr(format) +
+#let read-mime(data, fmt, ctx: none, handler-args: none) = {
+  if fmt not in ctx.handlers {
+    panic("format " + repr(fmt) +
       " has no registered handler (is it a valid MIME string?)")
   }
-  let handler = ctx.handlers.at(ctx.format)
+  let handler = ctx.handlers.at(fmt)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
@@ -72,12 +72,12 @@
   let data = item-data.at(fmt)
   let ctx = (
     cell: cell,
-    format: fmt,
+    format: format, // the general format spec, not the format picked here
     handlers: handlers,
     ignore-wrong-format: ignore-wrong-format,
   )
   return (
     format: fmt,
-    value: read-mime(data, ctx: ctx, handler-args: handler-args),
+    value: read-mime(data, fmt, ctx: ctx, handler-args: handler-args),
   )
 }
