@@ -2,7 +2,6 @@
 #import "rich-object.typ"
 
 #let default-cell-header-pattern = regex("^# ?\|\s+(.*?):\s+(.*?)\s*$")
-#let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
 #let default-cell-names = ("metadata.label", "id", "metadata.tags")
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
 
@@ -167,7 +166,7 @@
 
 #let _cells-from-spec(spec, nb, count, name-path, cell-type, cell-header-pattern, keep-cell-header) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
-    panic("invalid literal cell, did you forget the `nb:` keyword while passing a notebook?")
+    panic("invalid literal cell, did you forget the 'nb:' keyword while passing a notebook?")
   }
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
@@ -187,7 +186,7 @@
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-/// Cell selector: return an array of cells according to the 'cell specification'
+/// Cell selector: return an array of cells according to the cell specification
 /// -> array
 #let cells(
   ..args,
@@ -230,7 +229,7 @@
 }
 
 // Process a stream item.
-// Can return none if the item is from an undesired stream (cf `stream` arg.)
+// Can return none if the item is from an undesired stream (cf 'stream' arg.)
 #let process-stream(item, stream: "all", ..args) = {
   if stream == none {
     return none
@@ -311,7 +310,7 @@
 #let outputs(
   ..cell-args,
   output-type: "all",
-  format: default-formats,
+  format: rich-object.default-formats,
   handlers: auto,
   ignore-wrong-format: false,
   stream: "all",
@@ -326,16 +325,9 @@
       panic("invalid output type: " + typ)
     }
   }
-  let handlers = get-all-handlers(
-    handlers,
-    rich-object.process.with(
-      format: format,
-      ignore-wrong-format: ignore-wrong-format,
-    ),
-  )
   let process-args = (
     format: format,
-    handlers: handlers,
+    handlers: get-all-handlers(handlers),
     ignore-wrong-format: ignore-wrong-format,
     stream: stream,
   )
@@ -376,11 +368,13 @@
 #let error       = output.with(output-type: "error")
 #let stream-item = output.with(output-type: "stream")
 
-// Same as stream-items, but merges all streams (matching `stream`) of the same cell, and always returns an item (possibly with an empty string as value) for each selected cell (of code type).
+// Same as stream-items, but merges all streams (matching 'stream') of the
+// same cell, and always returns an item (possibly with an empty string as
+// value) for each selected cell (of code type).
 #let streams(
   ..cell-args,
   output-type: "all",
-  format: default-formats,
+  format: rich-object.default-formats,
   handlers: auto,
   ignore-wrong-format: false,
   stream: "all",
@@ -414,8 +408,9 @@
 
 /// Extract the 'source' field from cells as raw blocks.
 /// Return type depends on the 'result' parameter.
-/// - result (str): Determine the return type of the array↓ (See also the final-output function)
-/// -> array of raw | (value: raw, cell: dict)
+/// - result (str): Use "value" to return just the raw items, or "dict" to
+///   return for each matching cell a dict with fields 'cell' and 'value'.
+/// -> array of any | array of dict
 #let sources(
   ..args,
   nb: none,

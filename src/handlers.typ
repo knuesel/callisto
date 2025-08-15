@@ -109,21 +109,12 @@
   "application/x.rich-object": handler-rich,
 )
 
-#let get-all-handlers(user-handlers, rich-processor) = {
+#let get-all-handlers(user-handlers) = {
   if user-handlers != auto and type(user-handlers) != dictionary {
     panic("handlers must be auto or a dictionary mapping formats to functions")
   }
-  // Start with default handlers
-  let handlers = mime-handlers
-  // Override with user handlers if any
-  if user-handlers != auto {
-    handlers += user-handlers
+  if user-handlers == auto {
+    user-handlers = (:)
   }
-  // TODO: cleanup
-  // Add special handler for rich objects
-  // handlers.insert(
-  //   "application/x.rich-object",
-  //   handler-rich.with(rich-processor),
-  // )
-  return handlers
+  return mime-handlers + user-handlers
 }

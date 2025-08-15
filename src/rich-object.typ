@@ -1,4 +1,3 @@
-// TODO: deduplicate this and reading.typ's version
 #let default-formats = ("image/svg+xml", "image/png", "image/gif", "text/markdown", "text/latex", "text/plain")
 
 #let normalize-formats(formats) = {
@@ -19,17 +18,14 @@
   return precedence.find(f => f in available)
 }
 
-// Interpret data according to the given MIME format string, using the given
-// handlers dict for decoding.
-// - handler-args: extra arguments to pass to the handler
+// Interpret data according to MIME format and handlers specified in ctx.
+// The appropriate handler will be called with the data, ctx, and all arguments
+// in handler-args.
 #let read-mime(data, ctx: none, handler-args: none) = {
-  // let all-handlers = get-all-handlers(handlers)
-  let all-handlers = ctx.handlers // TODO: fix
-  let format = ctx.format
-  if format not in all-handlers {
+  if ctx.format not in ctx.handlers {
     panic("format " + repr(format) + " has no registered handler (is it a valid MIME string?)")
   }
-  let handler = all-handlers.at(format)
+  let handler = ctx.handlers.at(ctx.format)
   if type(handler) != function {
     panic("handler must be a function or a dict of functions")
   }
@@ -65,28 +61,15 @@
     }
     return none
   }
+  let data = item-data.at(fmt)
   let ctx = (
     cell: cell,
     format: fmt,
     handlers: handlers,
     ignore-wrong-format: ignore-wrong-format,
   )
-  // Add rich object handler (this must be done in every call to this function
-  // since the handlers dict cannot refer to itself, so the 'handlers' argument
-  // received by this function and pre-applied below in process.with(...)
-  // contains no rich object handler.
-  // handlers.insert(
-  //   "application/x.rich-object",
-  //   process.with(
-  //     format: format,
-  //     handlers: handlers,
-  //     ignore-wrong-format: ignore-wrong-format,
-  //   ),
-  // )
-  let value = read-mime(item-data.at(fmt), ctx: ctx, handler-args: handler-args)
   return (
     format: fmt,
-    value: value,
+    value: read-mime(data, ctx: ctx, handler-args: handler-args),
   )
 }
-

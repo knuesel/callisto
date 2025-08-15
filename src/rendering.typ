@@ -1,4 +1,4 @@
-#import "reading.typ": *
+#import "reading.typ"
 #import "templates.typ"
 #import "handlers.typ": get-all-handlers
 #import "rich-object.typ"
@@ -121,7 +121,7 @@
   let processed-nb = if nb == none {
     none
   } else {
-    _read-notebook(nb, cell-header-pattern, keep-cell-header)
+    reading._read-notebook(nb, cell-header-pattern, keep-cell-header)
   }
   // Get lang from notebook if auto, so that the value can be passed to
   // templates (which don't receive the notebook itself)
@@ -129,18 +129,12 @@
     if processed-nb == none {
       lang = none
     } else {
-      lang = _notebook-lang(processed-nb)
+      lang = reading._notebook-lang(processed-nb)
     }
   }
 
   // Get all handlers
-  let handlers = get-all-handlers(
-    handlers,
-    rich-object.process.with(
-      format: format,
-      ignore-wrong-format: ignore-wrong-format,
-    ),
-  )
+  let handlers = get-all-handlers(handlers)
 
   // Arguments for rendering cell inputs
   let input-args = (
@@ -156,7 +150,7 @@
     output-type: output-type,
   )
 
-  for cell in cells(
+  for cell in reading.cells(
     ..cell-spec,
     nb: processed-nb,
     count: count,
