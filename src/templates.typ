@@ -24,7 +24,7 @@
   output-args.handlers.at("text/markdown")(
     cell.source,
     ctx: (cell: cell, ..output-args),
-  )
+  ) + parbreak()
 }
 
 #let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
