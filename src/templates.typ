@@ -1,10 +1,21 @@
 #import "reading.typ": source, outputs
 
+// Make a string for a cell execution count, showing a space if missing
 #let _count-string(count) = if count == none { return " " } else { str(count) }
 
+// Add the In/Out annotation in the margin of code cell input/output
 #let _in-out-num(prefix, count) = context {
   let txt = raw(prefix + "[" + _count-string(count) + "]:")
   place(top+left, dx: -1.2em - measure(txt).width, txt)
+}
+
+// Ensure a code/raw cell source has at least one (possibly empty) line
+// (without this the raw block looks weird for empty cells)
+#let _ensure-one-line(cell) = {
+  if cell.source == "" {
+    cell.source = "\n"
+  }
+  return cell
 }
 
 #let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
@@ -31,7 +42,7 @@
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  source(cell, ..input-args),
+  source(_ensure-one-line(cell), ..input-args),
 )
 
 #let notebook-markdown = plain-markdown
@@ -44,7 +55,7 @@
   fill: luma(240),
   {
     _in-out-num("In ", cell.execution_count)
-    source(cell, ..input-args)
+    source(_ensure-one-line(cell), ..input-args)
   },
 )
 
