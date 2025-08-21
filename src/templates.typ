@@ -45,7 +45,7 @@
 
 #let notebook-input(cell, output: true, input-args: none, ..args) = block(
   above: 2em,
-  below: if output { 0pt } else { 2em },
+  below: if output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
