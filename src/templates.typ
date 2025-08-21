@@ -21,13 +21,9 @@
 #let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
 
 #let plain-markdown(cell, output-args: none, ..args) = {
-  block(
-    width: 100%,
-    spacing: 1em,
-    output-args.handlers.at("text/markdown")(
-      cell.source,
-      ctx: (cell: cell, ..output-args),
-    )
+  output-args.handlers.at("text/markdown")(
+    cell.source,
+    ctx: (cell: cell, ..output-args),
   )
 }
 
