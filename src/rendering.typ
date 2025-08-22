@@ -161,11 +161,12 @@
   ) {
     template(
       cell,
-      dummy: none, // to check the template accepts extra arguments
+      nb: processed-nb,
       input: input,
       output: output,
       input-args: input-args,
       output-args: output-args,
+      dummy: none, // to check the template accepts extra arguments
     )
   }
 }

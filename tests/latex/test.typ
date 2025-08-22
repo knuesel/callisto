@@ -9,7 +9,7 @@
   \newcommand \ax yz % name=\ax, value=y, z is content
   \newcommand{\az}\ax % name=\az, value=\ax
   \newcommand+| % name=+, value=|
-  \renewcommand{\xvec}{\mathbf{x}}
+  \newcommand{\xvec}{\mathbf{x}}
   \newcommand{\vdot}[1]{\dot{\mathbf{#1}}}
   \newcommand{\dfdx}[2]{{\dfrac{\partial f_{#1}}{\partial x_{#2}}}}
   \newcommand{\mymatrix}[2]{\left( \begin{array}{#1} #2\end{array} \right)}
@@ -27,7 +27,7 @@
   "\\newcommand \\ax y",
   "\\newcommand{\\az}\\ax",
   "\\newcommand+|",
-  "\\renewcommand{\\xvec}{\\mathbf{x}}",
+  "\\newcommand{\\xvec}{\\mathbf{x}}",
   "\\newcommand{\\vdot}[1]{\\dot{\\mathbf{#1}}}",
   "\\newcommand{\\dfdx}[2]{{\\dfrac{\\partial f_{#1}}{\\partial x_{#2}}}}",
   "\\newcommand{\\mymatrix}[2]{\\left( \\begin{array}{#1} #2\\end{array} \\right)}",
@@ -39,3 +39,5 @@
 
 #let defs = latex.definitions(src).map(x => x.text)
 #assert.eq(defs, ref)
+
+// #latex.definitions(src)

@@ -20,10 +20,10 @@
 
 #let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
 
-#let plain-markdown(cell, output-args: none, ..args) = {
+#let plain-markdown(cell, nb: none, output-args: none, ..args) = {
   output-args.handlers.at("text/markdown")(
     cell.source,
-    ctx: (cell: cell, ..output-args),
+    ctx: (nb: nb, cell: cell, ..output-args),
   ) + parbreak()
 }
 
