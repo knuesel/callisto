@@ -76,6 +76,7 @@
 /// -> array of any | array of dict
 #let outputs(
   ..cell-args,
+  nb: none,
   output-type: "all",
   format: rich-object.default-formats,
   handlers: auto,
@@ -98,12 +99,17 @@
     ignore-wrong-format: ignore-wrong-format,
     stream: stream,
   )
-  let cs = cells(..cell-args, cell-type: "code")
+  let cs = cells(..cell-args, nb: nb, cell-type: "code")
   let outs = ()
   for cell in cs {
     outs += cell.outputs
       .filter(x => x.output_type in output-types)
-      .map(x => (processors.at(x.output_type))(x, cell: cell, ..process-args))
+      .map(x => (processors.at(x.output_type))(
+        x,
+        nb: nb,
+        cell: cell,
+        ..process-args),
+      )
       .filter(x => x != none)
       .map(final-result.with(cell, result))
   }

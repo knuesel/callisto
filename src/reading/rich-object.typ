@@ -53,6 +53,7 @@
 #let process(
   item-data,
   item-metadata,
+  nb: none,
   cell: none,
   format: auto,
   all-handlers: none,
@@ -74,6 +75,7 @@
   }
   let data = item-data.at(fmt)
   let new-ctx = (
+    nb: nb,
     cell: cell,
     format: format, // the general format spec, not the format picked here
     handlers: all-handlers,
