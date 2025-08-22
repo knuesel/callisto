@@ -67,7 +67,7 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: mitex.mitex,
+  math: ctx.handlers.at("application/x.latex-math").with(ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
     // handler delegates to the "image/x.path" handler. Users should define
@@ -80,6 +80,11 @@
 
 // Handler for LaTeX markup
 #let handler-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
+
+// Handler for LaTeX math items (typically equations in Markdown
+#let handler-latex-math(data, ctx: none, ..args) = {
+  mitex.mitex(data, ..args)
+}
 
 // Handler for rich objects, where data is a dict of possibly several available
 // formats.
@@ -106,6 +111,8 @@
   "text/markdown": handler-markdown,
   "text/latex"   : handler-latex,
   "text/plain"   : handler-text,
+  // Special handler for LaTeX math
+  "application/x.latex-math": handler-latex-math,
   // Generic image handlers
   "image/x.base64": handler-image-base64, // base64 encoded image
   "image/x.text"  : handler-image-text,   // text encoded image
