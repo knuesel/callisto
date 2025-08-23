@@ -120,6 +120,20 @@
     .join()
 }
 
+// Raise an error if the given list of LaTeX definitions contains duplicates
+// (same command defined twice)
+#let _check-latex-duplicates(defs) = {
+  let sorted = defs.sorted(key: x => x.command)
+  let prev = sorted.first()
+  for x in sorted.slice(1) {
+    if x.command == prev.command {
+      panic("conflicting \\newcommand definitions: " +
+       prev.text + " and " + x.text)
+    }
+    prev = x
+  }
+}
+
 // Make "preamble" string from given list of LaTeX definitions, removing
 // redundant duplicates and raising an error if there are non-redundant
 // (conflicting) duplicates.
@@ -127,29 +141,22 @@
   let deduped = defs
   if deduped.len() > 1 {
     // Remove non-conflicting duplicates (that redefine a command to the same)
-    let deduped = defs.dedup(key: latex.normalized-def-string)
+    deduped = defs.dedup(key: latex.normalized-def-string)
     // Raise an error if there are remaining duplicates
-    let prev = deduped.first()
-    for x in deduped.slice(1) {
-      if x.command == prev.command {
-        panic("conflicting \\newcommand definitions: " +
-         prev.command + " and " + x.command)
-      }
-      prev = x
-    }
+    _check-latex-duplicates(deduped)
   }
   return deduped.map(latex.normalized-def-string).join("\n")
 }
 
 // Handler for a LaTeX math item (typically and equation in Markdown).
 // This handler gathers all LaTeX \newcommand definitions from the notebook
-// (if provided) or cell (if provided and the notebook is not) and use that
+// (if provided) or cell (if provided and the notebook is not) and uses that
 // as "preamble" when rendering the math item. This is done to support commands
 // defined in one Markdown LaTeX equation and used in a later one (as supported
 // by MathJax and often used in Jupyter notebook although it's not valid in
 // real LaTeX). There are two caveats:
 // 1. Only '\newcommand' gets this special treatment. MathJax also supports
-//    definitions through '\def', '\newenvironment', '\renewcommand', etc but
+//    definitions through '\def', '\newenvironment', '\renewcommand', etc. but
 //    these don't get any special treatment here.
 // 2. MathJax allows using '\newcommand' instead of '\renewcommand' to
 //    redefine an existing command. There's no good way for us to support this
