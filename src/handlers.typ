@@ -68,7 +68,7 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: ctx.handlers.at("application/x.latex-math").with(ctx: ctx),
+  math: ctx.handlers.at("text/x.latex-math").with(ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
     // handler delegates to the "image/x.path" handler. Users should define
@@ -212,7 +212,7 @@
   "text/latex"   : handler-latex,
   "text/plain"   : handler-text,
   // Special handler for LaTeX math
-  "application/x.latex-math": handler-latex-math,
+  "text/x.latex-math": handler-latex-math,
   // Generic image handlers
   "image/x.base64": handler-image-base64, // base64 encoded image
   "image/x.text"  : handler-image-text,   // text encoded image
