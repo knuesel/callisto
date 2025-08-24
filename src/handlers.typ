@@ -205,6 +205,7 @@
   let result = rich-object.process(
     data,
     metadata,
+    nb: ctx.nb,
     cell: ctx.cell,
     format: ctx.format,
     all-handlers: ctx.handlers,
