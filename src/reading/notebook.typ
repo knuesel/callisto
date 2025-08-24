@@ -55,12 +55,9 @@
     panic("invalid notebook type: " + str(type(nb)))
   }
   let nb-json = if type(nb) in (str, bytes) { json(nb) } else { nb }
-  if not nb-json.metadata.at("nbio-processed", default: false) {
-    nb-json.cells = nb-json.cells
-      .enumerate().map(
-        ((i, c)) => _process-cell(i, c, cell-header-pattern, keep-cell-header)
-      )
-  }
+  nb-json.cells = nb-json.cells.enumerate().map(
+    ((i, c)) => _process-cell(i, c, cell-header-pattern, keep-cell-header)
+  )
   return nb-json
 }
 
