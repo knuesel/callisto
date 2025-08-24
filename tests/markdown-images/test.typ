@@ -11,6 +11,6 @@
 #callisto.render(
   nb: json("images.ipynb"),
   handlers: (
-    "image/x.path": (path, ctx: none, ..args) => image(path, ..args),
+    "image/x.generic": (data, ctx: none, ..args) => image(data, ..args),
   ),
 )

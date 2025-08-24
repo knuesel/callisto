@@ -13,6 +13,17 @@
 // is used for example in image handlers which can receive an 'alt' value
 // (and possibly also other values) to be forwarded to std.image.
 
+// Generic image handler that supports image path and image bytes, used by
+// several others to actually render the image.
+// Must be redefined by the user to support images specified by path.
+#let handler-image-generic(data, ctx: none, ..args) = {
+  if type(data) == str {
+    panic("image specified by path (" + data + ") requires a user-defined " +
+      "handler for MIME type \"image/x.generic\"")
+  }
+  std.image(data, ..args)
+}
+
 // Handler for images in Markdown cells. Such images can be specified by a
 // path of the form "attachment:name" where 'name' refers to a cell attachment.
 #let handler-image-markdown-cell(path, ctx: none, ..args) = {
@@ -30,25 +41,21 @@
       panic("cell attachment " + name + " not found")
     }
   } else {
-    handlers.at("image/x.path")(path, ctx: ctx, ..args)
+    handlers.at("image/x.generic")(path, ctx: ctx, ..args)
   }
 }
 
 // Handler for base64-encoded images
-#let handler-image-base64(data, ctx: none, ..args) = image(
-  base64.decode(data.replace("\n", "")),
-  ..args,
-)
+#let handler-image-base64(data, ctx: none, ..args) = {
+  let data-bytes = base64.decode(data.replace("\n", ""))
+  ctx.handlers.at("image/x.generic")(data-bytes, ..args)
+}
+
 // Handler for text-encoded images, for example svg+xml
-#let handler-image-text(data, ctx: none, ..args) = image(
-  bytes(data),
-  ..args,
-)
-// Handler for images given by path (must be defined by the user)
-#let handler-image-path(data, ctx: none, ..args) = panic(
-  "image path handler undefined; to render images given by path, define
-  a handler for MIME type \"image/x.path\""
-)
+#let handler-image-text(data, ctx: none, ..args) = {
+  ctx.handlers.at("image/x.generic")(bytes(data), ..args)
+}
+
 // Smart svg+xml handler that handles both text and base64 data
 #let handler-svg-xml(data, ctx: none, ..args) = {
   // base64 encoded version of:     "<?xml "                        "<sv"
@@ -71,7 +78,7 @@
   math: ctx.handlers.at("text/x.latex-math").with(ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
-    // handler delegates to the "image/x.path" handler. Users should define
+    // handler delegates to the "image/x.generic" handler. Users should define
     // that handler to fix image path resolution (until Typst gets a 'path'
     // type).
     image: ctx.handlers.at("image/x.markdown-cell").with(ctx: ctx),
@@ -220,10 +227,10 @@
   // Special handler for LaTeX math
   "text/x.latex-math": handler-latex-math,
   // Generic image handlers
-  "image/x.base64": handler-image-base64, // base64 encoded image
-  "image/x.text"  : handler-image-text,   // text encoded image
-  "image/x.path"  : handler-image-path,   // image determined by path string
-  "image/x.markdown-cell": handler-image-markdown-cell, // image in Markdown cell
+  "image/x.generic": handler-image-generic, // base handler used by others
+  "image/x.base64" : handler-image-base64,  // base64 encoded image
+  "image/x.text"   : handler-image-text,    // text encoded image
+  "image/x.markdown-cell": handler-image-markdown-cell, // Markdown cell image
   // Special handler for rich objects which can be available in multiple formats
   "application/x.rich-object": handler-rich,
 )
