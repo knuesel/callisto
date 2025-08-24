@@ -25,7 +25,7 @@
       let data = attachments.at(name)
       let handler = handlers.at("application/x.rich-object")
       // This handler accepts metadata but we have none to give
-      handler(data, ctx: ctx, metadata: (:), ..args)
+      handler(data, ctx: ctx, metadata: (:), subhandler-args: args)
     } else {
       panic("cell attachment " + name + " not found")
     }
@@ -188,7 +188,13 @@
 
 // Handler for rich objects, where data is a dict of possibly several available
 // formats.
-#let handler-rich(data, ctx: none, metadata: (:), ..args) = {
+#let handler-rich(
+  data,
+  ctx: none,
+  metadata: (:),
+  subhandler-args: none,
+  ..args,
+) = {
   let result = rich-object.process(
     data,
     metadata,
@@ -196,7 +202,7 @@
     format: ctx.format,
     all-handlers: ctx.handlers,
     ignore-wrong-format: ctx.ignore-wrong-format,
-    handler-args: args,
+    handler-args: subhandler-args,
   )
   if result == none { return none }
   return result.value
