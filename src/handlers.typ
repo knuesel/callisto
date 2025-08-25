@@ -75,7 +75,7 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: ctx.handlers.at("text/x.latex-math").with(ctx: ctx),
+  math: ctx.handlers.at("text/x.math-markdown-cell").with(ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
     // handler delegates to the "image/x.generic" handler. Users should define
@@ -88,6 +88,9 @@
 
 // Handler for LaTeX markup
 #let handler-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
+
+// Handler for LaTeX equations
+#let handler-math(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
 // Wrap the math item arguments in a labelled metadata
 #let _math-metadata(..args) = [#metadata(args)<__callisto-math-item>]
@@ -155,7 +158,7 @@
   return deduped.map(latex.normalized-def-string).join("\n")
 }
 
-// Handler for a LaTeX math item (typically and equation in Markdown).
+// Handler for LaTeX equations in Markdown cells.
 // This handler gathers all LaTeX \newcommand definitions from the notebook
 // (if provided) or cell (if provided and the notebook is not) and uses that
 // as "preamble" when rendering the math item. This is done to support commands
@@ -173,7 +176,7 @@
 //    value) and raise an error otherwise. This covers the most common case
 //    of duplicate definitions, where an equation or cell is duplicated by
 //    copy-paste.
-#let handler-latex-math(data, ctx: none, ..args) = {
+#let handler-math-markdown-cell(data, ctx: none, ..args) = {
   let defs = none
   if ctx.nb != none {
     // Get math definitions from the notebook if specified
@@ -190,7 +193,8 @@
     // Remove definitions from this item's body and prepend all defs
     txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
   }
-  return mitex.mitex(txt, ..args)
+  // Render equation with the latex math handler
+  return ctx.handlers.at("text/x.math")(txt, ..args)
 }
 
 // Handler for rich objects, where data is a dict of possibly several available
@@ -225,8 +229,9 @@
   "text/markdown": handler-markdown,
   "text/latex"   : handler-latex,
   "text/plain"   : handler-text,
-  // Special handler for LaTeX math
-  "text/x.latex-math": handler-latex-math,
+  // Special handlers for LaTeX math
+  "text/x.math": handler-math, // base handler used by next one
+  "text/x.math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
   // Generic image handlers
   "image/x.generic": handler-image-generic, // base handler used by others
   "image/x.base64" : handler-image-base64,  // base64 encoded image
