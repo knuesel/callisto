@@ -2,16 +2,29 @@
 #import "@preview/cmarker:0.1.6"
 #import "@preview/mitex:0.2.5"
 
+#import "common.typ": handle
 #import "reading/rich-object.typ"
 #import "latex.typ"
 
+// A handler is a function called to render a value such as a cell result
+// (in contrast to a template which is called to render a whole cell).
+// Each handler is associated with a MIME type. A template can for example
+// call the "text/markdown" handler to render the source of a Markdown cell.
+//
 // Handlers are always called with a positional argument for the data to
-// handle, and a 'ctx' keyword argument for contextual data: a dict that
-// includes at least least cell, format, handlers (full dict, not just the
-// user handlers or 'auto') and ignore-wrong-format fields.
-// Handlers must also accept arbitrary extra arguments for extensibility. This
-// is used for example in image handlers which can receive an 'alt' value
-// (and possibly also other values) to be forwarded to std.image.
+// render, and a 'ctx' keyword argument for contextual data. Some handlers also
+// take additional arguments:
+// 
+// - Image handlers must accept an 'alt' argument.
+// 
+// - Math handlers must accept a 'block' argument (true for block equations).
+//
+// - The generic "text/x.source" handler (used by the default code cell source
+//   and raw cell source handlers) takes a 'lang' argument.
+// 
+// When defining a handler, the user can choose to add an '..args' sink if
+// they don't care about extra arguments, or omit this sink if they prefer to
+// see an error when an unknown argument is passed.
 
 // Generic image handler that supports image path and image bytes, used by
 // several others to actually render the image.
@@ -36,7 +49,7 @@
       let data = attachments.at(name)
       let handler = handlers.at("application/x.rich-object")
       // This handler accepts metadata but we have none to give
-      handler(data, ctx: ctx, metadata: (:), subhandler-args: args)
+      handler(data, ctx: ctx, subhandler-args: args)
     } else {
       panic("cell attachment " + name + " not found")
     }
@@ -64,13 +77,15 @@
   } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
     ctx.handlers.at("image/x.text")
   } else {
-    panic("Unrecognized svg+xml data")
+    panic("unrecognized svg+xml data")
   }
   handler(data, ctx: ctx, ..args)
 }
 
 // Handler for simple text
-#let handler-text(data, ctx: none, ..args) = data
+#let handler-text(data, ctx: none, ..args) = {
+  raw(data, block: true, lang: "txt")
+}
 
 // Handler for Markdown markup
 #let handler-markdown(data, ctx: none, ..args) = cmarker.render(
@@ -194,7 +209,7 @@
     txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
   }
   // Render equation with the latex math handler
-  return ctx.handlers.at("text/x.math")(txt, ..args)
+  return ctx.handlers.at("text/x.math")(txt, ctx: ctx, ..args)
 }
 
 // Handler for rich objects, where data is a dict of possibly several available
@@ -202,22 +217,49 @@
 #let handler-rich(
   data,
   ctx: none,
-  metadata: (:),
+  metadata: none,
   subhandler-args: none,
   ..args,
 ) = {
-  let result = rich-object.process(
+  let result = rich-object.process-value(
     data,
     metadata,
-    nb: ctx.nb,
-    cell: ctx.cell,
-    format: ctx.format,
-    all-handlers: ctx.handlers,
-    ignore-wrong-format: ctx.ignore-wrong-format,
+    ctx: ctx,
     handler-args: subhandler-args,
   )
   if result == none { return none }
   return result.value
+}
+
+// Generic handler for source code
+#let handler-source(data, ctx: none, lang: none, ..args) = {
+  // Ensure the source has at least one (possibly empty) line
+  // (without this the raw block looks weird for empty cells)
+  if data == "" {
+    data = "\n"
+  }
+  raw(data, lang: lang, block: true)
+}
+
+#let handler-source-markdown-cell(data, ctx: none, ..args) = {
+  handle(data, "text/x.source", lang: "markdown", ctx: ctx)
+}
+
+#let handler-source-code-cell(data, ctx: none, ..args) = {
+  // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
+  handle(data, "text/x.source", lang: ctx.lang, ctx: ctx)
+}
+
+#let handler-source-raw-cell(data, ctx: none, ..args) = {
+  handle(data, "text/x.source", lang: ctx.cfg.raw-lang, ctx: ctx)
+}
+
+#let handler-stream(data, ctx: none, name: none, ..args) = {
+  raw(data, block: true, lang: "txt")
+}
+
+#let handler-error(data, ctx: none, name: none, traceback: none, ..args) = {
+  raw(traceback.join("\n"), block: true, lang: "txt")
 }
 
 // Default handlers for supported MIME types.
@@ -232,6 +274,13 @@
   // Special handlers for LaTeX math
   "text/x.math": handler-math, // base handler used by next one
   "text/x.math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
+  // Special handlers for specific kinds of text items
+  "text/x.source"          : handler-source,           // takes a lang: argument
+  "text/x.source-markdown-cell": handler-source-markdown-cell, // md cell source
+  "text/x.source-code-cell": handler-source-code-cell, // code cell source
+  "text/x.source-raw-cell" : handler-source-raw-cell,  // raw cell source
+  "text/x.stream": handler-stream,
+  "text/x.error": handler-error,
   // Generic image handlers
   "image/x.generic": handler-image-generic, // base handler used by others
   "image/x.base64" : handler-image-base64,  // base64 encoded image
@@ -240,13 +289,3 @@
   // Special handler for rich objects which can be available in multiple formats
   "application/x.rich-object": handler-rich,
 )
-
-#let get-all-handlers(user-handlers) = {
-  if user-handlers != auto and type(user-handlers) != dictionary {
-    panic("handlers must be auto or a dictionary mapping formats to functions")
-  }
-  if user-handlers == auto {
-    user-handlers = (:)
-  }
-  return mime-handlers + user-handlers
-}

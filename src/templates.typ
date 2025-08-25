@@ -1,3 +1,4 @@
+#import "common.typ": handle
 #import "reading.typ": source, outputs
 
 // Make a string for a cell execution count, showing a space if missing
@@ -9,49 +10,42 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
-// Ensure a code/raw cell source has at least one (possibly empty) line
-// (without this the raw block looks weird for empty cells)
-#let _ensure-one-line(cell) = {
-  if cell.source == "" {
-    cell.source = "\n"
-  }
-  return cell
+#let plain-raw(cell, ctx: none) = {
+  handle(cell.source, "text/x.source-raw-cell", ctx: ctx)
 }
 
-#let plain-raw(cell, input-args: none, ..args) = source(cell, ..input-args)
-
-#let plain-markdown(cell, nb: none, output-args: none, ..args) = {
-  output-args.handlers.at("text/markdown")(
-    cell.source,
-    ctx: (nb: nb, cell: cell, ..output-args),
-  ) + parbreak()
+#let plain-markdown(cell, ctx: none) = {
+  handle(cell.source, "text/markdown", ctx: ctx) + parbreak()
 }
 
-#let plain-input(cell, input-args: none, ..args) = source(cell, ..input-args)
-
-#let plain-output(cell, output-args: none, ..args) = {
-  outputs(cell, ..output-args, result: "value").join()
+#let plain-input(cell, ctx: none) = {
+  handle(cell.source, "text/x.source-code-cell", ctx: ctx)
 }
 
-#let notebook-raw(cell, input-args: none, ..args) = block(
+#let plain-output(cell, ctx: none) = {
+  // Get outputs with user config, but override 'result' to get just the values
+  outputs(cell, ..ctx.cfg, result: "value").join()
+}
+
+#let notebook-raw(cell, ctx: none) = block(
   spacing: 1.5em,
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  source(_ensure-one-line(cell), ..input-args),
+  handle(cell.source, "text/x.source-raw-cell", ctx: ctx),
 )
 
 #let notebook-markdown = plain-markdown
 
-#let notebook-input(cell, output: true, input-args: none, ..args) = block(
+#let notebook-input(cell, ctx: none) = block(
   above: 2em,
-  below: if output and cell.outputs.len() > 0 { 0pt } else { 2em },
+  below: if ctx.cfg.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
   {
     _in-out-num("In ", cell.execution_count)
-    source(_ensure-one-line(cell), ..input-args)
+    handle(cell.source, "text/x.source-code-cell", ctx: ctx)
   },
 )
 
@@ -61,19 +55,8 @@
   outset: 0.5em,
 )
 
-// Wrap some outputs in a raw block
-#let _notebook-output-value(out) = {
-  if out.type == "error" {
-    return raw(block: true, lang: "txt", out.traceback.join("\n"))
-  }
-  if out.type == "stream" or out.format == "text/plain" {
-    return raw(block: true, lang: "txt", out.value)
-  }
-  return out.value
-}
-
-#let notebook-output(cell, output-args: none, ..args) = {
-  let outs = outputs(cell, ..output-args, result: "dict")
+#let notebook-output(cell, ctx: none) = {
+  let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }
   block(
     above: 0pt,
@@ -82,20 +65,17 @@
     inset: 0.5em,
     {
       for out in outs {
-        let value = _notebook-output-value(out)
         if out.type == "execute_result" { 
           block({
             _in-out-num("Out", cell.execution_count)
-            value
+            out.value
           })
-        } else if out.type == "error" {
-          error-block(value)
-        } else if out.type == "stream" and out.name == "stderr" {
-          error-block(value)
-        } else if out.type == "stream" {
-          normal-block(value)
+        } else if out.type == "error" or (
+          out.type == "stream" and out.name == "stderr"
+        ) {
+          error-block(out.value)
         } else {
-          value
+          out.value
         }
       }
     },

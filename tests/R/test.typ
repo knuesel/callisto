@@ -4,6 +4,7 @@
 
 = First cell, choosing plain text
 #render(0, format: "text/plain")
+
 = First cell, preferring latex over markdown
 #render(0, format: ("image/svg+xml", "image/png", "text/latex", "text/markdown"))
 = Whole notebook, default config

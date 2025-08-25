@@ -1,31 +1,26 @@
-#import "reading.typ"
+#import "reading.typ": cells
 #import "templates.typ"
-#import "handlers.typ": get-all-handlers
+#import "ctx.typ": get-ctx
+#import "common.typ": parse-main-args
 
 // A code template function that uses input and output template functions.
 // Both input and output keywords are forwarded to the input/output templates to
 // let them use this information for example to produce smaller spacing between
 // input and output when both components are rendered.
-#let _code-template(
-  input-func,
-  output-func,
-  input: true,
-  output: true,
-   ..args,
-) = {
-  if input and input-func != none {
-    input-func(input: input, output: output, ..args)
+#let _code-template(cell, ctx: none, input-func: none, output-func: none) = {
+  if ctx.cfg.input and input-func != none {
+    input-func(cell, ctx: ctx)
   }
-  if output and output-func != none {
-    output-func(input: input, output: output, ..args)
+  if ctx.cfg.output and output-func != none {
+    output-func(cell, ctx: ctx)
   }
 }
 
 // A template function that delegates to a dict field for each cell type
-#let _merged-template(dict,  cell, ..args) = {
-  let f = dict.at(cell.cell_type, default: none)
+#let _merged-template(cell, ctx: none, func-dict: none) = {
+  let f = func-dict.at(cell.cell_type, default: none)
   if f != none {
-    f(cell, ..args)
+    f(cell, ctx: ctx)
   }
 }
 
@@ -49,7 +44,7 @@
     if dict.input == none and dict.output == none {
       return none
     }
-    return _code-template.with(dict.input, dict.output)
+    return _code-template.with(input-func: dict.input, output-func: dict.output)
   }
 
   let value = dict.at(key, default: none)
@@ -87,90 +82,19 @@
   dict.code = _normalize-subtemplate(dict, "code")
   dict.markdown = _normalize-subtemplate(dict, "markdown")
   dict.raw = _normalize-subtemplate(dict, "raw")
-  return _merged-template.with(dict)
+  return _merged-template.with(func-dict: dict)
 }
 
-#let render(
-  // Cell args
-  ..cell-spec,
-  nb: none,
-  count: "index",
-  name-path: auto,
-  cell-type: "all",
-  keep: "all",
-  cell-header-pattern: auto,
-  keep-cell-header: false,
-  // Other args
-  lang: auto,
-  raw-lang: none,
-  result: "value", // unused but accepted to have more uniform API
-  stream: "all",
-  format: auto,
-  handlers: auto,
-  ignore-wrong-format: false,
-  template: "notebook",
-  output-type: "all",
-  input: true,
-  output: true,
-) = {
-  template = _normalize-template(template)
-  if template == none {
-    return
-  }
-  let processed-nb = if nb == none {
-    none
-  } else {
-    reading.notebook.read(nb, cell-header-pattern, keep-cell-header)
-  }
-  // Get lang from notebook if auto, so that the value can be passed to
-  // templates (which don't receive the notebook itself)
-  if lang == auto {
-    if processed-nb == none {
-      lang = none
-    } else {
-      lang = reading.notebook.lang(processed-nb)
-    }
-  }
-
-  // Get all handlers
-  let handlers = get-all-handlers(handlers)
-
-  // Arguments for rendering cell inputs
-  let input-args = (
-    lang: lang,
-    raw-lang: raw-lang,
-  )
-  // Arguments for rendering cell outputs
-  let output-args = (
-    stream: stream,
-    format: format,
-    handlers: handlers,
-    ignore-wrong-format: ignore-wrong-format,
-    output-type: output-type,
-  )
-
-  for cell in reading.cells(
-    ..cell-spec,
-    nb: processed-nb,
-    count: count,
-    name-path: name-path,
-    cell-type: cell-type,
-    keep: keep,
-    cell-header-pattern: cell-header-pattern,
-    keep-cell-header: keep-cell-header,
-  ) {
-    template(
-      cell,
-      nb: processed-nb,
-      input: input,
-      output: output,
-      input-args: input-args,
-      output-args: output-args,
-      dummy: none, // to check the template accepts extra arguments
-    )
+#let render(..args) = {
+  let (cell-spec, cfg) = parse-main-args(args)
+  let template = _normalize-template(cfg.template)
+  if template == none { return none }
+  let cfg = parse-main-args(args).cfg
+  for cell in cells(..args) {
+    template(cell, ctx: get-ctx(cell, cfg: cfg))
   }
 }
 
 #let Cell = render.with(keep: "unique")
-#let In = Cell.with(cell-type: "code", output: false)
-#let Out = Cell.with(cell-type: "code", input: false)
+#let In = Cell.with(cell-type: "code", input: true, output: false)
+#let Out = Cell.with(cell-type: "code", input: false, output: true)

@@ -1,8 +1,10 @@
-#import "common.typ": ensure-array
+#import "../ctx.typ": get-ctx
+#import "../common.typ": ensure-array, parse-main-args
 
 #import "notebook.typ"
 
 #let default-cell-names = ("metadata.label", "id", "metadata.tags")
+#let all-cell-types = ("code", "markdown", "raw")
 
 // Get value at given path in recursive dict.
 // The path can be a string of the form `key1.key2....`, or an array
@@ -21,16 +23,26 @@
   return value == spec or (type(value) == array and spec in value)
 }
 
-#let _cell-type-array(cell-type) = {
-  if cell-type == "all" {
-    cell-type = ("code", "markdown", "raw")
+#let _cell-types(cell-type) = {
+  if cell-type == "all" { return all-cell-types }
+  let types = ensure-array(cell-type)
+  for typ in types {
+    if typ not in all-cell-types {
+      panic("invalid cell type: " + repr(typ))
+    }
   }
-  return ensure-array(cell-type)
+  return types
 }
 
 #let _filter-type(cells, cell-type) = {
-  let types = _cell-type-array(cell-type)
+  let types = _cell-types(cell-type)
   cells.filter(x => x.cell_type in types)
+}
+
+// Resolve 'name-path' setting to an array of name paths
+#let _name-paths(path) = {
+  if path == auto { return default-cell-names }
+  return ensure-array(path)
 }
 
 // Get cell indices for a single specification.
@@ -38,17 +50,10 @@
 // The cells-of-type array contains cells already filtered to match cell-type.
 // The all-cells array contains all cells and can be used for performance for
 // cells specified by their index.
-#let _cell-indices(
-  spec,
-  cell-type,
-  cells-of-type,
-  all-cells,
-  count,
-  name-path,
-) = {
+#let _cell-indices(spec, cells-of-type, all-cells, cfg: none) = {
   if type(spec) == dictionary {
     // Literal cell
-    return _filter-type((spec,), cell-type).map(c => c.index)
+    return _filter-type((spec,), cfg.cell-type).map(c => c.index)
   }
   if type(spec) == function {
     // Filter with given predicate
@@ -56,28 +61,24 @@
   }
   if type(spec) == str {
     // Match on any of the specified names
-    let names = if name-path == auto {
-      default-cell-names
-    } else {
-      ensure-array(name-path)
-    }
+    let names = _name-paths(cfg.name-path)
     return cells-of-type
       .filter(x => names.any(name-matches.with(x, spec)))
       .map(c => c.index)
   }
   if type(spec) == int {
-    if count == "index" {
-      let type-ok = all-cells.at(spec).cell_type in _cell-type-array(cell-type)
+    if cfg.count == "index" {
+      let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)
       return if type-ok { (spec,) } else { () }
     }
-    if count == "execution" {
+    if cfg.count == "execution" {
       // Different cells can have the same execution_count, e.g. when
       // evaluating only some cells after a kernel restart.
       return cells-of-type
         .filter(x => x.at("execution_count", default: none) == spec)
         .map(c => c.index)
     }
-    panic("invalid cell count mode:" + repr(count))
+    panic("invalid cell count mode:" + repr(cfg.count))
   }
   panic("invalid cell specification: " + repr(spec))
 }
@@ -101,15 +102,7 @@
   panic("invalid keep value: " + repr(keep))
 }
 
-#let _cells-from-spec(
-  spec,
-  nb,
-  count,
-  name-path,
-  cell-type,
-  cell-header-pattern,
-  keep-cell-header,
-) = {
+#let _cells-from-spec(spec, cfg: none) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
     panic("invalid literal cell, did you forget the 'nb:' keyword " +
       "while passing a notebook?")
@@ -117,61 +110,27 @@
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
-    return _filter-type(ensure-array(spec), cell-type)
+    return _filter-type(ensure-array(spec), cfg.cell-type)
   }
-  let all-cells = notebook.read(
-    nb,
-    cell-header-pattern,
-    keep-cell-header,
-  ).cells
-  let cells-of-type = _filter-type(all-cells, cell-type)
+  let all-cells = notebook.read(cfg.nb, cfg: cfg).cells
+  let cells-of-type = _filter-type(all-cells, cfg.cell-type)
   if spec == none {
     // No spec means select all cells
     return cells-of-type
   }
   let indices = ()
   for s in ensure-array(spec) {
-    indices += _cell-indices(
-      s,
-      cell-type,
-      cells-of-type,
-      all-cells,
-      count,
-      name-path,
-    )
+    indices += _cell-indices(s, cells-of-type, all-cells, cfg: cfg)
   }
   return indices.dedup().sorted().map(i => all-cells.at(i))
 }
 
-/// Cell selector: return an array of cells according to the cell specification
-/// -> array
-#let cells(
-  ..args,
-  nb: none,
-  count: "index",
-  name-path: auto,
-  cell-type: "all",
-  keep: "all",
-  cell-header-pattern: auto,
-  keep-cell-header: false,
-) = {
-  if args.named().len() > 0 {
-    panic("invalid named arguments: " + repr(args.named()))
-  }
-  if args.pos().len() > 1 {
-    panic("expected 1 positional argument, got " + str(args.pos().len()))
-  }
-  let spec = args.pos().at(0, default: none)
-  let cs = _cells-from-spec(
-    spec,
-    nb,
-    count,
-    name-path,
-    cell-type,
-    cell-header-pattern,
-    keep-cell-header,
-  )
-  return _apply-keep(cs, keep)
+// Cell selector: return an array of cells according to the cell specification.
+// The function accepts one optional position argument, plus any config
+#let cells(..args, keep: "all") = {
+  let (cell-spec, cfg) = parse-main-args(args)
+  let cs = _cells-from-spec(cell-spec, cfg: cfg)
+  return _apply-keep(cs, cfg.keep)
 }
 
 #let cell(..args, keep: "unique") = cells(..args, keep: keep).first()
