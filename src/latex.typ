@@ -11,24 +11,38 @@
 // When the name/value is a single character, it need not be a word character
 // but a name cannot be given as '{' or '}' and a value cannot be given
 // as '['.
+
 #let _open = "\\{"
 #let _close = "\\}"
 #let _no-open-close = "\\\\\\{|\\\\\\}|[^{}]"
-#let _brace-arg-nest0 = _open + "(?:" + _no-open-close + ")*" + _close
-#let _brace-arg-nest1 = _open + "(?:" + _brace-arg-nest0 + "|" + _no-open-close + ")*" + _close
-#let _brace-arg-nest2 = _open + "(?:" + _brace-arg-nest1 + "|" + _no-open-close + ")*" + _close
-#let _brace-arg-nest3 = _open + "(?:" + _brace-arg-nest2 + "|" + _no-open-close + ")*" + _close
-#let _brace-arg-nest4 = _open + "(?:" + _brace-arg-nest3 + "|" + _no-open-close + ")*" + _close
-#let _brace-arg-nest5 = _open + "(?:" + _brace-arg-nest4 + "|" + _no-open-close + ")*" + _close
-#let _brace-arg = _brace-arg-nest5
-#let _name = "(?<name>\s*" + _brace-arg-nest0 + "|\s*\\\\\w+\b|\s+[^\s{}]|[^\s\w])"
-#let _n-params = "\\[(?<nparams>[0-9])\\]"
-#let _default-value = "\\[(?<default>(?:" + _brace-arg-nest4 + "|[^]])*)\\]"
-#let _expression = "(?<expression>\s*" + _brace-arg + "|\s*\\\\\w+\b|\s*[^\s\[])"
-#let command-definition = regex(
-  "\\\\newcommand" + _name +
-  "(?:\s*" + _n-params + "(?:\s*" + _default-value + ")?)?" + _expression
+#let _brace-arg-no-nest = _open + "(?:" + _no-open-close + ")*" + _close
+
+// Return a regex string that matches a braced argument with up to 'depth'
+// levels of nested brace groups
+#let _brace-arg-nested(depth) = range(depth).fold(
+  _brace-arg-no-nest,
+  (acc, val) => _open + "(?:" + acc + "|" + _no-open-close + ")*" + _close,
 )
+
+// Return a regex for a LateX command definition that uses up to 'group-depth'
+// levels of nested brace groups.
+// (Handling an arbitrary depth cannot be done with true regular expressions.)
+#let definition-regex(group-depth: 5) = {
+  let brace-arg = _brace-arg-nested(group-depth)
+  let name = "(?<name>\s*" + _brace-arg-no-nest + "|\s*\\\\\w+\b|\s+[^\s{}]|[^\s\w])"
+  let n-params = "\\[(?<nparams>[0-9])\\]"
+  let default-value = "\\[(?<default>(?:" + brace-arg + "|[^]])*)\\]"
+  let expression = "(?<expression>\s*" + brace-arg + "|\s*\\\\\w+\b|\s*[^\s\[])"
+
+  return regex(
+    "\\\\newcommand" + name +
+    "(?:\s*" + n-params + "(?:\s*" + default-value + ")?)?" + expression
+  )
+}
+// Command definition regex with default nesting level of brace groups
+// (We might make the level user-configurable at some point if there's demand
+// for it.)
+#let command-definition = definition-regex()
 
 // Convert a command name text to the `\name` form (always starting
 // with a backslash, no surrounding spaces and braces).
