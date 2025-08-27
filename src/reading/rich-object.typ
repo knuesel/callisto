@@ -1,3 +1,5 @@
+#import "../common.typ": handle
+
 // Functions to handle rich objects. A rich object is an object that can be
 // available in multiple formats. It is given as a dict with MIME types as keys
 // and data in the corresponding MIME type as values. This is how
@@ -40,25 +42,6 @@
   return precedence.find(f => f in available)
 }
 
-// Interpret data according to MIME format and handlers specified in ctx.
-// The appropriate handler will be called with the data, ctx, and all arguments
-// in handler-args.
-// TODO: rename this function
-#let read-mime(data, fmt, ctx: none, handler-args: none) = {
-  if fmt not in ctx.handlers {
-    panic("format " + repr(fmt) +
-      " has no registered handler (is it a valid MIME string?)")
-  }
-  let handler = ctx.handlers.at(fmt)
-  if type(handler) != function {
-    panic("handler must be a function or a dict of functions")
-  }
-  if type(data) == array {
-    data = data.join()
-  }
-  return handler(data, ctx: ctx, ..handler-args)
-}
-
 // Process a "rich" object, which can be available in multiple formats.
 // The item-data and item-metadata arguments are dicts keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
@@ -88,6 +71,9 @@
     item-metadata = (:)
   }
   let fmt-data = item-data.at(fmt)
+  if type(fmt-data) == array {
+    fmt-data = fmt-data.join()
+  }
   let fmt-metadata = item-metadata.at(fmt, default: (:))
   let rich-desc = (
     format: fmt,
@@ -97,7 +83,7 @@
     full-metadata: item-metadata,
   )
   let new-ctx = (..ctx, rich-item: rich-desc)
-  let val = read-mime(fmt-data, fmt, ctx: new-ctx, handler-args: handler-args)
+  let val = handle(fmt-data, fmt, ctx: new-ctx, ..handler-args)
   return (..rich-desc, value: val)
 }
 

@@ -91,5 +91,12 @@
 }
 
 #let handle(data, mime, ctx: none, ..args) = {
+  if ctx == none {
+    panic("ctx not set")
+  }
+  if mime not in ctx.handlers {
+    panic("format " + repr(mime) +
+      " has no registered handler (is it a valid MIME string?)")
+  }
   ctx.handlers.at(mime)(data, ctx: ctx, ..args)
 }

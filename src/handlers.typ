@@ -47,39 +47,41 @@
     if name in attachments {
       // Get data dict (keyed by MIME type) for this attachment
       let data = attachments.at(name)
-      let handler = handlers.at("application/x.rich-object")
       // This handler accepts metadata but we have none to give
-      handler(data, ctx: ctx, subhandler-args: args)
+      handle(data, "application/x.rich-object", ctx: ctx, subhandler-args: args)
     } else {
       panic("cell attachment " + name + " not found")
     }
   } else {
-    handlers.at("image/x.generic")(path, ctx: ctx, ..args)
+    handle(path, "image/x.generic", ctx: ctx, ..args)
   }
 }
 
 // Handler for base64-encoded images
 #let handler-image-base64(data, ctx: none, ..args) = {
   let data-bytes = base64.decode(data.replace("\n", ""))
-  ctx.handlers.at("image/x.generic")(data-bytes, ..args)
+  handle(data-bytes, "image/x.generic", ctx: ctx, ..args)
 }
 
 // Handler for text-encoded images, for example svg+xml
 #let handler-image-text(data, ctx: none, ..args) = {
-  ctx.handlers.at("image/x.generic")(bytes(data), ..args)
+  handle(bytes(data), "image/x.generic", ctx: ctx, ..args)
+}
+
+#let _encoded-svg-mime(data) = {
+  // base64 encoded version of:     "<?xml "                        "<sv"
+  if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
+    return "image/x.base64"
+  } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
+    return "image/x.text"
+  }
+  panic("unrecognized svg+xml data")
 }
 
 // Smart svg+xml handler that handles both text and base64 data
 #let handler-svg-xml(data, ctx: none, ..args) = {
-  // base64 encoded version of:     "<?xml "                        "<sv"
-  let handler = if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
-    ctx.handlers.at("image/x.base64")
-  } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
-    ctx.handlers.at("image/x.text")
-  } else {
-    panic("unrecognized svg+xml data")
-  }
-  handler(data, ctx: ctx, ..args)
+  let mime = _encoded-svg-mime(data)
+  handle(data, mime, ctx: ctx, ..args)
 }
 
 // Handler for simple text
@@ -209,7 +211,7 @@
     txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
   }
   // Render equation with the latex math handler
-  return ctx.handlers.at("text/x.math")(txt, ctx: ctx, ..args)
+  return handle(txt, "text/x.math", ctx: ctx, ..args)
 }
 
 // Handler for rich objects, where data is a dict of possibly several available
