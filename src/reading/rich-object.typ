@@ -1,6 +1,7 @@
 #let default-formats = (
   "image/svg+xml",
   "image/png",
+  "image/jpeg",
   "image/gif",
   "text/markdown",
   "text/latex",
