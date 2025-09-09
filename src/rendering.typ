@@ -98,8 +98,8 @@
 }
 
 // Render a single cell
-#let Cell = render.with(keep: "unique")
+#let Cell(..args) = render(..args, keep: "unique")
 // Render a single cell's input
-#let In = Cell.with(cell-type: "code", input: true, output: false)
+#let In(..args) = Cell(..args, cell-type: "code", input: true, output: false)
 // Render a single cell's output
-#let Out = Cell.with(cell-type: "code", input: false, output: true)
+#let Out(..args) = Cell(..args, cell-type: "code", input: false, output: true)

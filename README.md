@@ -115,11 +115,11 @@ The function parameters are described in detail in the [function reference](http
 
 The cell specification can be a cell index, execution count, tag, ID, metadata label, user-defined cell field or filter function. Code cells can start with header lines of the form `#| key: value` (this pattern can be configured). When a notebook is processed, header lines are used to define corresponding fields in the cell metadata, and are removed from the cell source.
 
-For convenience, many additional functions are derived from the main functions by preconfiguring some of their parameters. For example, `render` has `Cell`, `In` and `Out` as preconfigured aliases to render a single cell, either in entirety (`Cell`) or just the input or output (`In` and `Out`). And `outputs` has aliases such as `results` and `displays` to get an array of results or displays for the selected cells.
+For convenience, many additional functions are derived from the main functions by setting some of their parameters to fixed values. For example, `render` has `Cell`, `In` and `Out` as aliases to render a single cell, either in entirety (`Cell`) or just the input or output (`In` and `Out`). And `outputs` has aliases such as `results` and `displays` to get an array of results or displays for the selected cells.
 
 Most aliases have a singular and a plural form, e.g. `result` and `results`: the singular form will return a single value (which can often be used directly as content), while a plural form always returns an array. By default the singular form also checks that there is a single value to return: for example `result("figure1")` will raise an error if the call matches more than one cell.
 
-All the functions can be further preconfigured by calling `config`, which returns a dict of preconfigured functions. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
+All the functions can be further preconfigured by calling `config`, which returns a dict of functions with some arguments pre-applied. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
 
 
 ## Markdown and LaTeX rendering configuration

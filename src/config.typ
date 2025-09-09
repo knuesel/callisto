@@ -27,9 +27,8 @@
     sources:      reading.sources     .with(..args),
     source:       reading.source      .with(..args),
     render:       rendering.render    .with(..args),
-    // Override 'keep' and 'cell-type' as necessary to maintain the semantics
-    Cell:         rendering.Cell      .with(..args, keep: "unique"),
-    In:           rendering.In        .with(..args, keep: "unique", cell-type: "code", input: true, output: false),
-    Out:          rendering.Out       .with(..args, keep: "unique", cell-type: "code", input: false, output: true),
+    Cell:         rendering.Cell      .with(..args),
+    In:           rendering.In        .with(..args),
+    Out:          rendering.Out       .with(..args),
   )
 }

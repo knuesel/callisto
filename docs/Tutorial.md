@@ -131,7 +131,7 @@ or together:
 
 What's the difference then between `#render("plot3")` and `#Cell("plot3")`? The `Cell` call does an additional check: it raises an error if it finds more than one cell (or no cell) matching `"plot3"`.
 
-Note: the functions `Cell`, `In` and `Out` are implemented as aliases of the `render` function. For example `In` is just the `render` function preconfigured with arguments `output: false` and `keep: "unique"`. See the [reference](Reference.md) for a description of all function arguments and all aliases.
+Note: the functions `Cell`, `In` and `Out` are implemented as aliases of the `render` function. For example `In` is just the `render` function with argument `output` set to `false` and `keep` set to `"unique"`. See the [reference](Reference.md) for a description of all function arguments and all aliases.
 
 ## Item extraction
 

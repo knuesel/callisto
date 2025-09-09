@@ -293,7 +293,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
 ## Alias functions
 
-The main functions have many aliases defined for convenience. Each alias corresponds to a call to a main function with some keyword arguments preconfigured.
+The main functions have many aliases defined for convenience. Each alias corresponds to a call to a main function with some keyword arguments set to fixed values.
 
 ### Aliases for output type
 
@@ -317,14 +317,14 @@ The main functions have many aliases defined for convenience. Each alias corresp
 
 The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form:
 
--  `cell` is the same as `cells` with `keep: "unique"` preconfigured. Example:
+-  `cell` is the same as `cells` with `keep` set to `"unique"`. Example:
 
    ```typst
    // The first cell
    #cell(0)
    ```
 
--  `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword argument preconfigured to the value `"unique"` (technically, these functions are wrappers rather than aliases of the plural form). Example:
+-  `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"` and return always a single value. Example:
 
    ```typst
    // The unique display item in the first cell's output
@@ -350,7 +350,7 @@ Note that `keep` is used to filter the cells matching the cell specification whi
 
 The `render` function always returns a `content` value, but it also has an alias to check that only one cell matches the specification:
 
--  `Cell` is the same as `render` but preconfigured with `keep: "unique"`. Example:
+-  `Cell` is the same as `render` with `keep` set to `"unique"`. Example:
 
    ```typst
    // Render the unique cell matching "plot1"
