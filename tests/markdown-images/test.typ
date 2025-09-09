@@ -14,3 +14,11 @@
     "image/x.generic": (data, ctx: none, ..args) => image(data, ..args),
   ),
 )
+
+
+Cell 3:
+#callisto.render(
+  3,
+  nb: json("images.ipynb"),
+  handlers: ("image/png": (ctx: none, ..args) => ctx.item.metadata.path),
+)
