@@ -294,10 +294,10 @@
 
 // Handler for error output items
 #let handler-error(evalue, ctx: none, name: none, traceback: none, ..args) = {
-  raw(traceback.join("\n"), block: true, lang: "txt")
+  raw(evalue, block: true, lang: "txt")
 }
 
-// Default handlers for supported MIME types.
+// Built-in handlers for supported MIME types.
 #let mime-handlers = (
   "image/svg+xml": handler-svg-xml,
   "image/png"    : handler-image-base64,

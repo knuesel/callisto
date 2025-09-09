@@ -56,17 +56,22 @@
   },
 )
 
-// Styled block for most output items
-#let normal-block = block.with(width: 100%)
-// Styled block for error items (error outputs or stderror streams)
-#let error-block = normal-block.with(
+// Styled block for error items (error outputs or stderr streams)
+#let error-block = block.with(
+  width: 100%,
   fill: red.lighten(90%),
   outset: 0.5em,
 )
 
+// Customized default handler for errors, rendering the traceback
+#let notebook-error-handler(data, ctx: none, traceback: none, ..args) = {
+  raw(traceback.join("\n"), block: true, lang: "txt")
+}
 
 // "notebook" template for code cell output
 #let notebook-output(cell, ctx: none) = {
+  // Change some default handlers
+  ctx.cfg._default-handlers = ("text/x.error": notebook-error-handler)
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }
   block(

@@ -46,7 +46,7 @@
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
 
-#assert("`aa` not defined" in error(result: "dict").value.text)
+#assert("`aa` not defined" in error().text)
 
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.name", format: "x")),

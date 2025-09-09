@@ -22,6 +22,8 @@
   output-type: "all",
   input: true,
   output: true,
+  // Settings for internal and template use
+  _default-handlers: auto,
 )
 
 // Parse the arguments of the main functions
