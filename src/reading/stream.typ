@@ -18,8 +18,8 @@
 
 // Get stream item text as a single string, if the item is a stream with
 // name matching ctx.stream. Returns none otherwise.
-#let _stream-text(item, ctx: none) = {
-  let names = _stream-names(ctx.cfg.stream)
+#let _stream-text(item, cfg: none) = {
+  let names = _stream-names(cfg.stream)
   if item.name not in names { return none }
   if type(item.text) == array {
     return item.text.join()
@@ -27,44 +27,41 @@
   return item.text
 }
 
+// Generic preprocessing that doesn't require context
+#let preprocess(item, ctx: none) = {
+  item.text = _stream-text(item, cfg: ctx.cfg)
+  if item.text == none { return none }
+  return item
+}
+
 // Process a stream output item.
 // Can return none if the item is from an undesired stream (cf 'stream' arg.)
-#let process-output(item, ctx: none) = {
-  let txt = _stream-text(item, ctx: ctx)
-  if txt == none { return none }
-  return (
-    type: "stream",
-    name: item.name,
-    value: handle(txt, "text/x.stream", ctx: ctx, name: item.name),
-    raw-text: txt,
-  )
+#let process(item, ctx: none) = {
+  return handle(item.text, mime: "text/x.stream", ctx: ctx, name: item.name)
 }
 
 // Same as stream-items function, but merges all streams (matching 'stream')
 // of the same cell, and always returns an item (possibly with an empty string
 // as value) for each selected cell (of code type).
+// XXX check this function
 #let streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(args)
   let names = _stream-names(cfg.stream)
   let cs = cells(..args, cell-type: "code")
   let outs = ()
   for cell in cs {
-    let ctx = get-ctx(cell, cfg: cfg)
     // Concatenate all stream items
     let txt = for item in cell.outputs {
       if item.output_type == "stream" {
-        _stream-text(item, ctx: ctx)
+        _stream-text(item, cfg: cfg)
       }
     }
-    if txt == none {
-      continue
-    }
-    let out = (
-      type: "stream",
-      name: cfg.stream,
-      value: handle(txt, "text/x.stream", ctx: ctx, name: cfg.stream),
-    )
-    outs.push(final-result(cell, cfg.result, out))
+    if txt == none { continue }
+    // item.index is undefined since we gather outputs from different cells
+    let ctx = get-ctx(cell, cfg: cfg, item: (type: "stream", index: none))
+    let preprocessed = (output_type: "stream", name: cfg.stream, text: txt)
+    let value = handle(txt, mime: "text/x.stream", ctx: ctx, name: cfg.stream)
+    outs.push(final-result(preprocessed, value, ctx: ctx))
   }
   return outs
 }

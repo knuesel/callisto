@@ -49,6 +49,15 @@
 // Wrap the argument in an array if it is not itself an array
 #let ensure-array(x) = if type(x) == array { x } else { (x,) }
 
+// Return the first positional argument that is different from `on`,
+// or return `on` if none is different.
+#let coalesce(on: none, ..args) = {
+  for x in args.pos() {
+    if x != on { return x }
+  }
+  return on
+}
+
 // A dictionary of cell-related data, to be used as one field in the result
 // dict.
 #let _cell-output-dict(cell) = (
@@ -60,21 +69,28 @@
   (execution-count: cell.execution_count)
 }
 
+/// Final result for an output item.
 /// Return either the 'value' key of dict or return the dict itself, with some
 /// added cell data under key 'cell'. See cell-output-dict for the added data.
 /// - cell (dict): A cell in json format
 /// - result-spec (str): Choose output mode: "value" or "dict"
 /// - dict (dict): Contains at least a 'value' key
 /// -> any | (value: any, cell: dict)
-#let final-result(cell, result-spec, dict) = {
-  if result-spec == "value" {
-    return dict.value
+// TODO: update docstring
+#let final-result(preprocessed, value, ctx: none) = {
+  if ctx.cfg.result not in ("value", "dict") {
+    panic("invalid result specification: " + repr(ctx.cfg.result))
   }
-  if result-spec == "dict" {
-    dict.cell = _cell-output-dict(cell)
-    return dict
+  if ctx.cfg.result == "value" {
+    return value
   }
-  panic("invalid result specification: " + repr(result))
+  // Remove "output_type" field if present (will be replaced by type field from
+  // ctx.item)
+  preprocessed.remove("output_type", default: none)
+  return preprocessed + ctx.item + (
+    cell: _cell-output-dict(ctx.cell),
+    value: value,
+  )
 }
 
 #let single-item(items, item: "unique") = {
@@ -90,7 +106,7 @@
   return items.at(item)
 }
 
-#let handle(data, mime, ctx: none, ..args) = {
+#let handle(data, mime: none, ctx: none, ..args) = {
   if ctx == none {
     panic("ctx not set")
   }
@@ -98,5 +114,6 @@
     panic("format " + repr(mime) +
       " has no registered handler (is it a valid MIME string?)")
   }
+  ctx.mime = mime
   ctx.handlers.at(mime)(data, ctx: ctx, ..args)
 }

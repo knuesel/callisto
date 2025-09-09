@@ -48,7 +48,7 @@
   output-type: "display_data",
   handlers: (
     "image/png": (data, ctx: none, ..args) => {
-      block[PNG display has metadata: #ctx.rich-item.metadata]
+      block[PNG display has metadata: #ctx.item.metadata]
     },
   ),
 )

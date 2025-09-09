@@ -12,7 +12,16 @@
 // 
 // - cfg: a dict with all the settings supported by callisto.config, using
 //   default values for settings not set by the user.
+// 
+// - item: a dict with information on the cell output item being processed, or
+//   'none' otherwise. When not 'none', the dict contains at least the
+//    following fields:
 //
+//    - index: the item index in the cell output list
+//    - metadata: item-specific metadata
+//    - rich-format: the format selected for this rich item, or 'none' if not
+//      currently processing a rich item.
+// 
 // - nb: a processed version of the notebook, with metadata in cell source
 //   headers converted to metadata in the cell dict.
 // 
@@ -22,10 +31,6 @@
 // - lang: the language set by the user (equal to 'cfg.lang') or, if that value
 //   is 'auto', the language inferred from the notebook if available and 'none'
 //   'none' otherwise.
-// 
-// During the processing of a rich item, 'ctx' will also include a 'rich-item'
-// field with item-specific metadata.
-
 #let _handlers(user-handlers) = {
   if user-handlers != auto and type(user-handlers) != dictionary {
     panic("handlers must be auto or a dictionary mapping formats to functions")
@@ -37,12 +42,16 @@
 }
 
 // Build a ctx dict for the given cell and settings dict
-#let get-ctx(cell, cell-spec: none, cfg: none) = {
+#let get-ctx(
+  cell,
+  cfg: none,
+  item: none,
+) = {
   let nb = notebook.read(cfg.nb, cfg: cfg)
   return (
     cell: cell,
-    cell-spec: cell-spec,
     cfg: cfg,
+    item: item,
     nb: nb,
     handlers: _handlers(cfg.handlers),
     lang: if cfg.lang == auto { notebook.lang(nb) } else { cfg.lang }

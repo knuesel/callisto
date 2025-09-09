@@ -42,62 +42,59 @@
   return precedence.find(f => f in available)
 }
 
+// XXX
 // Process a "rich" object, which can be available in multiple formats.
 // The item-data and item-metadata arguments are dicts keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
-// - handler-args: extra arguments to pass to the handler that will handle the
-//   item data (there is no such arguments when processing an output item, but
-//   for an image attachment in a Markdown cell for example the Markdown can
-//   define an 'alt' value that will be passed as a handler argument.
-#let process-value(
-  item-data,
-  item-metadata,
-  ctx: none,
-  handler-args: none,
-) = {
-  if item-data.len() == 0 { return none }
-  let fmt = pick-format(item-data.keys(), precedence: ctx.cfg.format)
+#let preprocess(item, ctx: none) = {
+  // Ignore item with no format
+  if item.data.len() == 0 { return none }
+  // Choose format
+  let fmt = pick-format(item.data.keys(), precedence: ctx.cfg.format)
   if fmt == none {
     if not ctx.cfg.ignore-wrong-format {
-      panic("output item has no appropriate format: item has " +
-        repr(item-data.keys()) + ", we want " +
+      panic("output item " + repr(ctx.item) +
+      " from cell " + str(ctx.cell.index) +
+      " has no appropriate format: item has " +
+        repr(item.data.keys()) + ", we want " +
         repr(normalize-formats(ctx.cfg.format)))
     }
     return none
   }
-  if item-metadata == none {
-    item-metadata = (:)
+
+  // Get data for this format
+  let data = item.data.at(fmt)
+  if type(data) == array {
+    data = data.join()
   }
-  let fmt-data = item-data.at(fmt)
-  if type(fmt-data) == array {
-    fmt-data = fmt-data.join()
-  }
-  let fmt-metadata = item-metadata.at(fmt, default: (:))
-  let rich-desc = (
-    format: fmt,
-    metadata: fmt-metadata,
-    // Also provide whole item metadata, since the spec says "The metadata of
-    // these messages *may* be keyed by mime-type as well" (our emphasis).
-    full-metadata: item-metadata,
+
+  // Get metadata for this format. If metadata doesn't have a key for the
+  // format, use the whole metadata instead.
+  let metadata = item.metadata.at(fmt, default: item.metadata)
+
+  return (
+    data: data,
+    metadata: metadata,
+    rich-format: fmt,
   )
-  let new-ctx = (..ctx, rich-item: rich-desc)
-  let val = handle(fmt-data, fmt, ctx: new-ctx, ..handler-args)
-  return (..rich-desc, value: val)
 }
 
-
-// Process a rich item, i.e. an item that can be available in multiple formats.
-// Can return none if item is available only in unsupported formats (and
-// ignore-wrong-format is true) or if the item is empty (data dict empty in
-// notebook JSON).
-#let process-output(item, ctx: none) = {
-  // When processing an output item, there's no handler-args
-  let result = process-value(item.data, item.metadata, ctx: ctx)
-  if result == none { return none }
-  return (
-    type: item.output_type,
-    ..result,
-  )
+// XXX
+// Process an item, given as a dict with keys data, metadata and rich-format.
+// - handler-args: extra arguments to pass to the handler that will handle the
+//   item data (there is no such arguments when processing an output item, but
+//   for an image attachment in a Markdown cell for example the Markdown can
+//   define an 'alt' value that will be passed as a handler argument.
+#let process(
+  item,
+  ctx: none,
+  handler-args: none,
+) = {
+  if item.data.len() == 0 { return none }
+  // Add some context fields
+  ctx.item.metadata = item.metadata
+  ctx.item.rich-format = item.rich-format
+  return handle(item.data, mime: item.rich-format, ctx: ctx, ..handler-args)
 }

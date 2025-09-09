@@ -11,15 +11,15 @@
 }
 
 #let plain-raw(cell, ctx: none) = {
-  handle(cell.source, "text/x.source-raw-cell", ctx: ctx)
+  handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx)
 }
 
 #let plain-markdown(cell, ctx: none) = {
-  handle(cell.source, "text/markdown", ctx: ctx) + parbreak()
+  handle(cell.source, mime: "text/markdown", ctx: ctx) + parbreak()
 }
 
 #let plain-input(cell, ctx: none) = {
-  handle(cell.source, "text/x.source-code-cell", ctx: ctx)
+  handle(cell.source, mime: "text/x.source-code-cell", ctx: ctx)
 }
 
 #let plain-output(cell, ctx: none) = {
@@ -32,7 +32,7 @@
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  handle(cell.source, "text/x.source-raw-cell", ctx: ctx),
+  handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx),
 )
 
 #let notebook-markdown = plain-markdown
@@ -45,7 +45,7 @@
   fill: luma(240),
   {
     _in-out-num("In ", cell.execution_count)
-    handle(cell.source, "text/x.source-code-cell", ctx: ctx)
+    handle(cell.source, mime: "text/x.source-code-cell", ctx: ctx)
   },
 )
 

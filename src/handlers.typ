@@ -39,6 +39,8 @@
 
 // Handler for images in Markdown cells. Such images can be specified by a
 // path of the form "attachment:name" where 'name' refers to a cell attachment.
+// As all image handlers, this handler can receive extra arguments such as
+// 'alt' that must be forwarded to the subhandler.
 #let handler-image-markdown-cell(path, ctx: none, ..args) = {
   let (handlers, cell) = ctx
   if path.starts-with("attachment:") {
@@ -47,25 +49,31 @@
     if name in attachments {
       // Get data dict (keyed by MIME type) for this attachment
       let data = attachments.at(name)
-      // This handler accepts metadata but we have none to give
-      handle(data, "application/x.rich-object", ctx: ctx, subhandler-args: args)
+      handle(
+        data,
+        mime: "application/x.rich-object",
+        ctx: ctx,
+        metadata: (path: path),
+        type: "attachment",
+        subhandler-args: args,
+      )
     } else {
       panic("cell attachment " + name + " not found")
     }
   } else {
-    handle(path, "image/x.generic", ctx: ctx, ..args)
+    handle(path, mime: "image/x.generic", ctx: ctx, ..args)
   }
 }
 
 // Handler for base64-encoded images
 #let handler-image-base64(data, ctx: none, ..args) = {
   let data-bytes = base64.decode(data.replace("\n", ""))
-  handle(data-bytes, "image/x.generic", ctx: ctx, ..args)
+  handle(data-bytes, mime: "image/x.generic", ctx: ctx, ..args)
 }
 
 // Handler for text-encoded images, for example svg+xml
 #let handler-image-text(data, ctx: none, ..args) = {
-  handle(bytes(data), "image/x.generic", ctx: ctx, ..args)
+  handle(bytes(data), mime: "image/x.generic", ctx: ctx, ..args)
 }
 
 #let _encoded-svg-mime(data) = {
@@ -81,7 +89,7 @@
 // Smart svg+xml handler that handles both text and base64 data
 #let handler-svg-xml(data, ctx: none, ..args) = {
   let mime = _encoded-svg-mime(data)
-  handle(data, mime, ctx: ctx, ..args)
+  handle(data, mime: mime, ctx: ctx, ..args)
 }
 
 // Handler for simple text
@@ -92,13 +100,13 @@
 // Handler for Markdown markup
 #let handler-markdown(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: ctx.handlers.at("text/x.math-markdown-cell").with(ctx: ctx),
+  math: handle.with(mime: "text/x.math-markdown-cell", ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
     // handler delegates to the "image/x.generic" handler. Users should define
     // that handler to fix image path resolution (until Typst gets a 'path'
     // type).
-    image: ctx.handlers.at("image/x.markdown-cell").with(ctx: ctx),
+    image: handle.with(mime: "image/x.markdown-cell", ctx: ctx),
   ),
   ..args,
 )
@@ -211,7 +219,7 @@
     txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
   }
   // Render equation with the latex math handler
-  return handle(txt, "text/x.math", ctx: ctx, ..args)
+  return handle(txt, mime: "text/x.math", ctx: ctx, ..args)
 }
 
 // Handler for rich objects, where data is a dict of possibly several available
@@ -220,17 +228,22 @@
   data,
   ctx: none,
   metadata: none,
+  type: none,
   subhandler-args: none,
   ..args,
 ) = {
-  let result = rich-object.process-value(
-    data,
-    metadata,
+  // Make item dict
+  let item = (data: data, metadata: metadata)
+  // Update context item desc
+  ctx.item = (index: none, type: type)
+  // Get dict with normalized data for this item
+  let preprocessed = rich-object.preprocess(item, ctx: ctx)
+  if preprocessed == none { return none }
+  return rich-object.process(
+    preprocessed,
     ctx: ctx,
     handler-args: subhandler-args,
   )
-  if result == none { return none }
-  return result.value
 }
 
 // Generic handler for source code
@@ -244,16 +257,16 @@
 }
 
 #let handler-source-markdown-cell(data, ctx: none, ..args) = {
-  handle(data, "text/x.source", lang: "markdown", ctx: ctx)
+  handle(data, mime: "text/x.source", lang: "markdown", ctx: ctx)
 }
 
 #let handler-source-code-cell(data, ctx: none, ..args) = {
   // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
-  handle(data, "text/x.source", lang: ctx.lang, ctx: ctx)
+  handle(data, mime: "text/x.source", lang: ctx.lang, ctx: ctx)
 }
 
 #let handler-source-raw-cell(data, ctx: none, ..args) = {
-  handle(data, "text/x.source", lang: ctx.cfg.raw-lang, ctx: ctx)
+  handle(data, mime: "text/x.source", lang: ctx.cfg.raw-lang, ctx: ctx)
 }
 
 #let handler-stream(data, ctx: none, name: none, ..args) = {

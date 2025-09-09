@@ -20,8 +20,12 @@
   for cell in cells(..args) {
     let ctx = get-ctx(cell, cfg: cfg)
     let mime = _cell-source-mimes.at(cell.cell_type)
-    let value = handle(cell.source, mime, ctx: ctx)
-    srcs.push(final-result(cell, cfg.result, (value: value)))
+    let txt = cell.source
+    if type(txt) == array {
+      txt = txt.join()
+    }
+    let value = handle(txt, mime: mime, ctx: ctx)
+    srcs.push(final-result((text: txt), value, ctx: ctx))
   }
   return srcs
 }

@@ -7,12 +7,14 @@
 #import "error.typ"
 
 #let all-output-types = ("display_data", "execute_result", "stream", "error")
+#let rich-output-types = ("display_data", "execute_result")
 
-#let processors = (
-  display_data: rich-object.process-output,
-  execute_result: rich-object.process-output,
-  stream: stream.process-output,
-  error: error.process-output,
+// The module that implements 'preprocess' and 'process' for each output type
+#let processor-modules = (
+  display_data: rich-object,
+  execute_result: rich-object,
+  stream: stream,
+  error: error,
 )
 
 // Resolve 'output-type' setting to a list of desired output types
@@ -46,14 +48,24 @@
   let output-types = _output-types(cfg.output-type)
   let outs = ()
   for cell in cells(..args, cell-type: "code") {
-    let ctx = get-ctx(cell, cfg: cfg)
-    // TODO: keep track of output item index and add it in ctx and result dict
-    // (good for error messages and for handler flexibility
-    outs += cell.outputs
-      .filter(x => x.output_type in output-types)
-      .map(x => processors.at(x.output_type)(x, ctx: ctx))
-      .filter(x => x != none)
-      .map(final-result.with(cell, cfg.result))
+    for (i, item) in cell.outputs.enumerate() {
+      // Ignore items with undesired output type
+      if item.output_type not in output-types { continue }
+      // Make context for processor
+      let item-desc = (index: i, type: item.output_type)
+      let ctx = get-ctx(cell, cfg: cfg, item: item-desc)
+      // Get processor module
+      let proc-module = processor-modules.at(item.output_type)
+      // Get dict with normalized data for this item
+      let preprocessed = proc-module.preprocess(item, ctx: ctx)
+      if preprocessed == none { continue }
+      // Get processed value
+      let value = proc-module.process(preprocessed, ctx: ctx)
+      if value == none { continue }
+      // Make final result (value or dict)
+      let result = final-result(preprocessed, value, ctx: ctx)
+      outs.push(result)
+    }
   }
   return outs
 }
