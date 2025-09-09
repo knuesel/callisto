@@ -41,9 +41,7 @@
 }
 
 // Same as stream-items function, but merges all streams (matching 'stream')
-// of the same cell, and always returns an item (possibly with an empty string
-// as value) for each selected cell (of code type).
-// XXX check this function
+// of the same cell.
 #let streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(args)
   let names = _stream-names(cfg.stream)
@@ -66,4 +64,5 @@
   return outs
 }
 
+// Return the merged streams for a single cell
 #let stream(..args, item: "unique") = single-item(streams(..args), item: item)

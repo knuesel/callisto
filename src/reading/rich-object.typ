@@ -1,10 +1,17 @@
 #import "../common.typ": handle
 
 // Functions to handle rich objects. A rich object is an object that can be
-// available in multiple formats. It is given as a dict with MIME types as keys
-// and data in the corresponding MIME type as values. This is how
-// display_data/execute_result values and Markdown cell attachments are stored
-// in the notebook.
+// available in multiple formats. It is given as a dict with fields
+// 
+// - data: a dict with MIME types as keys and data in the corresponding MIME
+//   type as values.
+// - metadata: a dict of metadata. The dict can contain directly the metadata
+//   if the same metadata applies to all MIME types, or it can have MIME types
+//   as keys, and MIME-specific metadata dicts as values.
+// - output_type: the output type (this field is absent for attachments).
+// 
+// This is how display_data/execute_result values and Markdown cell
+// attachments are stored in the notebook.
 
 // Default list of supported formats, in order of precedence: we will use
 // the first format in this list that is available in the object dict.
@@ -42,14 +49,14 @@
   return precedence.find(f => f in available)
 }
 
-// XXX
-// Process a "rich" object, which can be available in multiple formats.
-// The item-data and item-metadata arguments are dicts keyed by MIME types.
+// Preprocess a "rich" object, which can be available in multiple formats.
+// The item is a dict with at least 'data' and 'metadata' fields, with 'data'
+// a dict keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
 // notebook JSON).
 #let preprocess(item, ctx: none) = {
-  // Ignore item with no format
+  // Ignore item with no format (data dict empty)
   if item.data.len() == 0 { return none }
   // Choose format
   let fmt = pick-format(item.data.keys(), precedence: ctx.cfg.format)
@@ -67,6 +74,7 @@
   // Get data for this format
   let data = item.data.at(fmt)
   if type(data) == array {
+    // Normalize to a single value
     data = data.join()
   }
 
@@ -81,8 +89,7 @@
   )
 }
 
-// XXX
-// Process an item, given as a dict with keys data, metadata and rich-format.
+// Process an item given as a dict with keys data, metadata and rich-format.
 // - handler-args: extra arguments to pass to the handler that will handle the
 //   item data (there is no such arguments when processing an output item, but
 //   for an image attachment in a Markdown cell for example the Markdown can

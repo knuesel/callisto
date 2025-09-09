@@ -10,23 +10,28 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
+// Plain template for raw cell
 #let plain-raw(cell, ctx: none) = {
   handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx)
 }
 
+// Plain template for Markdown cell
 #let plain-markdown(cell, ctx: none) = {
   handle(cell.source, mime: "text/markdown", ctx: ctx) + parbreak()
 }
 
+// Plain template for code cell input
 #let plain-input(cell, ctx: none) = {
   handle(cell.source, mime: "text/x.source-code-cell", ctx: ctx)
 }
 
+// Plain template for code cell output
 #let plain-output(cell, ctx: none) = {
   // Get outputs with user config, but override 'result' to get just the values
   outputs(cell, ..ctx.cfg, result: "value").join()
 }
 
+// "notebook" template for raw cell
 #let notebook-raw(cell, ctx: none) = block(
   spacing: 1.5em,
   width: 100%,
@@ -35,8 +40,10 @@
   handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx),
 )
 
+// "notebook" template for Markdown cell
 #let notebook-markdown = plain-markdown
 
+// "notebook" template for code cell input
 #let notebook-input(cell, ctx: none) = block(
   above: 2em,
   below: if ctx.cfg.output and cell.outputs.len() > 0 { 0pt } else { 2em },
@@ -49,12 +56,16 @@
   },
 )
 
+// Styled block for most output items
 #let normal-block = block.with(width: 100%)
+// Styled block for error items (error outputs or stderror streams)
 #let error-block = normal-block.with(
   fill: red.lighten(90%),
   outset: 0.5em,
 )
 
+
+// "notebook" template for code cell output
 #let notebook-output(cell, ctx: none) = {
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }

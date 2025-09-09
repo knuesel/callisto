@@ -17,11 +17,15 @@
   return at-path(value, rest)
 }
 
+// Tests whether the cell name matches the user cell spec.
+// The 'name' value is interpreted as a path of the form 'x.y.z' in the cell
+// dict.
 #let name-matches(cell, spec, name) = {
   let value = at-path(cell, name)
   return value == spec or (type(value) == array and spec in value)
 }
 
+// List of cell types for the given cell type spec
 #let _cell-types(cell-type) = {
   if cell-type == "all" { return all-cell-types }
   let types = ensure-array(cell-type)
@@ -33,6 +37,7 @@
   return types
 }
 
+// Filter the cell list according to the cell type setting
 #let _filter-type(cells, cell-type) = {
   let types = _cell-types(cell-type)
   cells.filter(x => x.cell_type in types)
@@ -82,6 +87,7 @@
   panic("invalid cell specification: " + repr(spec))
 }
 
+// Filter the cell list according to the 'keep' setting
 #let _apply-keep(cells, keep) = {
   if keep == "all" {
     return cells
@@ -101,6 +107,10 @@
   panic("invalid keep value: " + repr(keep))
 }
 
+// Return the cells matching the given user spec.
+// The spec can a literal cell or array thereof in which case it is simply
+// filtered according to the cfg settings. Otherwise, cells will be read from
+// the notebook specified in the cfg settings before filtering.
 #let _cells-from-spec(spec, cfg: none) = {
   if type(spec) == dictionary and "id" not in spec and "nbformat" in spec {
     panic("invalid literal cell, did you forget the 'nb:' keyword " +
@@ -132,4 +142,5 @@
   return _apply-keep(cs, cfg.keep)
 }
 
+// Select a single cell
 #let cell(..args, keep: "unique") = cells(..args, keep: keep).first()

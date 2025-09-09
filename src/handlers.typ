@@ -21,10 +21,20 @@
 //
 // - The generic "text/x.source" handler (used by the default code cell source
 //   and raw cell source handlers) takes a 'lang' argument.
+//
+// - The "text/x.stream" handler gets a 'name' argument for the stream name
+//   ("stdout" or "stderr").
+//
+// - The "text/x.error" handler gets 'name' and 'traceback' arguments.
+//
+// - The "application/x.rich-object" handler gets 'metadata', 'type' and
+//   'subhandler-args' arguments.
 // 
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
 // see an error when an unknown argument is passed.
+//
+// To call a handler, use the 'handle' function from common.typ.
 
 // Generic image handler that supports image path and image bytes, used by
 // several others to actually render the image.
@@ -76,6 +86,8 @@
   handle(bytes(data), mime: "image/x.generic", ctx: ctx, ..args)
 }
 
+// Helper function to guess the SVG data encoding based on the first characters
+// in the given data string.
 #let _encoded-svg-mime(data) = {
   // base64 encoded version of:     "<?xml "                        "<sv"
   if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
@@ -222,8 +234,11 @@
   return handle(txt, mime: "text/x.math", ctx: ctx, ..args)
 }
 
-// Handler for rich objects, where data is a dict of possibly several available
-// formats.
+// Handler for rich objects, where data is a dict keyed by MIME types, and
+// metadta can be a simple metadata dict or a dict with metadata dicts keyed by
+// MIME types. The item type can be specified, generally as an output item type
+// or as "attachment". If given, the subhandler args will be forwarded to the
+// subhandler called by this handler to handle a particular format.
 #let handler-rich(
   data,
   ctx: none,
@@ -256,24 +271,29 @@
   raw(data, lang: lang, block: true)
 }
 
+// Handler for source of Markdown cells
 #let handler-source-markdown-cell(data, ctx: none, ..args) = {
   handle(data, mime: "text/x.source", lang: "markdown", ctx: ctx)
 }
 
+// Handle for source of code cells
 #let handler-source-code-cell(data, ctx: none, ..args) = {
   // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
   handle(data, mime: "text/x.source", lang: ctx.lang, ctx: ctx)
 }
 
+// Handler for source of raw cells
 #let handler-source-raw-cell(data, ctx: none, ..args) = {
   handle(data, mime: "text/x.source", lang: ctx.cfg.raw-lang, ctx: ctx)
 }
 
+// Handler for stream output items
 #let handler-stream(data, ctx: none, name: none, ..args) = {
   raw(data, block: true, lang: "txt")
 }
 
-#let handler-error(data, ctx: none, name: none, traceback: none, ..args) = {
+// Handler for error output items
+#let handler-error(evalue, ctx: none, name: none, traceback: none, ..args) = {
   raw(traceback.join("\n"), block: true, lang: "txt")
 }
 

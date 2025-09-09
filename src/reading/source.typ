@@ -30,4 +30,5 @@
   return srcs
 }
 
+// Return a single cell source
 #let source(..args, item: "unique") = single-item(sources(..args), item: item)

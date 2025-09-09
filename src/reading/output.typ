@@ -70,4 +70,5 @@
   return outs
 }
 
+// Return a single output
 #let output(..args, item: "unique") = single-item(outputs(..args), item: item)

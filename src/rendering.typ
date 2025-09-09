@@ -24,6 +24,7 @@
   }
 }
 
+// Resolve template by name
 #let _resolve-template(name) = {
   if name not in templates.cell-templates {
     panic("template name not found: " + name)
@@ -85,6 +86,7 @@
   return _merged-template.with(func-dict: dict)
 }
 
+// Render the specified cells according to the settings (see common.typ)
 #let render(..args) = {
   let (cell-spec, cfg) = parse-main-args(args)
   let template = _normalize-template(cfg.template)
@@ -95,6 +97,9 @@
   }
 }
 
+// Render a single cell
 #let Cell = render.with(keep: "unique")
+// Render a single cell's input
 #let In = Cell.with(cell-type: "code", input: true, output: false)
+// Render a single cell's output
 #let Out = Cell.with(cell-type: "code", input: false, output: true)

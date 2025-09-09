@@ -79,6 +79,7 @@
   streams,
   stream-items,
   stream-item,
+  output,
 ) = callisto.config(nb: "/tests/python/python.ipynb")
 
 
@@ -96,3 +97,21 @@
   ("stderr", "stdout", "stderr", "stdout"),
 )
 #assert.eq(stream-item(4, stream: "stderr", item: -1).text, "Error 2\n")
+
+// Dict result fields
+#let out = output(6, item: 2, result: "dict")
+#assert.eq(out.metadata.a, "x")
+#assert.eq(out.index, 2)
+#assert.eq(out.type, "display_data")
+#assert.eq(out.rich-format, "image/png")
+
+// ctx.item fields
+#let out = output(
+  6,
+  item: 2,
+  result: "dict",
+  handlers: ("image/png": (ctx: none, ..args) => ctx.item),
+)
+#assert.eq(out.index, 2)
+#assert.eq(out.type, "display_data")
+#assert.eq(out.rich-format, "image/png")

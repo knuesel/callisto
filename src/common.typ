@@ -69,14 +69,12 @@
   (execution-count: cell.execution_count)
 }
 
-/// Final result for an output item.
-/// Return either the 'value' key of dict or return the dict itself, with some
-/// added cell data under key 'cell'. See cell-output-dict for the added data.
-/// - cell (dict): A cell in json format
-/// - result-spec (str): Choose output mode: "value" or "dict"
-/// - dict (dict): Contains at least a 'value' key
-/// -> any | (value: any, cell: dict)
-// TODO: update docstring
+// Final result for an output item.
+// Depending on ctx.cfg.result, this returns either 'value', or the
+// 'preprocessed' dict with 'output_type' renamed to 'type' and with additional
+// fields:
+// - value: the rendered item
+// - cell (dict): the cell index, id, metadata and type.
 #let final-result(preprocessed, value, ctx: none) = {
   if ctx.cfg.result not in ("value", "dict") {
     panic("invalid result specification: " + repr(ctx.cfg.result))
@@ -86,13 +84,15 @@
   }
   // Remove "output_type" field if present (will be replaced by type field from
   // ctx.item)
-  preprocessed.remove("output_type", default: none)
+  _ = preprocessed.remove("output_type", default: none)
   return preprocessed + ctx.item + (
     cell: _cell-output-dict(ctx.cell),
     value: value,
   )
 }
 
+// Returns a single item from the given list, raising an error if the list is
+// empty or if 'item' is "unique" and the list contains more than one.
 #let single-item(items, item: "unique") = {
   if items.len() == 0 {
     panic("no matching item found")
@@ -106,6 +106,10 @@
   return items.at(item)
 }
 
+// Handle the given data using the handler registered for the given mime
+// type, forwarding the 'args' arguments to the handler.
+// Before calling the handler, the context is updated to include
+// 'mime' as an extra field.
 #let handle(data, mime: none, ctx: none, ..args) = {
   if ctx == none {
     panic("ctx not set")
