@@ -19,7 +19,7 @@
 // 
 // - Math handlers must accept a 'block' argument (true for block equations).
 //
-// - The generic "text/x.source" handler (used by the default code cell source
+// - The "text/x.source-generic" handler (used by the default code cell source
 //   and raw cell source handlers) takes a 'lang' argument.
 //
 // - The "text/x.stream" handler gets a 'name' argument for the stream name
@@ -273,18 +273,18 @@
 
 // Handler for source of Markdown cells
 #let handler-source-markdown-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "text/x.source", lang: "markdown", ctx: ctx)
+  handle(data, mime: "text/x.source-generic", lang: "markdown", ctx: ctx)
 }
 
 // Handle for source of code cells
 #let handler-source-code-cell(data, ctx: none, ..args) = {
   // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
-  handle(data, mime: "text/x.source", lang: ctx.lang, ctx: ctx)
+  handle(data, mime: "text/x.source-generic", lang: ctx.lang, ctx: ctx)
 }
 
 // Handler for source of raw cells
 #let handler-source-raw-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "text/x.source", lang: ctx.cfg.raw-lang, ctx: ctx)
+  handle(data, mime: "text/x.source-generic", lang: ctx.cfg.raw-lang, ctx: ctx)
 }
 
 // Handler for stream output items
@@ -299,6 +299,7 @@
 
 // Built-in handlers for supported MIME types.
 #let mime-handlers = (
+  // Handlers for rich items (output items and cell attachments)
   "image/svg+xml": handler-svg-xml,
   "image/png"    : handler-image-base64,
   "image/jpeg"   : handler-image-base64,
@@ -310,7 +311,7 @@
   "text/x.math": handler-math, // base handler used by next one
   "text/x.math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
   // Special handlers for specific kinds of text items
-  "text/x.source"          : handler-source,           // takes a lang: argument
+  "text/x.source-generic"  : handler-source, // takes a lang: argument
   "text/x.source-markdown-cell": handler-source-markdown-cell, // md cell source
   "text/x.source-code-cell": handler-source-code-cell, // code cell source
   "text/x.source-raw-cell" : handler-source-raw-cell,  // raw cell source
