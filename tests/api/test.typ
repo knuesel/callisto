@@ -33,11 +33,11 @@
 #assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
 
 // Test cell-header-pattern
-#let strict-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$") // doesn't allow space between `#` and `|`
+#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$")) // doesn't allow space between `#` and `|`
 #let cell-spec = arguments("pattern-test", name-path: "metadata.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
-#let cpp-pattern = regex("^//\|\s+(.*?):\s+(.*?)\s*$")
+#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
 #let cpp-cell-spec = arguments("calc", nb: "/tests/api/cpp.ipynb")
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
@@ -115,3 +115,14 @@
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display_data")
 #assert.eq(out.rich-format, "image/png")
+
+// Check header pattern logic for OCaml syntax
+#let pat = "(* %key: %value *)"
+#let pat-regex = callisto.reading.notebook.cell-header-regex(pat)
+#let pat-writer = callisto.reading.notebook.cell-header-writer(pat)
+#let header-line = "(* some key: some value *)   "
+#assert.eq(header-line.match(pat-regex).captures, ("some key", "some value"))
+#assert.eq(
+  (pat-writer)("some key", "some value"),
+  "(* some key: some value *)"),
+)
