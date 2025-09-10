@@ -4,7 +4,7 @@
 #import "notebook.typ"
 
 #let _cell-source-mimes = (
-  "markdown": "text/x.source-code-cell",
+  "markdown": "text/x.source-markdown-cell",
   "code": "text/x.source-code-cell",
   "raw": "text/x.source-raw-cell",
 )
