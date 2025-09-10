@@ -17,7 +17,7 @@
 == Cell 2
 #Cell(2)
 
-=== Rendered input
+=== Rendered input (plain template)
 #In(2, template: "plain")
 
 === Rendered output (framed)
@@ -28,21 +28,22 @@
 === Rendered error
 #Out(3, count: "execution", output-type: "error")
 
-=== Same but with `plain` template
+=== Same but with plain template
 #Out(3, count: "execution", output-type: "error", template: "plain")
 
 == Raw cells
 #render(cell-type: "raw")
 
-=== With `plain` template
+=== With plain template
 #render(cell-type: "raw", template: "plain")
 
 #pagebreak()
 
-== Markdown and code cells\ (only source and result, no display)
+== Markdown cells and code results (no display)
 #render(
   cell-type: ("markdown", "code"),
   output-type: "execute_result",
+  template: ("markdown": "notebook", output: "notebook"),
 )
 
 #pagebreak()
@@ -51,6 +52,8 @@
 #results().join()
 
 == Markdown display, shown with custom handler (`repr`)
-#display(format: "text/markdown", ignore-wrong-format: true, handlers: (
-  "text/markdown": (data, ..args) => repr(data),
-))
+#display(
+  format: "text/markdown",
+  ignore-wrong-format: true,
+  handlers: ("text/markdown": (data, ..args) => repr(data)),
+)

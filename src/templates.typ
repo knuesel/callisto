@@ -17,7 +17,13 @@
 
 // Plain template for Markdown cell
 #let plain-markdown(cell, ctx: none) = {
-  handle(cell.source, mime: "text/markdown", ctx: ctx) + parbreak()
+  // Render as inline Markdown to integrate seamlessly in the document
+  // without interference from a block container (see
+  // https://github.com/knuesel/callisto/issues/13) but add parbreaks
+  // to render the content as a distinct unit.
+  parbreak()
+  handle(cell.source, mime: "text/x.markdown-inline", ctx: ctx)
+  parbreak()
 }
 
 // Plain template for code cell input

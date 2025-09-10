@@ -109,8 +109,12 @@
   raw(data, block: true, lang: "txt")
 }
 
-// Handler for Markdown markup
-#let handler-markdown(data, ctx: none, ..args) = cmarker.render(
+// Handler for Markdown markup to be rendered inline, without block wrapper.
+// (This is useful for Markdown that must be included seamlessly in the flow
+// of the document, so that e.g. spacing around headings can be configured
+// without interference from a container block, see
+// https://github.com/knuesel/callisto/issues/13)
+#let handler-markdown-inline(data, ctx: none, ..args) = cmarker.render(
   data,
   math: handle.with(mime: "text/x.math-markdown-cell", ctx: ctx),
   scope: (
@@ -123,8 +127,13 @@
   ..args,
 )
 
+// Handler for Markdown outputs
+#let handler-markdown(data, ctx: none, ..args) = {
+  block(handle(data, mime: "text/x.markdown-inline", ctx: ctx, ..args))
+}
+
 // Handler for LaTeX markup
-#let handler-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
+#let handler-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
 
 // Handler for LaTeX equations
 #let handler-math(data, ctx: none, ..args) = mitex.mitex(data, ..args)
@@ -317,6 +326,7 @@
   "text/x.source-raw-cell" : handler-source-raw-cell,  // raw cell source
   "text/x.stream": handler-stream,
   "text/x.error": handler-error,
+  "text/x.markdown-inline": handler-markdown-inline,
   // Generic image handlers
   "image/x.generic": handler-image-generic, // base handler used by others
   "image/x.base64" : handler-image-base64,  // base64 encoded image

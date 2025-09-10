@@ -16,9 +16,9 @@
 )
 
 
-Cell 3:
+Cell 3 showing attachment path instead of content:
 #callisto.render(
   3,
   nb: json("images.ipynb"),
-  handlers: ("image/png": (ctx: none, ..args) => ctx.item.metadata.path),
+  handlers: ("image/png": (ctx: none, ..args) => raw(ctx.item.metadata.path)),
 )
