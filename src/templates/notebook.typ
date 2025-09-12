@@ -1,6 +1,9 @@
 #import "../common.typ": handle
 #import "../reading.typ": outputs
 
+// Document template
+#let doc-template(x) = x
+
 // Make a string for a cell execution count, showing a space if missing
 #let _count-string(count) = if count == none { return " " } else { str(count) }
 
@@ -11,7 +14,7 @@
 }
 
 // "notebook" template for raw cell
-#let raw(cell, ctx: none) = block(
+#let raw-cell(cell, ctx: none) = block(
   spacing: 1.5em,
   width: 100%,
   inset: 0.5em,
@@ -20,7 +23,7 @@
 )
 
 // "notebook" template for Markdown cell
-#let markdown(cell, ctx: none) = {
+#let markdown-cell(cell, ctx: none) = {
   // Render as inline Markdown to integrate seamlessly in the document
   // without interference from a block container (see
   // https://github.com/knuesel/callisto/issues/13) but add parbreaks
@@ -31,7 +34,7 @@
 }
 
 // "notebook" template for code cell input
-#let input(cell, ctx: none) = block(
+#let code-input(cell, ctx: none) = block(
   above: 2em,
   below: if ctx.cfg.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
@@ -56,7 +59,7 @@
 }
 
 // "notebook" template for code cell output
-#let output(cell, ctx: none) = {
+#let code-output(cell, ctx: none) = {
   // Change some default handlers
   ctx.cfg._default-handlers = ("text/x.error": error-handler)
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
@@ -85,10 +88,8 @@
 }
 
 #let cell-template =(
-  raw: raw,
-  markdown: markdown,
-  input: input,
-  output: output,
+  raw: raw-cell,
+  markdown: markdown-cell,
+  input: code-input,
+  output: code-output,
 )
-
-#let doc-template(x) = x
