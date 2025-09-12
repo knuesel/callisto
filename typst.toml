@@ -1,6 +1,6 @@
 [package]
 name = "callisto"
-version = "0.2.4"
+version = "0.3.0"
 entrypoint = "src/callisto.typ"
 authors = ["Jeremie Knuesel <https://github.com/knuesel>"]
 license = "MIT"
