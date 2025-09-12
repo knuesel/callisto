@@ -1,5 +1,5 @@
 #import "reading.typ": cells
-#import "templates.typ"
+#import "templates.typ": cell-templates
 #import "ctx.typ": get-ctx
 #import "common.typ": parse-main-args
 
@@ -26,10 +26,10 @@
 
 // Resolve template by name
 #let _resolve-template(name) = {
-  if name not in templates.cell-templates {
+  if name not in cell-templates {
     panic("template name not found: " + name)
   }
-  return templates.cell-templates.at(name)
+  return cell-templates.at(name)
 }
 
 // Return a normalized value for the given key of the given template dict,
