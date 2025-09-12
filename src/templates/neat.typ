@@ -31,6 +31,8 @@
 
   show raw.where(block: true): set block(.._raw-block-cfg)
 
+  show math.equation: set text(1.1em)
+
   doc
 }
 
