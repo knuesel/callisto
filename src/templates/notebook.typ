@@ -19,7 +19,7 @@
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx),
+  handle(cell.source, mime: "source-raw-cell", ctx: ctx),
 )
 
 // "notebook" template for Markdown cell
@@ -28,9 +28,7 @@
   // without interference from a block container (see
   // https://github.com/knuesel/callisto/issues/13) but add parbreaks
   // to render the content as a distinct unit.
-  parbreak()
-  handle(cell.source, mime: "text/x.markdown-inline", ctx: ctx)
-  parbreak()
+  handle(cell.source, mime: "markdown-par", ctx: ctx)
 }
 
 // "notebook" template for code cell input
@@ -42,7 +40,7 @@
   fill: luma(240),
   {
     _in-out-num("In ", cell.execution_count)
-    handle(cell.source, mime: "text/x.source-code-cell", ctx: ctx)
+    handle(cell.source, mime: "source-code-cell", ctx: ctx)
   },
 )
 
@@ -61,7 +59,7 @@
 // "notebook" template for code cell output
 #let code-output(cell, ctx: none) = {
   // Change some default handlers
-  ctx.cfg._default-handlers = ("text/x.error": error-handler)
+  ctx.cfg._default-handlers = ("error": error-handler)
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }
   block(

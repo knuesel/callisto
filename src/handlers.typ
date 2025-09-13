@@ -19,15 +19,15 @@
 // 
 // - Math handlers must accept a 'block' argument (true for block equations).
 //
-// - The "text/x.source-generic" handler (used by the default code cell source
+// - The "source-generic" handler (used by the default code cell source
 //   and raw cell source handlers) takes a 'lang' argument.
 //
-// - The "text/x.stream" handler gets a 'name' argument for the stream name
+// - The "stream" handler gets a 'name' argument for the stream name
 //   ("stdout" or "stderr").
 //
-// - The "text/x.error" handler gets 'name' and 'traceback' arguments.
+// - The "error" handler gets 'name' and 'traceback' arguments.
 //
-// - The "application/x.rich-object" handler gets 'metadata', 'type' and
+// - The "rich-object" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 // 
 // When defining a handler, the user can choose to add an '..args' sink if
@@ -42,7 +42,7 @@
 #let handler-image-generic(data, ctx: none, ..args) = {
   if type(data) == str {
     panic("image specified by path (" + data + ") requires a user-defined " +
-      "handler for MIME type \"image/x.generic\"")
+      "handler for MIME type \"image-generic\"")
   }
   std.image(data, ..args)
 }
@@ -61,7 +61,7 @@
       let data = attachments.at(name)
       handle(
         data,
-        mime: "application/x.rich-object",
+        mime: "rich-object",
         ctx: ctx,
         metadata: (path: path),
         type: "attachment",
@@ -71,19 +71,19 @@
       panic("cell attachment " + name + " not found")
     }
   } else {
-    handle(path, mime: "image/x.generic", ctx: ctx, ..args)
+    handle(path, mime: "image-generic", ctx: ctx, ..args)
   }
 }
 
 // Handler for base64-encoded images
 #let handler-image-base64(data, ctx: none, ..args) = {
   let data-bytes = base64.decode(data.replace("\n", ""))
-  handle(data-bytes, mime: "image/x.generic", ctx: ctx, ..args)
+  handle(data-bytes, mime: "image-generic", ctx: ctx, ..args)
 }
 
 // Handler for text-encoded images, for example svg+xml
 #let handler-image-text(data, ctx: none, ..args) = {
-  handle(bytes(data), mime: "image/x.generic", ctx: ctx, ..args)
+  handle(bytes(data), mime: "image-generic", ctx: ctx, ..args)
 }
 
 // Helper function to guess the SVG data encoding based on the first characters
@@ -91,22 +91,17 @@
 #let _encoded-svg-mime(data) = {
   // base64 encoded version of:     "<?xml "                        "<sv"
   if data.starts-with("PD94bWwg") or data.starts-with("PHN2") {
-    return "image/x.base64"
+    return "image-base64"
   } else if data.starts-with("<?xml ") or data.starts-with("<svg") {
-    return "image/x.text"
+    return "image-text"
   }
   panic("unrecognized svg+xml data")
 }
 
 // Smart svg+xml handler that handles both text and base64 data
-#let handler-svg-xml(data, ctx: none, ..args) = {
+#let handler-image-svg-xml(data, ctx: none, ..args) = {
   let mime = _encoded-svg-mime(data)
   handle(data, mime: mime, ctx: ctx, ..args)
-}
-
-// Handler for simple text
-#let handler-text(data, ctx: none, ..args) = {
-  raw(data, block: true, lang: "txt")
 }
 
 // Handler for Markdown markup to be rendered inline, without block wrapper.
@@ -114,29 +109,42 @@
 // of the document, so that e.g. spacing around headings can be configured
 // without interference from a container block, see
 // https://github.com/knuesel/callisto/issues/13)
-#let handler-markdown-inline(data, ctx: none, ..args) = cmarker.render(
+#let handler-markdown-generic(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: handle.with(mime: "text/x.math-markdown-cell", ctx: ctx),
+  math: handle.with(mime: "math-markdown-cell", ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default markdown-cell
-    // handler delegates to the "image/x.generic" handler. Users should define
+    // handler delegates to the "image-generic" handler. Users should define
     // that handler to fix image path resolution (until Typst gets a 'path'
     // type).
-    image: handle.with(mime: "image/x.markdown-cell", ctx: ctx),
+    image: handle.with(mime: "image-markdown-cell", ctx: ctx),
   ),
   ..args,
 )
 
+// Handler for Markdown markup to be rendered as one or several paragraphs but
+// without a block wrapper (see handler-markdown-generic).
+#let handler-markdown-par(data, ctx: none, ..args) = {
+  parbreak()
+  handle(data, mime: "markdown-generic", ctx: ctx, ..args)
+  parbreak()
+}
+
 // Handler for Markdown outputs
-#let handler-markdown(data, ctx: none, ..args) = {
-  block(handle(data, mime: "text/x.markdown-inline", ctx: ctx, ..args))
+#let handler-text-markdown(data, ctx: none, ..args) = {
+  block(handle(data, mime: "markdown-generic", ctx: ctx, ..args))
 }
 
 // Handler for LaTeX markup
-#let handler-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+#let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+
+// Handler for simple text
+#let handler-text-plain(data, ctx: none, ..args) = {
+  raw(data, block: true, lang: "txt")
+}
 
 // Handler for LaTeX equations
-#let handler-math(data, ctx: none, ..args) = mitex.mitex(data, ..args)
+#let handler-math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
 // Wrap the math item arguments in a labelled metadata
 #let _math-metadata(..args) = [#metadata(args)<__callisto-math-item>]
@@ -240,7 +248,7 @@
     txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
   }
   // Render equation with the latex math handler
-  return handle(txt, mime: "text/x.math", ctx: ctx, ..args)
+  return handle(txt, mime: "math-generic", ctx: ctx, ..args)
 }
 
 // Handler for rich objects, where data is a dict keyed by MIME types, and
@@ -248,7 +256,7 @@
 // MIME types. The item type can be specified, generally as an output item type
 // or as "attachment". If given, the subhandler args will be forwarded to the
 // subhandler called by this handler to handle a particular format.
-#let handler-rich(
+#let handler-rich-object(
   data,
   ctx: none,
   metadata: none,
@@ -282,18 +290,18 @@
 
 // Handler for source of Markdown cells
 #let handler-source-markdown-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "text/x.source-generic", lang: "markdown", ctx: ctx)
+  handle(data, mime: "source-generic", lang: "markdown", ctx: ctx)
 }
 
 // Handle for source of code cells
 #let handler-source-code-cell(data, ctx: none, ..args) = {
   // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
-  handle(data, mime: "text/x.source-generic", lang: ctx.lang, ctx: ctx)
+  handle(data, mime: "source-generic", lang: ctx.lang, ctx: ctx)
 }
 
 // Handler for source of raw cells
 #let handler-source-raw-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "text/x.source-generic", lang: ctx.cfg.raw-lang, ctx: ctx)
+  handle(data, mime: "source-generic", lang: ctx.cfg.raw-lang, ctx: ctx)
 }
 
 // Handler for stream output items
@@ -306,32 +314,35 @@
   raw(evalue, block: true, lang: "txt")
 }
 
-// Built-in handlers for supported MIME types.
+// Built-in handlers
 #let mime-handlers = (
-  // Handlers for rich items (output items and cell attachments)
-  "image/svg+xml": handler-svg-xml,
+  // Handlers for specific formats of rich items (outputs and cell attachments)
+  "image/svg+xml": handler-image-svg-xml,
   "image/png"    : handler-image-base64,
   "image/jpeg"   : handler-image-base64,
   "image/gif"    : handler-image-base64,
-  "text/markdown": handler-markdown,
-  "text/latex"   : handler-latex,
-  "text/plain"   : handler-text,
-  // Special handlers for LaTeX math
-  "text/x.math": handler-math, // base handler used by next one
-  "text/x.math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
-  // Special handlers for specific kinds of text items
-  "text/x.source-generic"  : handler-source, // takes a lang: argument
-  "text/x.source-markdown-cell": handler-source-markdown-cell, // md cell source
-  "text/x.source-code-cell": handler-source-code-cell, // code cell source
-  "text/x.source-raw-cell" : handler-source-raw-cell,  // raw cell source
-  "text/x.stream": handler-stream,
-  "text/x.error": handler-error,
-  "text/x.markdown-inline": handler-markdown-inline,
+  "text/markdown": handler-text-markdown,
+  "text/latex"   : handler-text-latex,
+  "text/plain"   : handler-text-plain,
   // Generic image handlers
-  "image/x.generic": handler-image-generic, // base handler used by others
-  "image/x.base64" : handler-image-base64,  // base64 encoded image
-  "image/x.text"   : handler-image-text,    // text encoded image
-  "image/x.markdown-cell": handler-image-markdown-cell, // Markdown cell image
-  // Special handler for rich objects which can be available in multiple formats
-  "application/x.rich-object": handler-rich,
+  "image-generic": handler-image-generic, // base handler used by others
+  "image-base64" : handler-image-base64,  // base64 encoded image
+  "image-text"   : handler-image-text,    // text encoded image
+  "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
+  // Handlers for non-rich outputs
+  "stream": handler-stream,
+  "error": handler-error,
+  // Handlers for Markdown as part of the document flow
+  "markdown-generic": handler-markdown-generic,
+  "markdown-par": handler-markdown-par,
+  // Handlers for LaTeX math
+  "math-generic": handler-math-generic, // base handler for math
+  "math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
+  // Handlers for 'source' function
+  "source-generic"  : handler-source, // takes a lang: argument
+  "source-markdown-cell": handler-source-markdown-cell, // md cell source
+  "source-code-cell": handler-source-code-cell, // code cell source
+  "source-raw-cell" : handler-source-raw-cell,  // raw cell source
+  // Handler for objects that can be available in multiple formats
+  "rich-object": handler-rich-object,
 )

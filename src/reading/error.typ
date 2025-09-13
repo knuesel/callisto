@@ -6,7 +6,7 @@
 // Process an error item
 #let process(item, ctx: none) = handle(
   item.evalue,
-  mime: "text/x.error",
+  mime: "error",
   ctx: ctx,
   name: item.ename,
   traceback: item.traceback,

@@ -38,7 +38,7 @@
 
 // Neat template for raw cell
 #let raw-cell(cell, ctx: none) = {
-  handle(cell.source, mime: "text/x.source-raw-cell", ctx: ctx)
+  handle(cell.source, mime: "source-raw-cell", ctx: ctx)
 }
 
 // Neat template for Markdown cell
@@ -47,9 +47,7 @@
   // without interference from a block container (see
   // https://github.com/knuesel/callisto/issues/13) but add parbreaks
   // to render the content as a distinct unit.
-  parbreak()
-  handle(cell.source, mime: "text/x.markdown-inline", ctx: ctx)
-  parbreak()
+  handle(cell.source, mime: "markdown-par", ctx: ctx)
 }
 
 // Neat template for code cell input
@@ -58,7 +56,7 @@
   set text(rgb("#005979"))
   show raw: set block(.._raw-block-cfg, above: 1em)
   show raw: set block(below: 1em) if not has-output
-  handle(cell.source, mime: "text/x.source-code-cell", ctx: ctx)
+  handle(cell.source, mime: "source-code-cell", ctx: ctx)
 }
 
 // Neat template for code cell input

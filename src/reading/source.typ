@@ -4,9 +4,9 @@
 #import "notebook.typ"
 
 #let _cell-source-mimes = (
-  "markdown": "text/x.source-markdown-cell",
-  "code": "text/x.source-code-cell",
-  "raw": "text/x.source-raw-cell",
+  "markdown": "source-markdown-cell",
+  "code": "source-code-cell",
+  "raw": "source-raw-cell",
 )
 
 /// Extract the 'source' field from cells as raw blocks.
