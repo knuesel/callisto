@@ -141,6 +141,3 @@
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }
-
-// Select a single cell
-#let cell(..args, keep: "unique") = cells(..args, keep: keep).first()

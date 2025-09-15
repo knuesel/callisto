@@ -1,4 +1,4 @@
-#import "/src/callisto.typ" as callisto: *
+#import "/callisto.typ" as callisto: *
 
 #let render = callisto.render.with(nb: json("R.ipynb"))
 

@@ -1,5 +1,5 @@
-#import "../common.typ": handle
-#import "../reading.typ": outputs
+#import "/lib/common.typ": handle
+#import "/lib/reading/output.typ": outputs
 
 #let _fill = rgb(233, 236, 239)
 #let _inset = 8pt
@@ -14,7 +14,7 @@
 )
 
 // Document template
-#let doc-template(doc) = {
+#let neat-template(doc) = {
   set text(font: "Noto Sans")
   show raw: set text(font: "Noto Sans Mono")
   show heading: set text(weight: "semibold")
@@ -36,31 +36,15 @@
   doc
 }
 
-// Neat template for raw cell
-#let raw-cell(cell, ctx: none) = {
-  handle(cell.source, mime: "source-raw-cell", ctx: ctx)
-}
-
-// Neat template for Markdown cell
-#let markdown-cell(cell, ctx: none) = {
-  // Render as inline Markdown to integrate seamlessly in the document
-  // without interference from a block container (see
-  // https://github.com/knuesel/callisto/issues/13) but add parbreaks
-  // to render the content as a distinct unit.
-  handle(cell.source, mime: "markdown-par", ctx: ctx)
-}
-
-// Neat template for code cell input
-#let code-input(cell, ctx: none) = {
+#let neat-code-cell-input(cell, ctx: none) = {
   let has-output = ctx.cfg.output and cell.outputs.len() > 0
   set text(rgb("#005979"))
   show raw: set block(.._raw-block-cfg, above: 1em)
   show raw: set block(below: 1em) if not has-output
-  handle(cell.source, mime: "source-code-cell", ctx: ctx)
+  handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
 }
 
-// Neat template for code cell input
-#let code-output(cell, ctx: none) = {
+#let neat-code-cell-output(cell, ctx: none) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   // Undo global show rule for raw block
@@ -74,9 +58,8 @@
   )
 }
 
-#let cell-template =(
-  raw: raw-cell,
-  markdown: markdown-cell,
-  input: code-input,
-  output: code-output,
+#let theme =(
+  template: neat-template,
+  code-cell-input: neat-code-cell-input,
+  code-cell-output: neat-code-cell-output,
 )

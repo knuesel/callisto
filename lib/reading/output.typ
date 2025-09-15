@@ -1,6 +1,5 @@
-#import "../common.typ": single-item, final-result, ensure-array, parse-main-args
+#import "../common.typ": final-result, ensure-array, parse-main-args, handle
 #import "../ctx.typ": get-ctx
-#import "notebook.typ"
 #import "cell.typ": cells
 #import "rich-object.typ"
 #import "stream.typ"
@@ -29,20 +28,8 @@
   return types
 }
 
-/// Extract outputs from cells specified by 'cell-args'.
-/// Can return several outputs per cell.
-/// - output-type (str | array): Output type(s) to include in returned array.
-///   Valid types are "display_data", "execute_result", "stream" and "error".
-/// - format (str | array): The format, or order of preference of formats, to
-///   choose in case of "rich" outputs.
-/// - handlers (auto | dict): Handler functions for rendering various formats
-/// - ignore-wrong-format (bool): Whether outputs without supported format
-///   should be silently ignored.
-/// - stream (str | array): Kind(s) of streams to include in the returned array
-/// - result (str): Use "value" to return just the outputs themselves, or
-///   "dict" to return for each output a dict with fields 'value', 'cell',
-///   'type' and additional fields specific to each output type.
-/// -> array of any | array of dict
+// Extract outputs from the specified cell.
+// Can return several outputs per cell. The return value is always an array.
 #let outputs(..args) = {
   let (cell-spec, cfg) = parse-main-args(args)
   let output-types = _output-types(cfg.output-type)
@@ -54,13 +41,19 @@
       // Make context for processor
       let item-desc = (index: i, type: item.output_type)
       let ctx = get-ctx(cell, cfg: cfg, item: item-desc)
+
+      // The processing is split in two output-type-specific steps:
+      // preprocessing and rendering. The preprocessed data is used
+      // as argument to the handler and to populate the final result when
+      // 'result' is "dict". The handler takes the preprocessed data and
+      // returns the rendered value.
+
       // Get processor module
       let proc-module = processor-modules.at(item.output_type)
       // Get dict with normalized data for this item
       let preprocessed = proc-module.preprocess(item, ctx: ctx)
       if preprocessed == none { continue }
-      // Get processed value
-      let value = proc-module.process(preprocessed, ctx: ctx)
+      let value = handle(preprocessed, mime: "output", ctx: ctx)
       if value == none { continue }
       // Make final result (value or dict)
       let result = final-result(preprocessed, value, ctx: ctx)
@@ -69,6 +62,3 @@
   }
   return outs
 }
-
-// Return a single output
-#let output(..args, item: "unique") = single-item(outputs(..args), item: item)

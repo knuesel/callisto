@@ -16,14 +16,13 @@
   format: auto,
   handlers: auto,
   ignore-wrong-format: false,
-  template: "notebook",
   item: "unique",
-  // Special (should not override args set in pre-configured functions)
   output-type: "all",
   input: true,
   output: true,
-  // Settings for internal and template use
-  _default-handlers: auto,
+  default-handlers: (:), // to be filled in callisto.typ
+  named-themes: (:), // to be filled in callisto.typ
+  theme: "notebook",
 )
 
 // Parse the arguments of the main functions

@@ -4,12 +4,18 @@
 
 #import "common.typ": handle
 #import "reading/rich-object.typ"
+#import "reading/stream.typ"
+#import "reading/error.typ"
+#import "reading/output.typ": outputs
 #import "latex.typ"
 
-// A handler is a function called to render a value such as a cell result
-// (in contrast to a template which is called to render a whole cell).
-// Each handler is associated with a MIME type. A template can for example
-// call the "text/markdown" handler to render the source of a Markdown cell.
+// A handler is a function called to render a value such as a cell's source,
+// a cell output or even a whole cell.
+// Each handler is associated with a MIME type. Rich items, which can be
+// available in multiple formats, are rendered by calling the handler on the
+// selected format. In this case the type is a real MIME type, for example
+// "image/png". Other handlers use dummy MIME types such as "code-cell"
+// (without slash character).
 //
 // Handlers are always called with a positional argument for the data to
 // render, and a 'ctx' keyword argument for contextual data. Some handlers also
@@ -19,15 +25,15 @@
 // 
 // - Math handlers must accept a 'block' argument (true for block equations).
 //
-// - The "source-generic" handler (used by the default code cell source
-//   and raw cell source handlers) takes a 'lang' argument.
+// - The "source-code-generic" handler (used by the default raw cell and
+//   code input handlers) takes a 'lang' argument.
 //
 // - The "stream" handler gets a 'name' argument for the stream name
 //   ("stdout" or "stderr").
 //
 // - The "error" handler gets 'name' and 'traceback' arguments.
 //
-// - The "rich-object" handler gets 'metadata', 'type' and
+// - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 // 
 // When defining a handler, the user can choose to add an '..args' sink if
@@ -61,10 +67,9 @@
       let data = attachments.at(name)
       handle(
         data,
-        mime: "rich-object",
+        mime: "attachment",
         ctx: ctx,
         metadata: (path: path),
-        type: "attachment",
         subhandler-args: args,
       )
     } else {
@@ -251,23 +256,21 @@
   return handle(txt, mime: "math-generic", ctx: ctx, ..args)
 }
 
-// Handler for rich objects, where data is a dict keyed by MIME types, and
-// metadta can be a simple metadata dict or a dict with metadata dicts keyed by
-// MIME types. The item type can be specified, generally as an output item type
-// or as "attachment". If given, the subhandler args will be forwarded to the
-// subhandler called by this handler to handle a particular format.
-#let handler-rich-object(
+// Handler for attachments, where data is a dict keyed by MIME types, and
+// metadata can be a simple metadata dict or a dict with metadata dicts keyed
+// by MIME types. If given, the subhandler args will be forwarded to
+// the subhandler called by this handler to handle a particular format.
+#let handler-attachment(
   data,
   ctx: none,
   metadata: none,
-  type: none,
   subhandler-args: none,
   ..args,
 ) = {
   // Make item dict
   let item = (data: data, metadata: metadata)
   // Update context item desc
-  ctx.item = (index: none, type: type)
+  ctx.item = (index: none, type: "attachment")
   // Get dict with normalized data for this item
   let preprocessed = rich-object.preprocess(item, ctx: ctx)
   if preprocessed == none { return none }
@@ -278,35 +281,14 @@
   )
 }
 
-// Generic handler for source code
-#let handler-source(data, ctx: none, lang: none, ..args) = {
-  // Ensure the source has at least one (possibly empty) line
-  // (without this the raw block looks weird for empty cells)
-  if data == "" {
-    data = "\n"
-  }
-  raw(data, lang: lang, block: true)
-}
-
-// Handler for source of Markdown cells
-#let handler-source-markdown-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "source-generic", lang: "markdown", ctx: ctx)
-}
-
-// Handle for source of code cells
-#let handler-source-code-cell(data, ctx: none, ..args) = {
-  // Using ctx.lang (not ctx.cfg.lang) as it resolves auto to notebook lang
-  handle(data, mime: "source-generic", lang: ctx.lang, ctx: ctx)
-}
-
-// Handler for source of raw cells
-#let handler-source-raw-cell(data, ctx: none, ..args) = {
-  handle(data, mime: "source-generic", lang: ctx.cfg.raw-lang, ctx: ctx)
+// Handler for specific stream type
+#let handler-stream-any(data, ctx: none, ..args) = {
+  raw(data, block: true, lang: "txt")
 }
 
 // Handler for stream output items
 #let handler-stream(data, ctx: none, name: none, ..args) = {
-  raw(data, block: true, lang: "txt")
+  handle(data, mime: "stream-" + name, ctx: ctx, ..args)
 }
 
 // Handler for error output items
@@ -314,8 +296,82 @@
   raw(evalue, block: true, lang: "txt")
 }
 
-// Built-in handlers
-#let mime-handlers = (
+#let handler-rich-item(data, ctx: none, ..args) = {
+  handle(data, mime: ctx.item.rich-format, ctx: ctx, ..args)
+}
+
+// Handler for any type of code cell output
+#let handler-output(data, ctx: none, ..args) = {
+  let processor-module = (
+    display_data: rich-object,
+    execute_result: rich-object,
+    stream: stream,
+    error: error,
+  ).at(ctx.item.type)
+  processor-module.process(data, ctx: ctx, ..args)
+}
+
+// Handler for source code
+#let handler-source-code-generic(txt, ctx: none, lang: none, ..args) = {
+  // Ensure the source has at least one (possibly empty) line
+  // (without this the raw block looks weird for empty cells)
+  if txt == "" {
+    txt = "\n"
+  }
+  raw(txt, lang: lang, block: true)
+}
+
+// Handler for raw cell
+#let handler-raw-cell(cell, ctx: none, ..args) = {
+  handle(
+    cell.source,
+    mime: "source-code-generic",
+    ctx: ctx,
+    lang: ctx.cfg.raw-lang,
+    ..args,
+  )
+}
+
+// Handler for Markdown cell
+#let handler-markdown-cell(cell, ctx: none, ..args) = {
+  handle(cell.source, mime: "markdown-par", ctx: ctx, ..args)
+}
+
+// Handler for code cell input
+#let handler-code-cell-input(cell, ctx: none, ..args) = {
+  handle(
+    cell.source,
+    mime: "source-code-generic",
+    ctx: ctx,
+    lang: ctx.lang,
+    ..args,
+  )
+}
+
+// Handler for code cell output
+#let handler-code-cell-output(cell, ctx: none, ..args) = {
+  // Get outputs with user config, but override 'result' to get just the values
+  outputs(cell, ..ctx.cfg, result: "value").join()
+}
+
+// Handler for code cell
+#let handler-code-cell(cell, ctx: none, ..args) = {
+  if ctx.cfg.input {
+    handle(cell, mime: "code-cell-input", ctx: ctx, ..args)
+  }
+  if ctx.cfg.output {
+    handle(cell, mime: "code-cell-output", ctx: ctx, ..args)
+  }
+}
+
+// Handler for cells
+#let handler-cell(cell, ctx: none, ..args) = {
+  // Delegate to cell-type-specific handler
+  handle(cell, mime: cell.cell_type + "-cell", ctx: ctx, ..args)
+}
+
+// Default handlers
+#let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
   "image/svg+xml": handler-image-svg-xml,
   "image/png"    : handler-image-base64,
@@ -329,20 +385,29 @@
   "image-base64" : handler-image-base64,  // base64 encoded image
   "image-text"   : handler-image-text,    // text encoded image
   "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
-  // Handlers for non-rich outputs
-  "stream": handler-stream,
+  // Handlers for output items
+  "display_data": handler-rich-item,
+  "result": handler-rich-item,
   "error": handler-error,
+  "stream-stdout": handler-stream-any,
+  "stream-stderr": handler-stream-any,
+  "stream-all":    handler-stream-any, // for when both streams are merged
+  "stream": handler-stream, // called before stream-type-specific handler
+  "output": handler-output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
   "markdown-generic": handler-markdown-generic,
   "markdown-par": handler-markdown-par,
   // Handlers for LaTeX math
   "math-generic": handler-math-generic, // base handler for math
   "math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
-  // Handlers for 'source' function
-  "source-generic"  : handler-source, // takes a lang: argument
-  "source-markdown-cell": handler-source-markdown-cell, // md cell source
-  "source-code-cell": handler-source-code-cell, // code cell source
-  "source-raw-cell" : handler-source-raw-cell,  // raw cell source
-  // Handler for objects that can be available in multiple formats
-  "rich-object": handler-rich-object,
+  // Handlers for cell rendering
+  "raw-cell": handler-raw-cell,
+  "markdown-cell": handler-markdown-cell,
+  "code-cell-input": handler-code-cell-input,
+  "code-cell-output": handler-code-cell-output,
+  "code-cell": handler-code-cell,
+  "cell": handler-cell, // called before the cell-type-specific handler
+  // Other handlers
+  "source-code-generic": handler-source-code-generic,
+  "attachment": handler-attachment,
 )

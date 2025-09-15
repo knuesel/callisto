@@ -1,8 +1,5 @@
-#import "../common.typ": handle
-#import "../reading.typ": outputs
-
-// Document template
-#let doc-template(x) = x
+#import "/lib/common.typ": handle
+#import "/lib/reading/output.typ": outputs
 
 // Make a string for a cell execution count, showing a space if missing
 #let _count-string(count) = if count == none { return " " } else { str(count) }
@@ -13,26 +10,15 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
-// "notebook" template for raw cell
-#let raw-cell(cell, ctx: none) = block(
+#let notebook-raw-cell(cell, ctx: none) = block(
   spacing: 1.5em,
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  handle(cell.source, mime: "source-raw-cell", ctx: ctx),
+  handle(cell.source, mime: "source-code-generic", ctx: ctx),
 )
 
-// "notebook" template for Markdown cell
-#let markdown-cell(cell, ctx: none) = {
-  // Render as inline Markdown to integrate seamlessly in the document
-  // without interference from a block container (see
-  // https://github.com/knuesel/callisto/issues/13) but add parbreaks
-  // to render the content as a distinct unit.
-  handle(cell.source, mime: "markdown-par", ctx: ctx)
-}
-
-// "notebook" template for code cell input
-#let code-input(cell, ctx: none) = block(
+#let notebook-code-cell-input(cell, ctx: none) = block(
   above: 2em,
   below: if ctx.cfg.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
@@ -40,7 +26,7 @@
   fill: luma(240),
   {
     _in-out-num("In ", cell.execution_count)
-    handle(cell.source, mime: "source-code-cell", ctx: ctx)
+    handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
   },
 )
 
@@ -52,18 +38,15 @@
 )
 
 // Customized default handler for errors, rendering the traceback
-#let error-handler(data, ctx: none, traceback: none, ..args) = {
+#let notebook-error(data, ctx: none, traceback: none, ..args) = {
   raw(traceback.join("\n"), block: true, lang: "txt")
 }
 
-// "notebook" template for code cell output
-#let code-output(cell, ctx: none) = {
-  // Change some default handlers
-  ctx.cfg._default-handlers = ("error": error-handler)
+#let notebook-code-cell-output(cell, ctx: none) = {
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }
   block(
-    above: if ctx.cfg.input { 0pt } else { 2em },
+    above: 0pt,
     below: 2em,
     width: 100%,
     inset: 0.5em,
@@ -85,9 +68,9 @@
   )
 }
 
-#let cell-template =(
-  raw: raw-cell,
-  markdown: markdown-cell,
-  input: code-input,
-  output: code-output,
+#let theme = (
+  error: notebook-error,
+  raw-cell: notebook-raw-cell,
+  code-cell-input: notebook-code-cell-input,
+  code-cell-output: notebook-code-cell-output,
 )

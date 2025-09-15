@@ -1,4 +1,4 @@
-#import "/src/callisto.typ"
+#import "/callisto.typ"
 
 // Preferred format among `xyz`, `text/plain`, `abc`
 #assert.eq(
@@ -24,6 +24,7 @@
   result,
   display,
   source,
+  output,
 ) = callisto.config(nb: "/tests/julia/julia.ipynb")
 
 // Check for cell deduplication
@@ -65,12 +66,22 @@
 
 #assert.eq(display("scatter", name-path: "metadata.type", item: 1).func(), image)
 
+// Check override of a single handler by theme name
+#let out = error(
+  5,
+  theme: callisto.themes.named.plain + (
+    error: "notebook",
+  ),
+)
+#assert("Stacktrace" in out.text)
+
 // Allow multiple items in singular functions, pick the first
 #[
   #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
   #assert.eq(display("plot3").func(), image)
   #assert.eq(result("scatter", name-path: "metadata.type").func(), image)
 ]
+
 
 // With python.ipynb
 #let (

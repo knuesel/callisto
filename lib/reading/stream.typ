@@ -63,6 +63,3 @@
   }
   return outs
 }
-
-// Return the merged streams for a single cell
-#let stream(..args, item: "unique") = single-item(streams(..args), item: item)

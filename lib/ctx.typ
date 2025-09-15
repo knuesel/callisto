@@ -1,8 +1,8 @@
 #import "common.typ": parse-main-args
 #import "reading/notebook.typ"
-#import "handlers.typ": mime-handlers
+#import "theming.typ"
 
-// The 'ctx' dict is passed to all handler and template calls and holds
+// The 'ctx' dict is passed to all handler calls and holds
 // contextual data including at least the following fields:
 //
 // - cell: the dict of the cell being processed
@@ -33,25 +33,14 @@
 //   'none' otherwise.
 
 
-// Retrieve the specified handlers field from 'cfg' is valid and 
-#let _handlers-field(field, cfg: none) = {
-  let handlers = cfg.at(field)
-  if handlers != auto and type(handlers) != dictionary {
-    panic(field + " must be auto or a dictionary mapping formats to functions")
-  }
-  if handlers == auto {
-    return (:)
-  }
-  return handlers
-}
-
-// Get final handlers from built-in, default and user handlers.
-// (The default handlers can be configured by the template, but the user can
-// still override them with the 'handlers' setting.)
+// Get final handlers from default, theme and user handlers.
 #let _all-handlers(cfg: none) = {
-  let default = _handlers-field("_default-handlers", cfg: cfg)
-  let user = _handlers-field("handlers", cfg: cfg)
-  return mime-handlers + default + user
+  if cfg.handlers != auto and type(cfg.handlers) != dictionary {
+    panic("handlers must be auto or a dictionary mapping formats to functions")
+  }
+  let user-handlers = if cfg.handlers == auto { (:) } else { cfg.handlers }
+  let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
+  return cfg.default-handlers + theme-handlers + user-handlers
 }
 
 // Build a ctx dict for the given cell and settings dict.

@@ -1,4 +1,4 @@
-#import "/src/callisto.typ"
+#import "/callisto.typ"
 
 // Render whole notebook
 #callisto.render(nb: json("../../docs/example.ipynb"))
@@ -16,8 +16,8 @@
    nb: json("../../docs/example.ipynb"),
 )
 
-// Render the first 3 cells using the plain template
-#render(range(3), template: "plain")
+// Render the first 3 cells using the plain theme
+#render(range(3), theme: "plain")
 
 // Render only cell among the first two that is of type "code"
 #Cell(range(2), cell-type: "code")
@@ -33,9 +33,9 @@
 #In("plot2")
 #Out("plot2")
 
-// Use notebook template for code inputs, custom template for markdown cells
-#let repr-template(cell, ..args) = repr(cell.source)
-#render(template: (input: "notebook", markdown: repr-template))
+// Use notebook theme for code inputs, custom theme for markdown cells
+#let repr-theme(cell, ..args) = repr(cell.source)
+#render(theme: (code-cell-input: "notebook", markdown-cell: repr-theme))
 
 // Get more functions preconfigured for this notebook
 #let (display, result, source, output, outputs) = callisto.config(

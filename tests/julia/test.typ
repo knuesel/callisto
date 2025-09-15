@@ -1,4 +1,4 @@
-#import "/src/callisto.typ"
+#import "/callisto.typ"
 
 #let (
   Cell,
@@ -17,8 +17,8 @@
 == Cell 2
 #Cell(2)
 
-=== Rendered input (plain template)
-#In(2, template: "plain")
+=== Rendered input (plain theme)
+#In(2, theme: "plain")
 
 === Rendered output (framed)
 #block(stroke: 1pt, Out(2))
@@ -28,14 +28,14 @@
 === Rendered error
 #Out(3, count: "execution", output-type: "error")
 
-=== Same but with plain template
-#Out(3, count: "execution", output-type: "error", template: "plain")
+=== Same but with plain theme
+#Out(3, count: "execution", output-type: "error", theme: "plain")
 
 == Raw cells
 #render(cell-type: "raw")
 
-=== With plain template
-#render(cell-type: "raw", template: "plain")
+=== With plain theme
+#render(cell-type: "raw", theme: "plain")
 
 #pagebreak()
 
@@ -43,7 +43,7 @@
 #render(
   cell-type: ("markdown", "code"),
   output-type: "execute_result",
-  template: ("markdown": "notebook", output: "notebook"),
+  input: false,
 )
 
 #pagebreak()
