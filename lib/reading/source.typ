@@ -16,7 +16,7 @@
 ///   return for each matching cell a dict with fields 'cell' and 'value'.
 /// -> array of any | array of dict
 #let sources(..args) = {
-  let (cell-spec, cfg) = parse-main-args(args)
+  let (cell-spec, cfg) = parse-main-args(..args)
   let srcs = ()
   for cell in cells(..args) {
     let ctx = get-ctx(cell, cfg: cfg)

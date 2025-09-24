@@ -43,7 +43,7 @@
 // Same as stream-items function, but merges all streams (matching 'stream')
 // of the same cell.
 #let streams(..args) = {
-  let (cell-spec, cfg) = parse-main-args(args)
+  let (cell-spec, cfg) = parse-main-args(..args)
   let names = _stream-names(cfg.stream)
   let cs = cells(..args, cell-type: "code")
   let outs = ()

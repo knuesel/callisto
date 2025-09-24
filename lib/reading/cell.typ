@@ -137,7 +137,7 @@
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
 #let cells(..args, keep: "all") = {
-  let (cell-spec, cfg) = parse-main-args(args)
+  let (cell-spec, cfg) = parse-main-args(..args)
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

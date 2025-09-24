@@ -70,7 +70,7 @@
     panic("unexpected positional argument(s): " + repr(args.pos()))
   }
   // Validate named arguments
-  let (cfg,) = common.parse-main-args(args)
+  let (cfg,) = common.parse-main-args(..args)
   return (
     template: theming.resolve(cfg.theme, cfg.named-themes).template,
     cells:        cells       .with(..args),

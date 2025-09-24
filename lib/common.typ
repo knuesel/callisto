@@ -26,7 +26,7 @@
 )
 
 // Parse the arguments of the main functions
-#let parse-main-args(args) = {
+#let parse-main-args(..args) = {
   if args.pos().len() > 1 {
     panic("expected 0 or 1 positional argument for the cell specification, " +
       "got " + repr(args.pos()))
