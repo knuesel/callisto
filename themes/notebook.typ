@@ -46,7 +46,7 @@
   let outs = outputs(cell, ..ctx.cfg, result: "dict")
   if outs.len() == 0 { return }
   block(
-    above: 0pt,
+    above: if ctx.cfg.input { 0pt } else { 2em },
     below: 2em,
     width: 100%,
     inset: 0.5em,
