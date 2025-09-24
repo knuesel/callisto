@@ -8,7 +8,21 @@
 
 = Python notebook
 
-#render(nb: json("python.ipynb"))
+#render()
+
+#pagebreak()
+
+== `neat` theme
+
+#v(1em)
+#[
+  #let (render, template) = callisto.config(
+    nb: json("python.ipynb"),
+    theme: "neat",
+  )
+  #show: template
+  #render(theme: "neat")
+]
 
 #pagebreak()
 
@@ -50,3 +64,8 @@
     },
   ),
 )
+
+// == `neat` theme with stderr from notebook
+
+// // #render(4, theme: "neat", handlers: (stream-stderr: "notebook"))
+// #render(4, theme: callisto.themes.named.neat + (stream-stderr: "notebook"))
