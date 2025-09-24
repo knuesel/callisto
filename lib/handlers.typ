@@ -281,14 +281,19 @@
   )
 }
 
-// Handler for specific stream type
-#let handler-stream-any(data, ctx: none, ..args) = {
+// Generic stream handler
+#let handler-stream-generic(data, ctx: none, ..args) = {
   raw(data, block: true, lang: "txt")
 }
 
 // Handler for stream output items
 #let handler-stream(data, ctx: none, name: none, ..args) = {
-  handle(data, mime: "stream-" + name, ctx: ctx, ..args)
+  let mime = (
+    "stdout": "stream-stdout",
+    "stderr": "stream-stderr",
+    "all": "stream-merged",
+  ).at(name)
+  handle(data, mime: mime, ctx: ctx, ..args)
 }
 
 // Handler for error output items
@@ -389,9 +394,9 @@
   "display_data": handler-rich-item,
   "result": handler-rich-item,
   "error": handler-error,
-  "stream-stdout": handler-stream-any,
-  "stream-stderr": handler-stream-any,
-  "stream-all":    handler-stream-any, // for when both streams are merged
+  "stream-stdout": handler-stream-generic,
+  "stream-stderr": handler-stream-generic,
+  "stream-merged": handler-stream-generic, // used when both streams are merged
   "stream": handler-stream, // called before stream-type-specific handler
   "output": handler-output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
