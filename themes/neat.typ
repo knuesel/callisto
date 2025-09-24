@@ -48,6 +48,7 @@
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   // Undo global show rule for raw block
+  // (we don't want simple text outputs to be shown in rounded gray rects)
   show raw: set block(width: auto, inset: 0pt, radius: 0pt, fill: none)
   block(
     .._raw-block-cfg,
@@ -58,7 +59,7 @@
   )
 }
 
-#let theme =(
+#let theme = (
   template: neat-template,
   code-cell-input: neat-code-cell-input,
   code-cell-output: neat-code-cell-output,

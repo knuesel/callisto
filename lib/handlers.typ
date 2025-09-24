@@ -28,13 +28,10 @@
 // - The "source-code-generic" handler (used by the default raw cell and
 //   code input handlers) takes a 'lang' argument.
 //
-// - The "stream" handler gets a 'name' argument for the stream name
-//   ("stdout" or "stderr").
-//
-// - The "error" handler gets 'name' and 'traceback' arguments.
-//
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
+//
+// - XXX consider rethinking the above
 // 
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
@@ -287,33 +284,28 @@
 }
 
 // Handler for stream output items
-#let handler-stream(data, ctx: none, name: none, ..args) = {
+#let handler-stream(item, ctx: none, ..args) = {
   let mime = (
     "stdout": "stream-stdout",
     "stderr": "stream-stderr",
     "all": "stream-merged",
-  ).at(name)
-  handle(data, mime: mime, ctx: ctx, ..args)
+  ).at(item.name)
+  handle(item.text, mime: mime, ctx: ctx, ..args)
 }
 
 // Handler for error output items
-#let handler-error(evalue, ctx: none, name: none, traceback: none, ..args) = {
-  raw(evalue, block: true, lang: "txt")
+#let handler-error(item, ctx: none, ..args) = {
+  raw(item.evalue, block: true, lang: "txt")
 }
 
-#let handler-rich-item(data, ctx: none, ..args) = {
-  handle(data, mime: ctx.item.rich-format, ctx: ctx, ..args)
+// Handler for rich output items (display_data and result)
+#let handler-rich-item-generic(data, ctx: none, ..args) = {
+  rich-object.process(data, ctx: ctx, ..args)
 }
 
 // Handler for any type of code cell output
 #let handler-output(data, ctx: none, ..args) = {
-  let processor-module = (
-    display_data: rich-object,
-    execute_result: rich-object,
-    stream: stream,
-    error: error,
-  ).at(ctx.item.type)
-  processor-module.process(data, ctx: ctx, ..args)
+  handle(data, mime: ctx.item.type, ctx: ctx, ..args)
 }
 
 // Handler for source code
@@ -391,9 +383,11 @@
   "image-text"   : handler-image-text,    // text encoded image
   "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
   // Handlers for output items
-  "display_data": handler-rich-item,
-  "result": handler-rich-item,
+  "rich-item-generic": handler-rich-item-generic,
+  "display_data": handler-rich-item-generic,
+  "execute_result": handler-rich-item-generic,
   "error": handler-error,
+  "stream-generic": handler-stream-generic,
   "stream-stdout": handler-stream-generic,
   "stream-stderr": handler-stream-generic,
   "stream-merged": handler-stream-generic, // used when both streams are merged

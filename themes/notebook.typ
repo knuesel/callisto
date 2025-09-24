@@ -38,38 +38,36 @@
 )
 
 // Customized default handler for errors, rendering the traceback
-#let notebook-error(data, ctx: none, traceback: none, ..args) = {
-  raw(traceback.join("\n"), block: true, lang: "txt")
+#let notebook-error(data, ctx: none, ..args) = {
+  error-block(raw(data.traceback.join("\n"), block: true, lang: "txt"))
 }
 
+#let notebook-stream-stderr(data, ctx: none, ..args) = {
+  let value = handle(data, mime: "stream-generic", ctx: ctx, ..args)
+  error-block(value)
+}
+
+#let notebook-result(data, ctx: none, ..args) = block({
+  _in-out-num("Out", ctx.cell.execution_count)
+  handle(data, mime: "rich-item-generic", ctx: ctx, ..args)
+})
+
 #let notebook-code-cell-output(cell, ctx: none) = {
-  let outs = outputs(cell, ..ctx.cfg, result: "dict")
+  let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   block(
     above: if ctx.cfg.input { 0pt } else { 2em },
     below: 2em,
     width: 100%,
     inset: 0.5em,
-    {
-      for out in outs {
-        let is-stderr = out.type == "stream" and out.name == "stderr"
-        if out.type == "execute_result" { 
-          block({
-            _in-out-num("Out", cell.execution_count)
-            out.value
-          })
-        } else if is-stderr or out.type == "error" {
-          error-block(out.value)
-        } else {
-          out.value
-        }
-      }
-    },
+    outs.join(),
   )
 }
 
 #let theme = (
+  stream-stderr: notebook-stream-stderr,
   error: notebook-error,
+  execute_result: notebook-result,
   raw-cell: notebook-raw-cell,
   code-cell-input: notebook-code-cell-input,
   code-cell-output: notebook-code-cell-output,

@@ -34,12 +34,6 @@
   return item
 }
 
-// Process a stream output item.
-// Can return none if the item is from an undesired stream (cf 'stream' arg.)
-#let process(item, ctx: none) = {
-  return handle(item.text, mime: "stream", ctx: ctx, name: item.name)
-}
-
 // Same as stream-items function, but merges all streams (matching 'stream')
 // of the same cell.
 #let streams(..args) = {
@@ -58,7 +52,7 @@
     // item.index is undefined since we gather outputs from different cells
     let ctx = get-ctx(cell, cfg: cfg, item: (type: "stream", index: none))
     let preprocessed = (output_type: "stream", name: cfg.stream, text: txt)
-    let value = handle(txt, mime: "stream", ctx: ctx, name: cfg.stream)
+    let value = handle(preprocessed, mime: "stream", ctx: ctx)
     outs.push(final-result(preprocessed, value, ctx: ctx))
   }
   return outs

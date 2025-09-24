@@ -47,7 +47,7 @@
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
 
-#assert("`aa` not defined" in error().text)
+#assert("`aa` not defined" in error(theme: "plain").text)
 
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.name", format: "x")),
@@ -60,7 +60,7 @@
 
 #assert.eq(results(c => c.execution_count > 3).len(), 2)
 
-#assert.eq(result("plot3").text, "5")
+#assert.eq(result("plot3", result: "dict").data, "5")
 
 #assert.eq(display("plot3", item: 0).func(), image)
 
@@ -73,13 +73,13 @@
     error: "notebook",
   ),
 )
-#assert("Stacktrace" in out.text)
+#assert("Stacktrace" in out.body.text)
 
 // Allow multiple items in singular functions, pick the first
 #[
   #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
   #assert.eq(display("plot3").func(), image)
-  #assert.eq(result("scatter", name-path: "metadata.type").func(), image)
+  #assert.eq(result("scatter", name-path: "metadata.type", theme: "plain").func(), image)
 ]
 
 
@@ -107,7 +107,7 @@
   stream-items(4, result: "dict").map(x => x.name),
   ("stderr", "stdout", "stderr", "stdout"),
 )
-#assert.eq(stream-item(4, stream: "stderr", item: -1).text, "Error 2\n")
+#assert.eq(stream-item(4, stream: "stderr", item: -1).body.text, "Error 2\n")
 
 // Dict result fields
 #let out = output(6, item: 2, result: "dict")
