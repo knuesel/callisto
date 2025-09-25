@@ -31,8 +31,6 @@
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 //
-// - XXX consider rethinking the above
-// 
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
 // see an error when an unknown argument is passed.
@@ -299,7 +297,7 @@
 }
 
 // Handler for rich output items (display_data and result)
-#let handler-rich-item-generic(data, ctx: none, ..args) = {
+#let handler-rich-output-generic(data, ctx: none, ..args) = {
   rich-object.process(data, ctx: ctx, ..args)
 }
 
@@ -383,9 +381,9 @@
   "image-text"   : handler-image-text,    // text encoded image
   "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
   // Handlers for output items
-  "rich-item-generic": handler-rich-item-generic,
-  "display_data": handler-rich-item-generic,
-  "execute_result": handler-rich-item-generic,
+  "rich-output-generic": handler-rich-output-generic,
+  "display_data": handler-rich-output-generic,
+  "execute_result": handler-rich-output-generic,
   "error": handler-error,
   "stream-generic": handler-stream-generic,
   "stream-stdout": handler-stream-generic,
