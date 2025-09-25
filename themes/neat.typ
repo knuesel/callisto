@@ -1,3 +1,4 @@
+#import "plain.typ"
 #import "/lib/common.typ": handle
 #import "/lib/reading/output.typ": outputs
 
@@ -59,7 +60,7 @@
   )
 }
 
-#let theme = (
+#let theme = plain.theme + (
   template: neat-template,
   code-cell-input: neat-code-cell-input,
   code-cell-output: neat-code-cell-output,

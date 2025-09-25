@@ -139,9 +139,7 @@
 #let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
 
 // Handler for simple text
-#let handler-text-plain(data, ctx: none, ..args) = {
-  raw(data, block: true, lang: "txt")
-}
+#let handler-text-plain(data, ctx: none, ..args) = data
 
 // Handler for LaTeX equations
 #let handler-math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
@@ -277,9 +275,7 @@
 }
 
 // Generic stream handler
-#let handler-stream-generic(data, ctx: none, ..args) = {
-  raw(data, block: true, lang: "txt")
-}
+#let handler-stream-generic(data, ctx: none, ..args) = data
 
 // Handler for stream output items
 #let handler-stream(item, ctx: none, ..args) = {
@@ -292,9 +288,7 @@
 }
 
 // Handler for error output items
-#let handler-error(item, ctx: none, ..args) = {
-  raw(item.evalue, block: true, lang: "txt")
-}
+#let handler-error(item, ctx: none, ..args) = item.evalue
 
 // Handler for rich output items (display_data and result)
 #let handler-rich-output-generic(data, ctx: none, ..args) = {
