@@ -39,8 +39,12 @@
     panic("handlers must be auto or a dictionary mapping formats to functions")
   }
   let user-handlers = if cfg.handlers == auto { (:) } else { cfg.handlers }
-  let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
-  return cfg.default-handlers + theme-handlers + user-handlers
+  let handlers = cfg.default-handlers
+  if cfg.apply-theme {
+    let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
+    handlers += theme-handlers
+  }
+  return handlers + user-handlers
 }
 
 // Build a ctx dict for the given cell and settings dict.

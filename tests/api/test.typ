@@ -72,6 +72,7 @@
   theme: callisto.themes.named.plain + (
     error: "notebook",
   ),
+  apply-theme: true,
 )
 #assert("Stacktrace" in out.body.text)
 
@@ -107,7 +108,7 @@
   stream-items(4, result: "dict").map(x => x.name),
   ("stderr", "stdout", "stderr", "stdout"),
 )
-#assert.eq(stream-item(4, stream: "stderr", item: -1).body.text, "Error 2\n")
+#assert.eq(stream-item(4, stream: "stderr", item: -1).text, "Error 2\n")
 
 // Dict result fields
 #let out = output(6, item: 2, result: "dict")

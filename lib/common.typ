@@ -23,6 +23,7 @@
   default-handlers: (:), // to be filled in callisto.typ
   named-themes: (:), // to be filled in callisto.typ
   theme: "notebook",
+  apply-theme: false,
 )
 
 // Parse the arguments of the main functions
