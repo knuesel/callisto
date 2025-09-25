@@ -51,9 +51,10 @@
 == All cell results
 #results().join()
 
-== Markdown display, shown with custom handler (`repr`)
+== Markdown display, shown with custom handler (blue frame)
+#let blue-frame(data, ..args) = block(data, stroke: blue, outset: 3pt)
 #display(
   format: "text/markdown",
   ignore-wrong-format: true,
-  handlers: ("text/markdown": (data, ..args) => repr(data)),
+  handlers: ("text/markdown": (auto, blue-frame)),
 )

@@ -93,6 +93,7 @@
   stream-items,
   stream-item,
   output,
+  outputs,
 ) = callisto.config(nb: "/tests/python/python.ipynb")
 
 
@@ -128,3 +129,30 @@
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
 #assert.eq(out.rich-format, "image/png")
+
+// check that none handlers work
+#assert.eq(outputs(6, handlers: ("image/png": none)).len(), 2)
+#assert.eq(output(6, item: 2, handlers: (
+  "image/png": (none, (data, ..args) => block(data)),
+)), block(none))
+
+// check that unknown handlers don't work
+#let handlers = (
+  "custom": (..args) => square(stroke: red),
+  "image/png": callisto.handle.with(mime: "custom"),
+)
+#assert(catch(() => outputs(handlers: handlers)).starts-with(
+    "panicked with: \"unknown handler \\\"custom\\\""
+))
+
+// check that custom handlers work if registered
+#let out = output(
+  6,
+  item: 2,
+  default-handlers: callisto.handlers.default + ("custom": none),
+  handlers: (
+    "custom": (..args) => square(stroke: red),
+    "image/png": callisto.handle.with(mime: "custom"),
+  ),
+)
+#assert.eq(out.func(), square)

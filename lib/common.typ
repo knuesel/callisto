@@ -117,9 +117,12 @@
     panic("ctx not set")
   }
   if mime not in ctx.handlers {
-    panic("format " + repr(mime) +
-      " has no registered handler (is it a valid MIME string?)")
+    panic("no handle registered for MIME " + repr(mime))
+  }
+  let handler = ctx.handlers.at(mime)
+  if handler == none {
+    return none
   }
   ctx.mime = mime
-  ctx.handlers.at(mime)(data, ctx: ctx, ..args)
+  handler(data, ctx: ctx, ..args)
 }

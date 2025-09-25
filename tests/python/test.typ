@@ -12,7 +12,7 @@
 
 #pagebreak()
 
-== `neat` theme
+== `neat` theme with customization to show cell indices
 
 #v(1em)
 #[
@@ -21,10 +21,17 @@
     theme: "neat",
   )
   #show: template
-  #render(theme: "neat")
+  #render(handlers: ("cell": (
+    auto,
+    (data, ctx: none, ..args) => {
+      place(dx: -4em)[Cell #ctx.cell.index]
+      data
+    }
+  )))
 ]
 
 #pagebreak()
+
 
 == `plain` theme, styled raw blocks
 

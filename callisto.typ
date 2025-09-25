@@ -11,6 +11,8 @@
 #import "lib/rendering.typ"
 #import "lib/handlers.typ"
 
+#import common: handle
+
 #let cells = reading.cell.cells.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
