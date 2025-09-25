@@ -115,7 +115,7 @@
 #let out = output(6, item: 2, result: "dict")
 #assert.eq(out.metadata.a, "x")
 #assert.eq(out.index, 2)
-#assert.eq(out.type, "display_data")
+#assert.eq(out.type, "display")
 #assert.eq(out.rich-format, "image/png")
 
 // ctx.item fields
@@ -126,5 +126,5 @@
   handlers: ("image/png": (ctx: none, ..args) => ctx.item),
 )
 #assert.eq(out.index, 2)
-#assert.eq(out.type, "display_data")
+#assert.eq(out.type, "display")
 #assert.eq(out.rich-format, "image/png")

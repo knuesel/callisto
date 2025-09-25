@@ -290,7 +290,7 @@
 // Handler for error output items
 #let handler-error(item, ctx: none, ..args) = item.evalue
 
-// Handler for rich output items (display_data and result)
+// Handler for rich output items (display and result)
 #let handler-rich-output-generic(data, ctx: none, ..args) = {
   rich-object.process(data, ctx: ctx, ..args)
 }
@@ -376,8 +376,8 @@
   "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
   // Handlers for output items
   "rich-output-generic": handler-rich-output-generic,
-  "display_data": handle.with(mime: "rich-output-generic"),
-  "execute_result": handle.with(mime: "rich-output-generic"),
+  "display": handle.with(mime: "rich-output-generic"),
+  "result": handle.with(mime: "rich-output-generic"),
   "error": handler-error,
   "stream-generic": handler-stream-generic,
   "stream-stdout": handle.with(mime: "stream-generic"),

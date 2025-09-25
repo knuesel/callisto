@@ -5,13 +5,21 @@
 #import "stream.typ"
 #import "error.typ"
 
-#let all-output-types = ("display_data", "execute_result", "stream", "error")
-#let rich-output-types = ("display_data", "execute_result")
+#let all-output-types = ("display", "result", "stream", "error")
+#let rich-output-types = ("display", "result")
+
+// Map of json output type to our output type
+#let output-types-from-json = (
+  "display_data": "display",
+  "execute_result": "result",
+  "stream": "stream",
+  "error": "error",
+)
 
 // The module that implements 'preprocess' and 'process' for each output type
 #let processor-modules = (
-  display_data: rich-object,
-  execute_result: rich-object,
+  display: rich-object,
+  result: rich-object,
   stream: stream,
   error: error,
 )
@@ -37,9 +45,10 @@
   for cell in cells(..args, cell-type: "code") {
     for (i, item) in cell.outputs.enumerate() {
       // Ignore items with undesired output type
-      if item.output_type not in output-types { continue }
+      let output-type = output-types-from-json.at(item.output_type)
+      if output-type not in output-types { continue }
       // Make context for processor
-      let item-desc = (index: i, type: item.output_type)
+      let item-desc = (index: i, type: output-type)
       let ctx = get-ctx(cell, cfg: cfg, item: item-desc)
 
       // The processing is split in two output-type-specific steps:
@@ -49,7 +58,7 @@
       // returns the rendered value.
 
       // Get processor module
-      let proc-module = processor-modules.at(item.output_type)
+      let proc-module = processor-modules.at(output-type)
       // Get dict with normalized data for this item
       let preprocessed = proc-module.preprocess(item, ctx: ctx)
       if preprocessed == none { continue }

@@ -29,7 +29,7 @@
 #output("plot1")     // returns the cell display
 #outputs("plot2")
 #let my-output = output.with(
-  output-type: ("display_data", "execute_result"),
+  output-type: ("display", "result"),
   item: -1
 )
 #my-output("plot2")

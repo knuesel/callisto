@@ -57,7 +57,7 @@
 == Accessing metadata from image handler
 #render(
   6,
-  output-type: "display_data",
+  output-type: "display",
   handlers: (
     "image/png": (data, ctx: none, ..args) => {
       block[PNG display has metadata: #ctx.item.metadata]

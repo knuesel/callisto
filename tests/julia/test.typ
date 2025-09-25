@@ -42,7 +42,7 @@
 == Markdown cells and code results (no display)
 #render(
   cell-type: ("markdown", "code"),
-  output-type: "execute_result",
+  output-type: "result",
   input: false,
 )
 

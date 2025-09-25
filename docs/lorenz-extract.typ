@@ -5,6 +5,6 @@
 #callisto.render(
   range(5),
   nb: "/tests/lorenz/Lorenz.ipynb",
-  output-type: "display_data",
+  output-type: "display",
 )
  

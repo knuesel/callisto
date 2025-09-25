@@ -68,7 +68,7 @@
 #let theme = plain.theme + (
   stream-stderr: notebook-stream-stderr,
   error: notebook-error,
-  execute_result: notebook-result,
+  result: notebook-result,
   raw-cell: notebook-raw-cell,
   code-cell-input: notebook-code-cell-input,
   code-cell-output: notebook-code-cell-output,
