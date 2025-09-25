@@ -2,8 +2,6 @@
 #import "/lib/common.typ": handle
 #import "/lib/reading/output.typ": outputs
 
-#let notebook-text-plain(data, ..args) = raw(data, block: true, lang: "txt")
-
 // Make a string for a cell execution count, showing a space if missing
 #let _count-string(count) = if count == none { return " " } else { str(count) }
 
@@ -68,7 +66,6 @@
 }
 
 #let theme = plain.theme + (
-  stream-generic: (data, ..args) => raw(data, block: true, lang: "txt"),
   stream-stderr: notebook-stream-stderr,
   error: notebook-error,
   execute_result: notebook-result,

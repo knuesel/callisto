@@ -363,9 +363,9 @@
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
   "image/svg+xml": handler-image-svg-xml,
-  "image/png"    : handler-image-base64,
-  "image/jpeg"   : handler-image-base64,
-  "image/gif"    : handler-image-base64,
+  "image/png"    : handle.with(mime: "image-base64"),
+  "image/jpeg"   : handle.with(mime: "image-base64"),
+  "image/gif"    : handle.with(mime: "image-base64"),
   "text/markdown": handler-text-markdown,
   "text/latex"   : handler-text-latex,
   "text/plain"   : handler-text-plain,
@@ -376,13 +376,13 @@
   "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
   // Handlers for output items
   "rich-output-generic": handler-rich-output-generic,
-  "display_data": handler-rich-output-generic,
-  "execute_result": handler-rich-output-generic,
+  "display_data": handle.with(mime: "rich-output-generic"),
+  "execute_result": handle.with(mime: "rich-output-generic"),
   "error": handler-error,
   "stream-generic": handler-stream-generic,
-  "stream-stdout": handler-stream-generic,
-  "stream-stderr": handler-stream-generic,
-  "stream-merged": handler-stream-generic, // used when both streams are merged
+  "stream-stdout": handle.with(mime: "stream-generic"),
+  "stream-stderr": handle.with(mime: "stream-generic"),
+  "stream-merged": handle.with(mime: "stream-generic"), // used when both streams are merged
   "stream": handler-stream, // called before stream-type-specific handler
   "output": handler-output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
