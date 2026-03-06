@@ -1,12 +1,13 @@
 #import "/callisto.typ"
 
-#let (render, source, outputs, Cell, export, make-notebook) = callisto.config(
+#let (render, source, outputs, Cell, Out, export, make-notebook) = callisto.config(
   nb: "export.ipynb",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
   // handlers: (path: (x, ..args) => path(x)),
   // disabled: true,
   // export-name: "x",
-  kernel: "julia-1.11",
+  // kernel: "julia-1.11",
+  kernel: "python3",
 )
 
 #context[#metadata(make-notebook())<notebook>]
@@ -35,10 +36,10 @@ c
 
 ```python
 #| label: y
-2+2 |> inv
+2+2
 ```<g>
 
-dd
+#Out("help")
 
 #rect[
   This is cell "x":
@@ -46,7 +47,3 @@ dd
 ]
 
 #outputs("y")
-
-#context (query(<g>).len())
-
-
