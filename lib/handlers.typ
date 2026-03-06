@@ -274,7 +274,7 @@
 
 // Default handler for path: raise an error
 #let handler-path(cell, ctx: none, ..args) = {
-  panic("\"path\" handler undefined. You can define it with callisto.config(..., handler: (path: (x, ..args)=>read(x)))")
+  panic("\"path\" handler undefined. You can define it with callisto.config(..., handlers: (path: (x, ..args)=>read(x, encoding: none)))")
 }
 
 // Generic stream handler

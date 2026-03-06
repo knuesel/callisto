@@ -25,7 +25,7 @@
   display,
   source,
   output,
-) = callisto.config(nb: "/tests/julia/julia.ipynb")
+) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
 
 // Check for cell deduplication
 #assert.eq(cells((..range(2), 0)).len(), 2)
@@ -39,7 +39,7 @@
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
 #let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
-#let cpp-cell-spec = arguments("calc", nb: "/tests/api/cpp.ipynb")
+#let cpp-cell-spec = arguments("calc", nb: json("/tests/api/cpp.ipynb"))
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
@@ -94,7 +94,7 @@
   stream-item,
   output,
   outputs,
-) = callisto.config(nb: "/tests/python/python.ipynb")
+) = callisto.config(nb: json("/tests/python/python.ipynb"))
 
 
 #assert.eq(cells(cell-type: "markdown").len(), 2)
