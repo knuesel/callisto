@@ -70,6 +70,12 @@
       .filter(x => names.any(name-matches.with(x, spec)))
       .map(c => c.index)
   }
+  if type(spec) == label {
+    // Typst label: find matches in cell.metadata.callisto.label
+    return cells-of-type
+      .filter(x => name-matches(x, str(spec), "metadata.callisto.typst-label"))
+      .map(c => c.index)
+  }
   if type(spec) == int {
     if cfg.count == "index" {
       let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)

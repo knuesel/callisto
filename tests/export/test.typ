@@ -7,23 +7,16 @@
   // disabled: true,
   // export-name: "x",
   // kernel: "julia-1.11",
+  // lang: "python",
   kernel: "python3",
 )
 
 #context[#metadata(make-notebook())<notebook>]
 
-// #metadata(make-notebook(kernel: "julia-1.11", export-name: "export.ipynb"))<notebook>
+// typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook()'
+// typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook(lang="python")'
 
-#show <g>: export
-
-#show raw.where(block: true): set block(fill: luma(240), inset: 3pt)
-
-// #show raw.where(block: true): it => {
-//   if it.text.contains(regex("^#\| ")) {
-//     return raw(block: true, lang: it.lang, it.text.replace(regex("^#\| .*\n"), ""))
-//   }
-//   return it
-// }
+#show <g>: it => rect(it) + export(it)
 
 ```python
 #| label: x
@@ -39,11 +32,17 @@ c
 2+2
 ```<g>
 
+
+```python
+[1,2,3]
+```<g>
+
+
+// TODO: should panic!
 #Out("help")
 
-#rect[
-  This is cell "x":
-  #Cell("x")
-]
-
 #outputs("y")
+
+Render:
+#render(<g>)
+End

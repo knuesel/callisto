@@ -12,39 +12,60 @@
   let dict = (
     export-name: cfg.export-name,
     kernel: cfg.kernel,
-    lang: elem.at("lang", default: none),
     text: elem.text,
+    lang: elem.at("lang", default: none),
     block: elem.block,
+    label: elem.at("label", default: none),
   )
   return [#metadata(dict)#_export-label(cfg.export-name)]
 }
 
-// Make a JSON cell for the given source code, deriving an ID from the given
-// cell index.
-#let _make-cell(i, src) = {
+// Make cell metadata for given raw element dict
+#let _cell-metadata(elem) = (
+  callisto: (
+    lang: elem.lang,
+    block: elem.block,
+    typst-label: str(elem.label),
+  ),
+)
+
+// Make a JSON cell for the given raw element dict, deriving an ID from the
+// given cell index.
+#let _make-cell(i, elem) = {
   (
     id: str(i),
     cell_type: "code",
-    metadata: (:),
-    source: src,
+    metadata: _cell-metadata(elem),
+    source: elem.text,
     outputs: (),
     execution_count: none,
   )
+}
+
+// Make notebook metadata
+#let _notebook-metadata(kernel, lang) = {
+  // A kernelspec must contain a display name, but it's
+  // not used to find the kernel so we can pick one ourselves
+  let kernel-spec = (name: kernel, display_name: kernel)
+  let md =  (kernelspec: kernel-spec)
+  // The language info is normally written by the kernel upon execution, but it
+  // can be helpful to set it in case the notebook is read without execution
+  if lang not in (auto, none) {
+    md.language_info = (name: lang)
+  }
+  return md
 }
 
 // Make a notebook dictionary from the given raw elements (or dicts with the
 // same fields as raw), language_info and kernelspec. The lang parameter is used
 // to infer lang-info if unspecified.
 // If lang is auto, the lang of the first element is used.
-#let notebook-from-raw-elements(elems, kernel) = {
-  let sources = elems.map(it => it.text)
-  let cells = sources.enumerate().map(x => _make-cell(..x))
-  // If a kernelspec is defined it must contain a display name, but it's
-  // not used to find the kernel so we can pick one ourselves
-  let kernel-spec = (name: kernel, display_name: kernel)
+#let notebook-from-raw-elements(elems, kernel, lang) = {
+  let cells = elems.enumerate().map(x => _make-cell(..x))
+  let md
   let nb = (
     cells: cells,
-    metadata: (kernelspec: kernel-spec),
+    metadata: _notebook-metadata(kernel, lang),
     nbformat: 4,
     nbformat_minor: 5,
   )
@@ -103,7 +124,10 @@
   // Get all raw elements to export
   let elems = query(_export-label(cfg.export-name)).map(x => x.value)
 
-  // Default kernel is taken from metadata of fist exported raw element
+  // Default kernel is taken from metadata of fist exported raw element.
+  // This way a simple
+  // `typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook()"`
+  // can work.
   let kernel = cfg.kernel
   if kernel == none and elems.len() > 0 {
     kernel = elems.first().kernel
@@ -113,5 +137,5 @@
     panic("the Jupyter kernel must be specified")
   }
 
-  return notebook-from-raw-elements(elems, kernel)
+  return notebook-from-raw-elements(elems, kernel, cfg.lang)
 }

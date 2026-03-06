@@ -136,5 +136,10 @@
 // Return the language name of the given notebook json
 #let lang(nb-json) = {
   if nb-json == none { return none }
+  if "language_info" not in nb-json.metadata {
+    // This can happen when reading an unexecuted notebook exported by Callisto
+    // with lang unset
+    return none
+  }
   return nb-json.metadata.language_info.name
 }
