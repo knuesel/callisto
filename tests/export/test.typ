@@ -18,6 +18,9 @@
 
 #show <g>: it => rect(it) + export(it)
 
+// Not implemented yet
+// #show <g>: it => export(it) + render(it)
+
 ```python
 #| label: x
 a = 1
@@ -39,7 +42,7 @@ c
 
 
 // TODO: should panic!
-#Out("help")
+// #Out("help")
 
 #outputs("y")
 
