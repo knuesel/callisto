@@ -25,6 +25,7 @@
   display,
   source,
   output,
+  Out,
 ) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
 
 // Check for cell deduplication
@@ -57,6 +58,16 @@
   catch(() => display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)),
   "panicked with: \"no matching item found\"",
 )
+
+// Tests for 'keep' and 'item'
+#assert.eq(
+  catch(() => Out("non-existing")),
+  "panicked with: \"expected 1 cell, found 0\"",
+)
+#{
+  let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
+  assert.eq(output("plot3"), "5")
+}
 
 #assert.eq(results(c => c.execution_count > 3).len(), 2)
 

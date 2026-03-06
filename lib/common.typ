@@ -25,7 +25,7 @@
   default-handlers: (:), // to be filled in callisto.typ
   named-themes: (:), // to be filled in callisto.typ
   theme: "notebook",
-  apply-theme: false,
+  apply-theme: false, // default for all but render functions
   disabled: auto,
   export-name: "default",
   kernel: none,
@@ -98,9 +98,12 @@
   )
 }
 
-// Returns a single item from the given list, raising an error if the list is
+// Calls the specified function with the given arguments and returns a single
+// item as specified in by the `item` setting, raising an error if the list is
 // empty or if 'item' is "unique" and the list contains more than one.
-#let single-item(items, item: "unique") = {
+#let single-item(func, args) = {
+  let items = func(..args)
+  let item = parse-main-args(..args).cfg.item
   if items.len() == 0 {
     panic("no matching item found")
   }

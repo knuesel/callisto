@@ -18,20 +18,13 @@
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let cell(..args, keep: "unique") = {
-  let (cell-spec, cfg) = common.parse-main-args(..args)
-  if common.disabled(cfg: cfg) { return none }
-  cells(..args, keep: keep).first()
-}
+#let cell(..args) = common.single-item(cells, args)
 
 #let outputs = reading.output.outputs.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let output(..args, item: "unique") = common.single-item(
-  outputs(..args),
-  item: item,
-)
+#let output(..args) = common.single-item(outputs, args)
 
 #let displays(..args)     = outputs(..args, output-type: "display")
 #let results(..args)      = outputs(..args, output-type: "result")
@@ -47,25 +40,19 @@
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let stream(..args, item: "unique") = common.single-item(
-  streams(..args),
-  item: item,
-)
+#let stream(..args) = common.single-item(streams, args)
 
 #let sources = reading.source.sources.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let source(..args, item: "unique") = common.single-item(
-  sources(..args),
-  item: item,
-)
+#let source(..args) = common.single-item(sources, args)
 
 #let render = rendering.render.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-// Render a single cell
+// Render a single cell. The `keep` value is enforced.
 #let Cell(..args) = render(..args, keep: "unique")
 // Render a single cell's input
 #let In(..args) = Cell(..args, cell-type: "code", input: true, output: false)
@@ -87,6 +74,11 @@
   }
   // Validate named arguments
   let (cfg,) = common.parse-main-args(..args)
+  // Preconfigure functions with user args, not with cfg as cfg includes all
+  // settings (using defaults for values not specified by the user) while we
+  // want functions to be able to have defaults different from the global
+  // common.settings defaults. This is used by render() to have default true
+  // for apply-theme while the global default is false.
   return (
     template: theming.resolve(cfg.theme, cfg.named-themes).template,
     cells:          cells         .with(..args),

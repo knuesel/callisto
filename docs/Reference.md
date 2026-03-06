@@ -12,7 +12,7 @@ The main functions and their aliases can be configured by calling `config`. This
 )
 ```
 
-configures `output` and `render` to use `notebook.ipynb` as notebook, keep only display and result outputs (ignoring errors and streams), and in case of multiple outputs to keep only the first one.
+configures `output` and `render` to use `notebook.ipynb` as notebook, keep only display and result outputs (ignoring errors and streams), and in case of multiple outputs to keep only the first one (index 0).
 
 ## Cell specification
 
@@ -109,7 +109,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(10), cell-type: ("markdown", "code"))
       ```
 
-   -  `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. This parameter cannot be set in `config`: it has meaning only in conjunction with the other `cells` arguments. Example:
+   -  `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. Example:
 
       ```typst
       // Get first and last non-raw cells with index between 0 and 9
@@ -315,18 +315,13 @@ The main functions have many aliases defined for convenience. Each alias corresp
 
 ### Aliases for single values
 
-The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form:
-
--  `cell` is the same as `cells` with `keep` set to `"unique"`. Example:
+The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form: the functions `cell`, `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Example:
 
    ```typst
    // The first cell
    #cell(0)
-   ```
-
--  `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"` and return always a single value. Example:
-
-   ```typst
+   // The unique cell that matches "plot1"
+   #cell("plot1")
    // The unique display item in the first cell's output
    #display(0)
    ```
@@ -337,14 +332,16 @@ The singular form is useful in two ways:
 
 2. A call such as `result("plot1")` will check for us that there is only one item of "result" type that matches the "plot1" cell specification. If more than one is found, by default an error is raised.
 
-The check for uniqueness can be disabled using the `keep` argument for `cells` and the `item` argument for other functions. Use for example `cell(..., keep: 0)` to get the first matching cell, and `display(..., item: -1)` to get the last display of the matching cell(s).
+The check for uniqueness can be disabled by setting the `item` argument to a value different from `"unique"`. Use for example `cell(..., item: 0)` to get the first matching cell, and `display(..., item: -1)` to get the last display of the matching cell(s).
 
-Note that `keep` is used to filter the cells matching the cell specification while `item` is used to pick one item extracted from the cell(s) . Both can be used together. Example:
+Note that `keep` is always a filter on the results of the cell specification and can be used for plural as well as singular functions, while `item` is used to select which result is returned by a singular function. Both can be used together. Example:
 
 ```typst
 // Second display of the first cell matching "plot1"
 #display("plot1", keep: 0, item: 1)
 ```
+
+However these functionalities overlap in the case of `cell`. Using both parameters rarely makes sense for this function.
 
 ### Aliases for rendering
 
