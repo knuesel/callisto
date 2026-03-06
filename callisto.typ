@@ -19,7 +19,7 @@
   named-themes: themes.named,
 )
 #let cell(..args, keep: "unique") = {
-  let (cell-spec, cfg) = parse-main-args(..args)
+  let (cell-spec, cfg) = common.parse-main-args(..args)
   if common.disabled(cfg: cfg) { return none }
   cells(..args, keep: keep).first()
 }
