@@ -53,6 +53,23 @@
   )
 }
 
+// Return true if notebook functions should be disabled in this configuration,
+// that is if the user set disabled=true or if disabled=auto and the configured
+// notebook is being exported (CLI input flag callisto-export==cfg export name).
+#let disabled(cfg: none) = {
+  if cfg.disabled != auto {
+    return cfg.disabled
+  }
+  let cli-export = sys.inputs.at("callisto-export", default: "false")
+  if cli-export == "false" {
+    return false
+  }
+  if cli-export == "true" {
+    return true
+  }
+  return cli-export == cfg.export-name
+}
+
 // Wrap the argument in an array if it is not itself an array
 #let ensure-array(x) = if type(x) == array { x } else { (x,) }
 
@@ -102,8 +119,11 @@
 // item as specified in by the `item` setting, raising an error if the list is
 // empty or if 'item' is "unique" and the list contains more than one.
 #let single-item(func, args) = {
+  let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
+
   let items = func(..args)
-  let item = parse-main-args(..args).cfg.item
+  let item = cfg.item
   if items.len() == 0 {
     panic("no matching item found")
   }
@@ -133,23 +153,6 @@
   }
   ctx.mime = mime
   handler(data, ctx: ctx, ..args)
-}
-
-// Return true if notebook functions should be disabled in this configuration,
-// that is if the user set disabled=true or if disabled=auto and the configured
-// notebook is being exported (CLI input flag callisto-export==cfg export name).
-#let disabled(cfg: none) = {
-  if cfg.disabled != auto {
-    return cfg.disabled
-  }
-  let cli-export = sys.inputs.at("callisto-export", default: "false")
-  if cli-export == "false" {
-    return false
-  }
-  if cli-export == "true" {
-    return true
-  }
-  return cli-export == cfg.export-name
 }
 
 // A handler function that composes the functions specified in the given list.
