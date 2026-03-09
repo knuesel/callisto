@@ -1,6 +1,6 @@
 #import "/callisto.typ"
 
-#let (render, source, outputs, Cell, Out, export, make-notebook) = callisto.config(
+#let (cell, render, source, outputs, Cell, Out, export, make-notebook) = callisto.config(
   nb: "export.ipynb",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
   // handlers: (path: (x, ..args) => path(x)),
@@ -13,10 +13,17 @@
 
 #context[#metadata(make-notebook())<notebook>]
 
+// #cell(```
+// #| label: y
+// 2+2
+// ```)
+
 // typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook()'
 // typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook(lang="python")'
+//
 
-#show <g>: it => rect(it) + export(it)
+#context text.size
+#show <g>: it => rect(it) + export(it) + render(it)
 
 // Not implemented yet
 // #show <g>: it => export(it) + render(it)
@@ -44,6 +51,7 @@ c
 // TODO: should panic!
 // #Out("help")
 
+Outputs of cell `y`:
 #outputs("y")
 
 Render:
