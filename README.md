@@ -16,7 +16,7 @@ The examples below illustrate the basic functionality. For more information see
 -  the [function reference](https://github.com/knuesel/callisto/blob/release-0.2/docs/Reference.md).
 
 ```typst
-#import "@preview/callisto:0.2.4"
+#import "@preview/callisto:0.2.5"
 
 // Render whole notebook
 #callisto.render(nb: json("docs/example.ipynb"))
