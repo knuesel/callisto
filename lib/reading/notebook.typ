@@ -69,8 +69,11 @@
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
+  cell.metadata.callisto.header = none // initial value
   let header-regex = cell-header-regex(cfg.cell-header-pattern)
-  if header-regex == none { return cell }
+  if header-regex == none {
+    return cell
+  }
   let source_lines = cell.source.split("\n")
   let n = 0
   for line in source_lines {
@@ -81,6 +84,7 @@
     n += 1
     let (key, value) = m.captures
     cell.metadata.insert(key, value)
+    cell.metadata.callisto.header += line + "\n"
   }
   // Remove header from source if necessary
   if not cfg.keep-cell-header and n > 0 {
@@ -92,6 +96,7 @@
 // Normalize cell dict (ensuring the source is a single string rather than an
 // array with one string per line) and convert source header metadata to cell
 // metadata, using cell-header-pattern to recognize and parse cell header lines.
+// Also ensures that the cell has a metadata.callisto dictionary.
 #let _process-cell(i, cell, cfg: none) = {
   if "id" not in cell {
     cell.id = str(i)
@@ -103,6 +108,9 @@
   }
   if "source" not in cell or cell.source == none {
     cell.source = ""
+  }
+  if "callisto" not in cell.metadata {
+    cell.metadata.callisto = (:)
   }
   if cell.cell_type == "code" {
     cell = _process-cell-header(cell, cfg: cfg)

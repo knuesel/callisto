@@ -47,6 +47,8 @@
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
+// Test header field in cell metadata
+#assert.eq(cell("plot3").metadata.callisto.header.split("\n").first(), "#| label: plot3")
 
 #assert("`aa` not defined" in error())
 
