@@ -129,8 +129,8 @@ By default Markdown and LaTeX are rendered using [cmarker](https://github.com/Sa
 The Markdown and LaTeX processing can be configured by changing the handlers for `text/markdown` and `text/latex`. For example to get working rendering of image files references in Markdown, the following can be used:
 
    ```typ
-   #import "@preview/cmarker:0.1.3"
-   #import "@preview/mitex:0.2.5": mitex
+   #import "@preview/cmarker:0.1.6"
+   #import "@preview/mitex:0.2.6": mitex
 
    #callisto.render(
      nb: json("notebook.ipynb"),

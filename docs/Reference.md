@@ -202,8 +202,8 @@ Most functions accept a cell specification as positional argument. Below we use 
       The default handlers for Markdown and LaTeX use [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex) respectively. These handlers can be redefined to apply custom cmarker/mitex settings. For example, to fix the rendering of image file references in Markdown, the following can be used:
 
       ```typ
-      #import "@preview/cmarker:0.1.3"
-      #import "@preview/mitex:0.2.5": mitex
+      #import "@preview/cmarker:0.1.6"
+      #import "@preview/mitex:0.2.6": mitex
 
       #callisto.render(
         nb: json("notebook.ipynb"),
