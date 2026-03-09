@@ -139,3 +139,9 @@
 
   return notebook-from-raw-elements(elems, kernel, cfg.lang)
 }
+
+#let stage-notebook(..args) = context {
+  let (cfg,) = common.parse-main-args(..args)
+  let md = metadata(make-notebook(..args))
+  return [#md#label(cfg.export-name)]
+}

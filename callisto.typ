@@ -67,6 +67,10 @@
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
+#let stage-notebook = exporting.stage-notebook.with(
+  default-handlers: handlers.default,
+  named-themes: themes.named,
+)
 
 #let config(..args) = {
   if args.pos().len() > 0 {
@@ -81,28 +85,29 @@
   // for apply-theme while the global default is false.
   return (
     template: theming.resolve(cfg.theme, cfg.named-themes).template,
-    cells:          cells         .with(..args),
-    cell:           cell          .with(..args),
-    outputs:        outputs       .with(..args),
-    output:         output        .with(..args),
-    displays:       displays      .with(..args),
-    display:        display       .with(..args),
-    results:        results       .with(..args),
-    result:         result        .with(..args),
-    stream-items:   stream-items  .with(..args),
-    stream-item:    stream-item   .with(..args),
-    errors:         errors        .with(..args),
-    error:          error         .with(..args),
-    streams:        streams       .with(..args),
-    stream:         stream        .with(..args),
-    sources:        sources       .with(..args),
-    source:         source        .with(..args),
-    render:         render        .with(..args),
-    Cell:           Cell          .with(..args),
-    In:             In            .with(..args),
-    Out:            Out           .with(..args),
-    export:         export        .with(..args),
-    make-notebook:  make-notebook .with(..args),
+    cells:            cells           .with(..args),
+    cell:             cell            .with(..args),
+    outputs:          outputs         .with(..args),
+    output:           output          .with(..args),
+    displays:         displays        .with(..args),
+    display:          display         .with(..args),
+    results:          results         .with(..args),
+    result:           result          .with(..args),
+    stream-items:     stream-items    .with(..args),
+    stream-item:      stream-item     .with(..args),
+    errors:           errors          .with(..args),
+    error:            error           .with(..args),
+    streams:          streams         .with(..args),
+    stream:           stream          .with(..args),
+    sources:          sources         .with(..args),
+    source:           source          .with(..args),
+    render:           render          .with(..args),
+    Cell:             Cell            .with(..args),
+    In:               In              .with(..args),
+    Out:              Out             .with(..args),
+    export:           export          .with(..args),
+    make-notebook:    make-notebook   .with(..args),
+    stage-notebook:   stage-notebook  .with(..args),
   )
 }
 // Preconfigure named-themes in a way that they are included in

@@ -1,6 +1,6 @@
 #import "/callisto.typ"
 
-#let (cell, render, source, outputs, Cell, Out, export, make-notebook) = callisto.config(
+#let (cell, render, source, outputs, Cell, Out, export, stage-notebook) = callisto.config(
   nb: "export.ipynb",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
   // handlers: (path: (x, ..args) => path(x)),
@@ -11,7 +11,7 @@
   kernel: "python3",
 )
 
-#context[#metadata(make-notebook())<notebook>]
+#stage-notebook()
 
 // #cell(```
 // #| label: y
