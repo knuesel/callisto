@@ -27,7 +27,7 @@
   theme: "notebook",
   apply-theme: false, // default for all but render functions
   disabled: auto,
-  export-name: "default",
+  export-name: "notebook",
   kernel: none,
 )
 
