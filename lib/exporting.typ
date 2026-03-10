@@ -25,7 +25,7 @@
   callisto: (
     lang: elem.lang,
     block: elem.block,
-    typst-label: str(elem.label),
+    typst-label: if elem.label == none { none } else { str(elem.label) },
   ),
 )
 
