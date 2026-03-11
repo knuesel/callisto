@@ -181,7 +181,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(output-type: ("execute_result", "error"))
       ```
       
-   -  `format` is used to select an output format for a given output (Jupyter notebooks can store the same output in several formats to let the viewer choose a format). This should be a format MIME string, or an array of such strings. The array order sets the preference: the first match is used. Every listed format must have a corresponding handler (see `handlers`). The value `auto` refers to the default value: `("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")`. The value `auto` can also be used as one element of an array of values; in this case the default values will be inserted at that position in the array. Example:
+   -  `format` is used to select an output format for a given output (Jupyter notebooks can store the same output in several formats to let the viewer choose a format). This should be a format MIME string, or an array of such strings. The array order sets the preference: the first match is used. Every listed format must have a corresponding handler (see `handlers`). The value `auto` refers to the default value: `("image/svg+xml", "image/png", "image/gif", "image/jpeg", "text/markdown", "text/latex", "text/plain")`. The value `auto` can also be used as one element of an array of values; in this case the default values will be inserted at that position in the array. Example:
 
       ```typst
       // Get PNG version of all display outputs, error if a display has no PNG
@@ -197,13 +197,13 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(handlers: ("text/plain": upper))
       ```
 
-      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/jpeg"` , `"image/gif"`, `"text/markdown"`, `"text/latex"`, `"text/plain"`.
+      There are predefined handlers for the following MIME types: `"image/svg+xml"`, `"image/png"`, `"image/gif"`, `"image/jpeg"` `"text/markdown"`, `"text/latex"`, `"text/plain"`.
 
       The default handlers for Markdown and LaTeX use [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex) respectively. These handlers can be redefined to apply custom cmarker/mitex settings. For example, to fix the rendering of image file references in Markdown, the following can be used:
 
       ```typ
-      #import "@preview/cmarker:0.1.3"
-      #import "@preview/mitex:0.2.5": mitex
+      #import "@preview/cmarker:0.1.6"
+      #import "@preview/mitex:0.2.6": mitex
 
       #callisto.render(
         nb: json("notebook.ipynb"),

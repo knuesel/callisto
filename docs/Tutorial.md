@@ -280,7 +280,7 @@ This will only work if the cell stores a PNG version of this item. We can also a
 #output("plot1", format: ("image/png", "image/svg+xml"))
 ```
 
-When `format` is `auto`, a default order of preference is used: `("image/svg+xml", "image/png", "text/markdown", "text/latex", "text/plain")`. We can also use the special value `auto` as an element of the array; The default list will then be inserted at that position:
+When `format` is `auto`, a default order of preference is used: `("image/svg+xml", "image/png", "image/gif", "image/jpeg", "text/markdown", "text/latex", "text/plain")`. We can also use the special value `auto` as an element of the array; The default list will then be inserted at that position:
 
 ```typst
 // Get PNG if available, otherwise use default order

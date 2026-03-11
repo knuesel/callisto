@@ -1,5 +1,5 @@
 #import "@preview/cmarker:0.1.6"
-#import "@preview/mitex:0.2.5": mitex
+#import "@preview/mitex:0.2.6": mitex
 
 #import "/callisto.typ" as callisto: *
 
