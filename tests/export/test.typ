@@ -6,16 +6,23 @@
 // Work around https://github.com/typst/typst/issues/1331
 #show raw: set text(8.8pt)
 
-// Test main ways to use the export functionality:
-// - Select exports with label
-// - Select exports with raw lang
-
-#let (cell, render, Cell, In, Out, export, stage-notebook) = callisto.config(
+#let (cell, render, Cell, In, Out, export, make-notebook, stage-notebook) = callisto.config(
   nb: "export.ipynb",
   kernel: "python3",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
+
+// Expose the exported notebook as labelled metadata for `typst query`
 #stage-notebook()
+
+// Embed the notebook (unexecuted) in the PDF
+#context pdf.attach(
+  "notebook.ipynb",
+  bytes(json.encode(make-notebook())),
+  mime-type: "application/x-ipynb+json",
+  relationship: "supplement",
+  description: "Notebook of all code blocks in the document",
+)
 
 = Select exports using a label
 
