@@ -15,10 +15,11 @@
 )
 
 // Document template
-#let neat-template(doc) = {
-  set text(font: "Noto Sans")
-  show raw: set text(font: "Noto Sans Mono")
-  show heading: set text(weight: "semibold")
+#let neat-template(doc, set-fonts: true) = {
+  set text(font: "Noto Sans") if set-fonts
+  show raw: set text(font: "Noto Sans Mono") if set-fonts
+  show heading: set text(weight: "semibold") if set-fonts
+
   show heading: set block(below: 1em)
   show heading.where(level: 1): set text(1.4em)
   show heading.where(level: 2): set text(1.2em)
