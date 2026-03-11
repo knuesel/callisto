@@ -12,11 +12,11 @@ A Typst package for reading from Jupyter notebooks. It currently addresses the f
 
 The examples below illustrate the basic functionality. For more information see
 
--  the [tutorial](https://github.com/knuesel/callisto/blob/release-0.2/docs/Tutorial.md),
--  the [function reference](https://github.com/knuesel/callisto/blob/release-0.2/docs/Reference.md).
+-  the [tutorial](https://github.com/knuesel/callisto/blob/v0.2.5/docs/Tutorial.md),
+-  the [function reference](https://github.com/knuesel/callisto/blob/v0.2.5/docs/Reference.md).
 
 ```typst
-#import "@preview/callisto:0.2.4"
+#import "@preview/callisto:0.2.5"
 
 // Render whole notebook
 #callisto.render(nb: json("docs/example.ipynb"))
