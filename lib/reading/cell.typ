@@ -1,4 +1,4 @@
-#import "../common.typ": ensure-array, parse-main-args
+#import "../common.typ": ensure-array, parse-main-args, disabled
 
 #import "notebook.typ"
 
@@ -70,6 +70,21 @@
       .filter(x => names.any(name-matches.with(x, spec)))
       .map(c => c.index)
   }
+  if type(spec) == label {
+    // Typst label: find matches in cell.metadata.callisto.label
+    return cells-of-type
+      .filter(x => name-matches(x, str(spec), "metadata.callisto.typst-label"))
+      .map(c => c.index)
+  }
+  if type(spec) == content and spec.func() == raw {
+    // Raw element: find code cells with perfect match for source text
+    // (including the cell header).
+    // We still work on cells-of-type so if the user filtered for non-code
+    // cells there will be no match.
+    return _filter-type(cells-of-type, "code")
+      .filter(x => x.metadata.callisto.header + x.source == spec.text)
+      .map(c => c.index)
+  }
   if type(spec) == int {
     if cfg.count == "index" {
       let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)
@@ -136,8 +151,9 @@
 
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
-#let cells(..args, keep: "all") = {
+#let cells(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

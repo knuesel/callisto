@@ -1,5 +1,5 @@
 #import "cell.typ": cells
-#import "../common.typ": handle, parse-main-args, final-result, ensure-array
+#import "../common.typ": handle, parse-main-args, final-result, ensure-array, disabled
 #import "../ctx.typ": get-ctx
 
 #let all-stream-names = ("stdout", "stderr")
@@ -38,6 +38,7 @@
 // of the same cell.
 #let streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
   let names = _stream-names(cfg.stream)
   let cs = cells(..args, cell-type: "code")
   let outs = ()

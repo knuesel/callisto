@@ -1,4 +1,4 @@
-#import "../common.typ": final-result, parse-main-args, handle
+#import "../common.typ": final-result, parse-main-args, handle, disabled
 #import "../ctx.typ": get-ctx
 #import "cell.typ": cells
 #import "notebook.typ"
@@ -17,6 +17,7 @@
 /// -> array of any | array of dict
 #let sources(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
   let srcs = ()
   for cell in cells(..args) {
     let ctx = get-ctx(cell, cfg: cfg)

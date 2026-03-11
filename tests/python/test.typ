@@ -4,7 +4,7 @@
   render,
   source,
   Cell,
-) = callisto.config(nb: "/tests/python/python.ipynb")
+) = callisto.config(nb: json("/tests/python/python.ipynb"))
 
 = Python notebook
 

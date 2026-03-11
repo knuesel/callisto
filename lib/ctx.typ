@@ -1,4 +1,4 @@
-#import "common.typ": parse-main-args
+#import "common.typ":  all-handlers
 #import "reading/notebook.typ"
 #import "theming.typ"
 
@@ -77,17 +77,6 @@
   }
 }
 
-// Get final handlers from default, theme and user handlers.
-#let _all-handlers(cfg: none) = {
-  let handlers = cfg.default-handlers
-  if cfg.apply-theme {
-    let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
-    handlers += theme-handlers
-  }
-  let user-handlers = _resolve-user-handlers(handlers, cfg.handlers)
-  return handlers + user-handlers
-}
-
 // Build a ctx dict for the given cell and settings dict.
 #let get-ctx(
   cell,
@@ -100,7 +89,7 @@
     cfg: cfg,
     item: item,
     nb: nb,
-    handlers: _all-handlers(cfg: cfg),
+    handlers: all-handlers(cfg: cfg),
     lang: if cfg.lang == auto { notebook.lang(nb) } else { cfg.lang }
   )
 }

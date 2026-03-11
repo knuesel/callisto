@@ -25,7 +25,8 @@
   display,
   source,
   output,
-) = callisto.config(nb: "/tests/julia/julia.ipynb")
+  Out,
+) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
 
 // Check for cell deduplication
 #assert.eq(cells((..range(2), 0)).len(), 2)
@@ -34,18 +35,20 @@
 #assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
 
 // Test cell-header-pattern
-#let strict-header-pattern = regex("^#\|\s+(.*?):\s+(.*?)\s*$") // doesn't allow space between `#` and `|`
+#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$")) // doesn't allow space between `#` and `|`
 #let cell-spec = arguments("pattern-test", name-path: "metadata.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
-#let cpp-pattern = regex("^//\|\s+(.*?):\s+(.*?)\s*$")
-#let cpp-cell-spec = arguments("calc", nb: "/tests/api/cpp.ipynb")
+#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
+#let cpp-cell-spec = arguments("calc", nb: json("/tests/api/cpp.ipynb"))
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
+// Test header field in cell metadata
+#assert.eq(cell("plot3").metadata.callisto.header.split("\n").first(), "#| label: plot3")
 
 #assert("`aa` not defined" in error())
 
@@ -57,6 +60,16 @@
   catch(() => display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)),
   "panicked with: \"no matching item found\"",
 )
+
+// Tests for 'keep' and 'item'
+#assert.eq(
+  catch(() => Out("non-existing")),
+  "panicked with: \"expected 1 cell, found 0\"",
+)
+#{
+  let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
+  assert.eq(output("plot3"), "5")
+}
 
 #assert.eq(results(c => c.execution_count > 3).len(), 2)
 
@@ -94,7 +107,7 @@
   stream-item,
   output,
   outputs,
-) = callisto.config(nb: "/tests/python/python.ipynb")
+) = callisto.config(nb: json("/tests/python/python.ipynb"))
 
 
 #assert.eq(cells(cell-type: "markdown").len(), 2)
@@ -156,3 +169,15 @@
   ),
 )
 #assert.eq(out.func(), square)
+
+// Check header pattern logic for OCaml syntax
+#let pat = "(* %key: %value *)"
+#let pat-regex = callisto.reading.notebook.cell-header-regex(pat)
+#let pat-writer = callisto.reading.notebook.cell-header-writer(pat)
+#let header-line = "(* some key: some value *)   "
+#assert.eq(header-line.match(pat-regex).captures, ("some key", "some value"))
+#assert.eq(
+  (pat-writer)("some key", "some value"),
+  "(* some key: some value *)"),
+)
+

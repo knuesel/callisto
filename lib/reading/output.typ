@@ -1,4 +1,4 @@
-#import "../common.typ": final-result, ensure-array, parse-main-args, handle
+#import "../common.typ": final-result, ensure-array, parse-main-args, handle, disabled
 #import "../ctx.typ": get-ctx
 #import "cell.typ": cells
 #import "rich-object.typ"
@@ -40,6 +40,7 @@
 // Can return several outputs per cell. The return value is always an array.
 #let outputs(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if disabled(cfg: cfg) { return none }
   let output-types = _output-types(cfg.output-type)
   let outs = ()
   for cell in cells(..args, cell-type: "code") {
