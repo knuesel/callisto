@@ -42,7 +42,7 @@
 // several others to actually render the image.
 #let handler-image-generic(data, ctx: none, ..args) = {
   if type(data) == str {
-    return handle(data, mime: "path", ctx: ctx, ..args)
+    data = handle(data, mime: "path", ctx: ctx, ..args)
   }
   std.image(data, ..args)
 }
@@ -281,7 +281,7 @@
 
 // Default handler for path: raise an error
 #let handler-path(cell, ctx: none, ..args) = {
-  panic("\"path\" handler undefined. You can define it with callisto.config(..., handlers: (path: (x, ..args)=>read(x, encoding: none)))")
+  panic("\"path\" handler undefined. You can define it with callisto.config(..., handlers: (path: (x, ..args) => read(x, encoding: none)))")
 }
 
 // Generic stream handler
