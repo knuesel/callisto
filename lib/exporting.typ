@@ -1,4 +1,5 @@
 #import "common.typ"
+#import "reading/notebook.typ"
 
 // Make label for exported raw elements
 #let _export-label(name) = label("__callisto-export:" + name)
@@ -7,12 +8,18 @@
   // The cell-spec is actually a raw element in this case
   let (cell-spec: elem, cfg) = common.parse-main-args(..args)
 
+  let txt = elem.text
+  if cfg.cell-label != none {
+    let header-writer = notebook.cell-header-writer(cfg.cell-header-pattern)
+    txt = header-writer("label", cfg.cell-label) + "\n" + txt
+  }
+
   // We store the raw fields rather than the raw element itself, to avoid
   // having it show up in query(raw)
   let dict = (
     export-name: cfg.export-name,
     kernel: cfg.kernel,
-    text: elem.text,
+    text: txt,
     lang: elem.at("lang", default: none),
     block: elem.at("block", default: true),
     label: elem.at("label", default: none),
@@ -33,7 +40,7 @@
 // given cell index.
 #let _make-cell(i, elem) = {
   (
-    id: str(i),
+    id: "id" + str(i),
     cell_type: "code",
     metadata: _cell-metadata(elem),
     source: elem.text,

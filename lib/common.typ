@@ -28,6 +28,7 @@
   apply-theme: false, // default for all but render functions
   disabled: auto,
   export-name: "notebook",
+  cell-label: none,
   kernel: none,
 )
 

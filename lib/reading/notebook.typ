@@ -21,6 +21,8 @@
   return regex("^" + translated + "\\s*$")
 }
 
+// For now a static value. In the future we might be smarter to automatically
+// support languages with other syntax (OCaml, C++, ...)
 #let default-cell-header-pattern = "# | %key: %value"
 
 #let _validate-header-pattern(pat) = {

@@ -179,15 +179,15 @@ The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
 Code can be generated dynamically for execution:
 
 #let exprs = (
-  poly: "3*x**3",
-  trig: "sin(2*x)",
-  log: "log(x + 1)",
+  "2*x**3 + 4*x",
+  "sin(2*x)",
+  "log(x + 1)",
 )
 
 // Generate two cells for each expr: one for the expr, one for its derivative
-#for (name, expr) in exprs {
-  export-sympy([#raw(expr)#label(name)])
-  export-sympy([#raw("diff(" + expr + ")")#label(name + "-diff")])
+#for (i, expr) in exprs.enumerate() {
+  export-sympy(raw(expr), cell-label: str(i))
+  export-sympy(raw("diff(" + expr + ")"), cell-label: str(i) + "-diff")
 }
 
 // Build table from results
@@ -197,10 +197,12 @@ Code can be generated dynamically for execution:
   stroke: none,
   table.header($f$, $f'$),
   table.hline(),
-  ..exprs.keys().map(k => (
-    result-sympy(label(k)),
-    result-sympy(label(k + "-diff")),
-  )).join()
+  ..for i in range(exprs.len()) {
+    (
+      result-sympy(str(i)),
+      result-sympy(str(i) + "-diff"),
+    )
+  }
 )
 
 = Third export with another kernel
