@@ -54,8 +54,8 @@
 }
 
 // Return true if notebook functions should be disabled in this configuration,
-// that is if the user set disabled=true or if disabled=auto and the configured
-// notebook is being exported (CLI input flag callisto-export==cfg export name).
+// that is if the user set disabled=true or if disabled=auto and export was
+// enabled on the command-line (--callisto-export=true).
 #let disabled(cfg: none) = {
   if cfg.disabled != auto {
     return cfg.disabled
@@ -67,7 +67,7 @@
   if cli-export == "true" {
     return true
   }
-  return cli-export == cfg.export-name
+  panic("unsupported value for --callisto-export: " + cli-export)
 }
 
 // Wrap the argument in an array if it is not itself an array
