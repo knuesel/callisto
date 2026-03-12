@@ -154,6 +154,58 @@ The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
 = Second export with another name
 
 #let (
+  result: result-sympy,
+  export: export-sympy,
+  stage-notebook: stage-sympy,
+) = callisto.config(
+  nb: "export-sympy.ipynb",
+  kernel: "python3",
+  export-name: "sympy",
+  handlers: (path: (x, ..args) => read(x, encoding: none)),
+)
+
+
+#stage-sympy()
+
+#export-sympy(
+  ```
+  from sympy import *
+  x = symbols('x')
+  ```
+)
+
+== Generated code blocks
+
+Code can be generated dynamically for execution:
+
+#let exprs = (
+  poly: "3*x**3",
+  trig: "sin(2*x)",
+  log: "log(x + 1)",
+)
+
+// Generate two cells for each expr: one for the expr, one for its derivative
+#for (name, expr) in exprs {
+  export-sympy([#raw(expr)#label(name)])
+  export-sympy([#raw("diff(" + expr + ")")#label(name + "-diff")])
+}
+
+// Build table from results
+#table(
+  columns: 2,
+  inset: 1em,
+  stroke: none,
+  table.header($f$, $f'$),
+  table.hline(),
+  ..exprs.keys().map(k => (
+    result-sympy(label(k)),
+    result-sympy(label(k + "-diff")),
+  )).join()
+)
+
+= Third export with another kernel
+
+#let (
   In: In-julia,
   Out: Out-julia,
   export: export-julia,

@@ -14,7 +14,7 @@
     kernel: cfg.kernel,
     text: elem.text,
     lang: elem.at("lang", default: none),
-    block: elem.block,
+    block: elem.at("block", default: true),
     label: elem.at("label", default: none),
   )
   return [#metadata(dict)#_export-label(cfg.export-name)]
