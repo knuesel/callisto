@@ -11,6 +11,7 @@
   cell-header-pattern: auto,
   keep-cell-header: false,
   // Other
+  h1-level: 1,
   lang: auto,
   raw-lang: none,
   result: "value",

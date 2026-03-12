@@ -121,6 +121,7 @@
     image: handle.with(mime: "image-markdown-cell", ctx: ctx),
   ),
   heading-labels: "jupyter",
+  h1-level: ctx.cfg.h1-level,
   ..args,
 )
 

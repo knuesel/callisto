@@ -31,6 +31,7 @@
 See @Some-heading and #ref(label("Here’s-a-heading-with-a-quote"))
 
 #callisto.render(
-  nb: json("heading-links.ipynb"),
+  nb: json("notebook.ipynb"),
+  h1-level: 0,
   // handlers: ("markdown-generic": handler-markdown-generic),
 )
