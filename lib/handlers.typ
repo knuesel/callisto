@@ -1,5 +1,5 @@
 #import "@preview/based:0.2.0": base64
-#import "@preview/cmarker:0.1.6"
+#import "@preview/cmarker:0.1.8"
 #import "@preview/mitex:0.2.6"
 
 #import "common.typ": handle
@@ -107,17 +107,20 @@
 // (This is useful for Markdown that must be included seamlessly in the flow
 // of the document, so that e.g. spacing around headings can be configured
 // without interference from a container block, see
-// https://github.com/knuesel/callisto/issues/13)
+// https://github.com/knuesel/callisto/issues/13 )
 #let handler-markdown-generic(data, ctx: none, ..args) = cmarker.render(
   data,
   math: handle.with(mime: "math-markdown-cell", ctx: ctx),
   scope: (
-    // Note that for images specified by disk path, the default markdown-cell
-    // handler delegates to the "image-generic" handler. Users should define
-    // that handler to fix image path resolution (until Typst gets a 'path'
-    // type).
+    // Note that for images specified by disk path, the default image-generic
+    // handler uses the path handler to resolve the path. Users must define
+    // that handler to have working path resolution (unfortunately this
+    // probably won't change when Typst gets a 'path' type as that won't give
+    // access to other files in the notebook directory, but the path type will
+    // make it easier to define the path handler).
     image: handle.with(mime: "image-markdown-cell", ctx: ctx),
   ),
+  heading-labels: "jupyter",
   ..args,
 )
 
@@ -160,6 +163,7 @@
     markdown,
     math: _math-metadata,
     scope: (image: (..args) => none),
+    heading-labels: "jupyter",
   )
   // For sequence, gather all math items among the children
   if rendered.func() == [].func() {
