@@ -6,7 +6,7 @@
 // Work around https://github.com/typst/typst/issues/1331
 #show raw: set text(8.8pt)
 
-#let (cell, render, Cell, In, Out, export, make-notebook, stage-notebook) = callisto.config(
+#let (cell, result, render, Cell, In, Out, export, make-notebook, stage-notebook) = callisto.config(
   nb: "export.ipynb",
   kernel: "python3",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
@@ -23,6 +23,8 @@
   relationship: "supplement",
   description: "Notebook of all code blocks in the document",
 )
+
+#outline()
 
 = Select exports using a label
 
@@ -135,6 +137,19 @@ b = 42
 == Render exported cells using raw lang in cell metadata
 
 #render(c => c.metadata.callisto.lang == "python-x")
+
+== Inline raw elements
+
+#let compute(it) = export(it) + result(it)
+
+The square of 3 is #compute(`3*3`).
+
+== Inline raw exported by label
+
+// Outputs in the the context of a raw element so will use monospace font
+#show <x>: it => export(it) + result(it)
+
+The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
 
 = Second export with another name
 
