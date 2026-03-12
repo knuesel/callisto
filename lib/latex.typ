@@ -24,7 +24,7 @@
   (acc, val) => _open + "(?:" + acc + "|" + _no-open-close + ")*" + _close,
 )
 
-// Return a regex for a LateX command definition that uses up to 'group-depth'
+// Return a regex for a LaTeX command definition that uses up to 'group-depth'
 // levels of nested brace groups.
 // (Handling an arbitrary depth cannot be done with true regular expressions.)
 #let definition-regex(group-depth: 5) = {
