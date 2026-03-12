@@ -7,6 +7,7 @@
 #import "reading/stream.typ"
 #import "reading/error.typ"
 #import "reading/output.typ": outputs
+#import "reading/notebook.typ"
 #import "latex.typ"
 
 // A handler is a function called to render a value such as a cell's source,
@@ -228,9 +229,10 @@
 //    copy-paste.
 #let handler-math-markdown-cell(data, ctx: none, ..args) = {
   let defs = none
-  if ctx.nb != none {
+  if ctx.cfg.nb != none {
+    let nb = notebook.read(cfg: ctx.cfg)
     // Get math definitions from the notebook if specified
-    defs = ctx.nb.cells.map(_cell-latex-defs).join()
+    defs = nb.cells.map(_cell-latex-defs).join()
   } else if ctx.cell != none {
     // Otherwise fall back on definitions from cell if specified
     defs = _cell-latex-defs(ctx.cell)

@@ -120,23 +120,23 @@
   return cell
 }
 
-#let _nb-json(nb, cfg: none) = {
-  if type(nb) not in (str, bytes, dictionary) {
+#let _nb-json(cfg: none) = {
+  if type(cfg.nb) not in (str, bytes, dictionary) {
     panic("invalid notebook type: " + str(type(nb)))
   }
-  if type(nb) == bytes {
-    return json(nb)
+  if type(cfg.nb) == bytes {
+    return json(cfg.nb)
   }
-  if type(nb) == str {
+  if type(cfg.nb) == str {
     let handlers = all-handlers(cfg: cfg)
-    return json(handlers.at("path")(nb, ctx: none))
+    return json(handlers.at("path")(cfg.nb, ctx: none))
   }
-  return nb
+  return cfg.nb
 }
 
-#let read(nb, cfg: none) = {
-  if nb == none { return none }
-  let nb-json = _nb-json(nb, cfg: cfg)
+#let read(cfg: none) = {
+  if cfg.nb == none { return none }
+  let nb-json = _nb-json(cfg: cfg)
   nb-json.cells = nb-json.cells.enumerate().map(
     ((i, c)) => _process-cell(i, c, cfg: cfg)
   )

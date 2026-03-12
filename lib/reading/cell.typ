@@ -136,7 +136,7 @@
     // No need to read the notebook
     return _filter-type(ensure-array(spec), cfg.cell-type)
   }
-  let all-cells = notebook.read(cfg.nb, cfg: cfg).cells
+  let all-cells = notebook.read(cfg: cfg).cells
   let cells-of-type = _filter-type(all-cells, cfg.cell-type)
   if spec == none {
     // No spec means select all cells

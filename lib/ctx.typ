@@ -83,13 +83,17 @@
   cfg: none,
   item: none,
 ) = {
-  let nb = notebook.read(cfg.nb, cfg: cfg)
+  let lang = cfg.lang
+  if lang == auto {
+    let nb = notebook.read(cfg: cfg)
+    lang = notebook.lang(nb)
+  }
+  let nb = notebook.read(cfg: cfg)
   return (
     cell: cell,
     cfg: cfg,
     item: item,
-    nb: nb,
     handlers: all-handlers(cfg: cfg),
-    lang: if cfg.lang == auto { notebook.lang(nb) } else { cfg.lang }
+    lang: lang,
   )
 }
