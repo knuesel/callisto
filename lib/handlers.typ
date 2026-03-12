@@ -403,9 +403,6 @@
   "code-cell-output": handler-code-cell-output,
   "code-cell": handler-code-cell,
   "cell": handler-cell, // called before the cell-type-specific handler
-  // Handlers for content missing from notebook
-  "missing-input": none,
-  "missing-output": none,
   // Other handlers
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
