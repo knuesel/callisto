@@ -153,7 +153,7 @@
   // math item itself to avoid duplicates.
   if ctx.latex-preamble != none {
     // Remove definitions from this item's body and prepend all defs
-    txt = ctx.latex-preamble + txt.replace(latex.command-definition, "")
+    txt = ctx.latex-preamble + txt.replace(latex.definition-regex(), "")
   }
   // Render equation with the latex math handler
   return handle(txt, mime: "math-generic", ctx: ctx, ..args)
