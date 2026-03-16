@@ -1,5 +1,5 @@
 #import "common.typ"
-#import "reading/notebook.typ"
+#import "header-pattern.typ"
 
 // Make label for exported raw elements
 #let _export-label(name) = label("__callisto-export:" + name)
@@ -10,7 +10,7 @@
 
   let txt = elem.text
   if cfg.cell-label != none {
-    let header-writer = notebook.cell-header-writer(cfg.cell-header-pattern)
+    let header-writer = header-pattern.cell-header-writer(cfg.cell-header-pattern)
     txt = header-writer("label", cfg.cell-label) + "\n" + txt
   }
 

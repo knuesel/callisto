@@ -50,7 +50,7 @@
       if output-type not in output-types { continue }
       // Make context for processor
       let item-desc = (index: i, type: output-type)
-      let ctx = get-ctx(cell, cfg: cfg, item: item-desc)
+      let ctx = get-ctx(cell, cfg: cfg, item-desc: item-desc)
 
       // The processing is split in two output-type-specific steps:
       // preprocessing and rendering. The preprocessed data is used
