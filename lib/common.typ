@@ -2,18 +2,20 @@
 
 // All settings for the main functions, with default values
 #let settings = (
-  // Cell selection
+  // Notebook
   nb: none,
+  cell-header-pattern: auto,
+  keep-cell-header: false,
+  lang: auto,
+  raw-lang: none,
+  // Cell selection
   count: "index",
   name-path: auto,
   cell-type: "all",
   keep: "all",
-  cell-header-pattern: auto,
-  keep-cell-header: false,
   // Other
   h1-level: 1,
-  lang: auto,
-  raw-lang: none,
+  // Outputs
   result: "value",
   stream: "all",
   format: auto,
@@ -21,12 +23,14 @@
   ignore-wrong-format: false,
   item: "unique",
   output-type: "all",
+  // Rendering
   input: true,
   output: true,
   default-handlers: (:), // to be filled in callisto.typ
   named-themes: (:), // to be filled in callisto.typ
   theme: "notebook",
   apply-theme: false, // default for all but render functions
+  // Export
   disabled: auto,
   export-name: "notebook",
   cell-label: none,
