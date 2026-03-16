@@ -51,7 +51,7 @@
     }
     if txt == none { continue }
     // item.index is undefined since we gather outputs from different cells
-    let ctx = get-ctx(cell, cfg: cfg, item: (type: "stream", index: none))
+    let ctx = get-ctx(cell, cfg: cfg, item-desc: (type: "stream", index: none))
     let preprocessed = (output_type: "stream", name: cfg.stream, text: txt)
     let value = handle(preprocessed, mime: "stream", ctx: ctx)
     outs.push(final-result(preprocessed, value, ctx: ctx))

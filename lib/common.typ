@@ -8,6 +8,7 @@
   keep-cell-header: false,
   lang: auto,
   raw-lang: none,
+  latex-preamble: auto,
   // Cell selection
   count: "index",
   name-path: auto,
@@ -113,9 +114,9 @@
     return value
   }
   // Remove "output_type" field if present (will be replaced by type field from
-  // ctx.item)
+  // ctx.item-desc)
   _ = preprocessed.remove("output_type", default: none)
-  return preprocessed + ctx.item + (
+  return preprocessed + ctx.item-desc + (
     cell: _cell-output-dict(ctx.cell),
     value: value,
   )
@@ -215,4 +216,19 @@
   }
   let user-handlers = _resolve-user-handlers(handlers, cfg.handlers)
   return handlers + user-handlers
+}
+
+// Return the notebook as JSON, without any processing
+#let nb-json(cfg: none) = {
+  if type(cfg.nb) not in (str, bytes, dictionary) {
+    panic("invalid notebook type: " + str(type(nb)))
+  }
+  if type(cfg.nb) == bytes {
+    return json(cfg.nb)
+  }
+  if type(cfg.nb) == str {
+    let handlers = all-handlers(cfg: cfg)
+    return json(handlers.at("path")(cfg.nb, ctx: none))
+  }
+  return cfg.nb
 }

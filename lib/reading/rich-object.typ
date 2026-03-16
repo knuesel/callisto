@@ -63,7 +63,7 @@
   let fmt = pick-format(item.data.keys(), precedence: ctx.cfg.format)
   if fmt == none {
     if not ctx.cfg.ignore-wrong-format {
-      panic("output item " + repr(ctx.item) +
+      panic("output item " + repr(ctx.item-desc) +
       " from cell " + str(ctx.cell.index) +
       " has no appropriate format: item has " +
         repr(item.data.keys()) + ", we want " +
@@ -102,7 +102,7 @@
 ) = {
   if item.data.len() == 0 { return none }
   // Add some context fields
-  ctx.item.metadata = item.metadata
-  ctx.item.rich-format = item.rich-format
+  ctx.item-desc.metadata = item.metadata
+  ctx.item-desc.rich-format = item.rich-format
   return handle(item.data, mime: item.rich-format, ctx: ctx, ..handler-args)
 }

@@ -7,7 +7,6 @@
 #import "reading/stream.typ"
 #import "reading/error.typ"
 #import "reading/output.typ": outputs
-#import "reading/notebook.typ"
 #import "latex.typ"
 
 // A handler is a function called to render a value such as a cell's source,
@@ -147,108 +146,14 @@
 // Handler for LaTeX equations
 #let handler-math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
-// Wrap the math item arguments in a labelled metadata
-#let _math-metadata(..args) = [#metadata(args)<__callisto-math-item>]
-
-// Return true if the content item is an extracted math item
-#let _is-math-item(it) = it.at("label", default: none) == <__callisto-math-item>
-
-// Extract an array of math items from the given Markdown string.
-// Each item is returned as an 'arguments' value holding the arguments that
-// cmarker passes to the 'math' callback for rendering the math item.
-// This includes at least
-// - a positional argument for the string holding the LaTeX math
-// - a 'block' argument set to true for block equations
-#let _extract-math(markdown) = {
-  let rendered = cmarker.render(
-    markdown,
-    math: _math-metadata,
-    scope: (image: (..args) => none),
-    heading-labels: "jupyter",
-  )
-  // For sequence, gather all math items among the children
-  if rendered.func() == [].func() {
-    return rendered.children.filter(_is-math-item).map(x => x.value)
-  }
-  // Otherwise we have at most one item
-  if _is-math-item(rendered) {
-    return (rendered.value,)
-  }
-  return ()
-}
-
-// Get the LaTeX definitions found in the math items in the given cell's
-// source. Each item is returned as a regex match in which the 'text' field
-// holds the command definition.
-#let _cell-latex-defs(c) = {
-  _extract-math(c.source)
-    .map(args => latex.definitions(args.at(0)))
-    .join()
-}
-
-// Raise an error if the given list of LaTeX definitions contains duplicates
-// (same command defined twice)
-#let _check-latex-duplicates(defs) = {
-  let sorted = defs.sorted(key: x => x.command)
-  let prev = sorted.first()
-  for x in sorted.slice(1) {
-    if x.command == prev.command {
-      panic("conflicting \\newcommand definitions: " +
-       prev.text + " and " + x.text)
-    }
-    prev = x
-  }
-}
-
-// Make "preamble" string from given list of LaTeX definitions, removing
-// redundant duplicates and raising an error if there are non-redundant
-// (conflicting) duplicates.
-#let _make-preamble(defs) = {
-  let deduped = defs
-  if deduped.len() > 1 {
-    // Remove non-conflicting duplicates (that redefine a command to the same)
-    deduped = defs.dedup(key: latex.normalized-def-string)
-    // Raise an error if there are remaining duplicates
-    _check-latex-duplicates(deduped)
-  }
-  return deduped.map(latex.normalized-def-string).join("\n")
-}
-
 // Handler for LaTeX equations in Markdown cells.
-// This handler gathers all LaTeX \newcommand definitions from the notebook
-// (if provided) or cell (if provided and the notebook is not) and uses that
-// as "preamble" when rendering the math item. This is done to support commands
-// defined in one Markdown LaTeX equation and used in a later one (as supported
-// by MathJax and often used in Jupyter notebook although it's not valid in
-// real LaTeX). There are two caveats:
-// 1. Only '\newcommand' gets this special treatment. MathJax also supports
-//    definitions through '\def', '\newenvironment', '\renewcommand', etc. but
-//    these don't get any special treatment here.
-// 2. MathJax allows using '\newcommand' instead of '\renewcommand' to
-//    redefine an existing command. There's no good way for us to support this
-//    in the general case (e.g. when a single equation defines a command
-//    several times with different values) so we only allow duplicate
-//    definitions when they are redundant (redefining a command to the same
-//    value) and raise an error otherwise. This covers the most common case
-//    of duplicate definitions, where an equation or cell is duplicated by
-//    copy-paste.
 #let handler-math-markdown-cell(data, ctx: none, ..args) = {
-  let defs = none
-  if ctx.cfg.nb != none {
-    let nb = notebook.read(cfg: ctx.cfg)
-    // Get math definitions from the notebook if specified
-    defs = nb.cells.map(_cell-latex-defs).join()
-  } else if ctx.cell != none {
-    // Otherwise fall back on definitions from cell if specified
-    defs = _cell-latex-defs(ctx.cell)
-  }
-  // If we could collect definitions from the notebook or cell, we'll use those
-  // (checking for conflicting duplicates) and remove definitions from the
-  // math item itself to avoid duplicates.
   let txt = data
-  if defs != none {
+  // If the preamble is defined, we'll use it and remove definitions from the
+  // math item itself to avoid duplicates.
+  if ctx.latex-preamble != none {
     // Remove definitions from this item's body and prepend all defs
-    txt = _make-preamble(defs) + txt.replace(latex.command-definition, "")
+    txt = ctx.latex-preamble + txt.replace(latex.command-definition, "")
   }
   // Render equation with the latex math handler
   return handle(txt, mime: "math-generic", ctx: ctx, ..args)
@@ -265,10 +170,10 @@
   subhandler-args: none,
   ..args,
 ) = {
-  // Make item dict
+  // Make item
   let item = (data: data, metadata: metadata)
   // Update context item desc
-  ctx.item = (index: none, type: "attachment")
+  ctx.item-desc = (index: none, type: "attachment")
   // Get dict with normalized data for this item
   let preprocessed = rich-object.preprocess(item, ctx: ctx)
   if preprocessed == none { return none }
@@ -307,7 +212,7 @@
 
 // Handler for any type of code cell output
 #let handler-output(data, ctx: none, ..args) = {
-  handle(data, mime: ctx.item.type, ctx: ctx, ..args)
+  handle(data, mime: ctx.item-desc.type, ctx: ctx, ..args)
 }
 
 // Handler for source code
@@ -355,10 +260,10 @@
 
 // Handler for code cell
 #let handler-code-cell(cell, ctx: none, ..args) = {
-  if ctx.cfg.input {
+  if ctx.input {
     handle(cell, mime: "code-cell-input", ctx: ctx, ..args)
   }
-  if ctx.cfg.output {
+  if ctx.output {
     handle(cell, mime: "code-cell-output", ctx: ctx, ..args)
   }
 }

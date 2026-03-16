@@ -1,4 +1,5 @@
 #import "/callisto.typ"
+#import "/lib/header-pattern.typ"
 
 // Preferred format among `xyz`, `text/plain`, `abc`
 #assert.eq(
@@ -132,12 +133,12 @@
 #assert.eq(out.type, "display")
 #assert.eq(out.rich-format, "image/png")
 
-// ctx.item fields
+// ctx.item-desc fields
 #let out = output(
   6,
   item: 2,
   result: "dict",
-  handlers: ("image/png": (ctx: none, ..args) => ctx.item),
+  handlers: ("image/png": (ctx: none, ..args) => ctx.item-desc),
 )
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
@@ -172,8 +173,8 @@
 
 // Check header pattern logic for OCaml syntax
 #let pat = "(* %key: %value *)"
-#let pat-regex = callisto.reading.notebook.cell-header-regex(pat)
-#let pat-writer = callisto.reading.notebook.cell-header-writer(pat)
+#let pat-regex = header-pattern.cell-header-regex(pat)
+#let pat-writer = header-pattern.cell-header-writer(pat)
 #let header-line = "(* some key: some value *)   "
 #assert.eq(header-line.match(pat-regex).captures, ("some key", "some value"))
 #assert.eq(

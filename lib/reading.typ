@@ -1,4 +1,3 @@
-#import "reading/notebook.typ"
 #import "reading/rich-object.typ"
 #import "reading/cell.typ"
 #import "reading/source.typ"

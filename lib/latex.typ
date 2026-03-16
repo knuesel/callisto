@@ -87,7 +87,7 @@
 //   \newcommand + |
 // is normalized to
 //   \newcommand{\+}{|}
-#let normalized-def-string(def) = {
+#let _normalized-def-string(def) = {
   let normalized = "\\newcommand{" + def.command + "}"
   if def.n-params != none {
     normalized += "[" + def.n-params + "]"
@@ -113,4 +113,33 @@
 #let definitions(txt) = {
   txt.matches(command-definition)
     .map(_normalize-match)
+}
+
+// Raise an error if the given list of LaTeX definitions contains duplicates
+// (same command defined twice)
+#let _check-latex-duplicates(defs) = {
+  let sorted = defs.sorted(key: x => x.command)
+  let prev = sorted.first()
+  for x in sorted.slice(1) {
+    if x.command == prev.command {
+      panic("conflicting \\newcommand definitions: " +
+       prev.text + " and " + x.text)
+    }
+    prev = x
+  }
+}
+
+// Make "preamble" string from given list of LaTeX definitions (given as dicts
+// as returned by definitions()), removing
+// redundant duplicates and raising an error if there are non-redundant
+// (conflicting) duplicates.
+#let make-preamble(defs) = {
+  let deduped = defs
+  if deduped.len() > 1 {
+    // Remove non-conflicting duplicates (that redefine a command to the same)
+    deduped = defs.dedup(key: _normalized-def-string)
+    // Raise an error if there are remaining duplicates
+    _check-latex-duplicates(deduped)
+  }
+  return deduped.map(_normalized-def-string).join("\n")
 }
