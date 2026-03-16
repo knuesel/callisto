@@ -1,7 +1,6 @@
 #import "../common.typ": final-result, parse-main-args, handle, disabled
 #import "../ctx.typ": get-ctx
 #import "cell.typ": cells
-#import "notebook.typ"
 
 // Return the lang of the cell's source
 #let _cell-lang(cell, ctx: none) = (

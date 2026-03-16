@@ -67,7 +67,7 @@
   output-type: "display",
   handlers: (
     "image/png": (data, ctx: none, ..args) => {
-      block[PNG display has metadata: #ctx.item.metadata]
+      block[PNG display has metadata: #ctx.item-desc.metadata]
     },
   ),
 )

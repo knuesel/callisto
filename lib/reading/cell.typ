@@ -1,9 +1,68 @@
-#import "../common.typ": ensure-array, parse-main-args, disabled
-
-#import "notebook.typ"
+#import "../common.typ"
+#import "../header-pattern.typ"
 
 #let default-cell-names = ("metadata.label", "id", "metadata.tags")
 #let all-cell-types = ("code", "markdown", "raw")
+
+// Convert metadata in code header to cell metadata
+#let _process-cell-header(cell, cfg: none) = {
+  cell.metadata.callisto.header = none // initial value
+  let header-regex = header-pattern.cell-header-regex(cfg.cell-header-pattern)
+  if header-regex == none {
+    return cell
+  }
+  let source_lines = cell.source.split("\n")
+  let n = 0
+  for line in source_lines {
+    let m = line.match(header-regex)
+    if m == none {
+      break
+    }
+    n += 1
+    let (key, value) = m.captures
+    cell.metadata.insert(key, value)
+    cell.metadata.callisto.header += line + "\n"
+  }
+  // Remove header from source if necessary
+  if not cfg.keep-cell-header and n > 0 {
+    cell.source = source_lines.slice(n).join("\n")
+  }
+  return cell
+}
+
+// Normalize cell dict (ensuring the source is a single string rather than an
+// array with one string per line) and convert source header metadata to cell
+// metadata, using cell-header-pattern to recognize and parse cell header lines.
+// Also ensures that the cell has a metadata.callisto dictionary.
+#let _process-cell(i, cell, cfg: none) = {
+  if "id" not in cell {
+    cell.id = str(i)
+  }
+  cell.index = i
+  // Normalize source field to a single string
+  if "source" in cell and type(cell.source) == array {
+    cell.source = cell.source.join() // will be none if array is empty
+  }
+  if "source" not in cell or cell.source == none {
+    cell.source = ""
+  }
+  if "callisto" not in cell.metadata {
+    cell.metadata.callisto = (:)
+  }
+  if cell.cell_type == "code" {
+    cell = _process-cell-header(cell, cfg: cfg)
+  }
+  return cell
+}
+
+#let _preprocess-nb(cfg: none) = {
+  if cfg.nb == none { return none }
+  let nb-json = common.nb-json(cfg: cfg)
+  nb-json.cells = nb-json.cells.enumerate().map(
+    ((i, c)) => _process-cell(i, c, cfg: cfg)
+  )
+  return nb-json
+}
 
 // Get value at given path in recursive dict.
 // The path can be a string of the form `key1.key2....`, or an array
@@ -28,7 +87,7 @@
 // List of cell types for the given cell type spec
 #let _cell-types(cell-type) = {
   if cell-type == "all" { return all-cell-types }
-  let types = ensure-array(cell-type)
+  let types = common.ensure-array(cell-type)
   for typ in types {
     if typ not in all-cell-types {
       panic("invalid cell type: " + repr(typ))
@@ -46,7 +105,7 @@
 // Resolve 'name-path' setting to an array of name paths
 #let _name-paths(path) = {
   if path == auto { return default-cell-names }
-  return ensure-array(path)
+  return common.ensure-array(path)
 }
 
 // Get cell indices for a single specification.
@@ -134,16 +193,16 @@
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
-    return _filter-type(ensure-array(spec), cfg.cell-type)
+    return _filter-type(common.ensure-array(spec), cfg.cell-type)
   }
-  let all-cells = notebook.read(cfg: cfg).cells
+  let all-cells = _preprocess-nb(cfg: cfg).cells
   let cells-of-type = _filter-type(all-cells, cfg.cell-type)
   if spec == none {
     // No spec means select all cells
     return cells-of-type
   }
   let indices = ()
-  for s in ensure-array(spec) {
+  for s in common.ensure-array(spec) {
     indices += _cell-indices(s, cells-of-type, all-cells, cfg: cfg)
   }
   return indices.dedup().sorted().map(i => all-cells.at(i))
@@ -152,8 +211,8 @@
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
-  let (cell-spec, cfg) = parse-main-args(..args)
-  if disabled(cfg: cfg) { return none }
+  let (cell-spec, cfg) = common.parse-main-args(..args)
+  if common.disabled(cfg: cfg) { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }
