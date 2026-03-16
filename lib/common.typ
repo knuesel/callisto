@@ -89,6 +89,17 @@
   return on
 }
 
+// Ensure each cell source is a single string.
+#let normalize-cell-source(cell) = {
+  if "source" in cell and type(cell.source) == array {
+    cell.source = cell.source.join() // will be none if array is empty
+  }
+  if "source" not in cell or cell.source == none {
+    cell.source = ""
+  }
+  return cell
+}
+
 // A dictionary of cell-related data, to be used as one field in the result
 // dict.
 #let _cell-output-dict(cell) = (

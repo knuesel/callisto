@@ -39,13 +39,10 @@
     cell.id = str(i)
   }
   cell.index = i
+
   // Normalize source field to a single string
-  if "source" in cell and type(cell.source) == array {
-    cell.source = cell.source.join() // will be none if array is empty
-  }
-  if "source" not in cell or cell.source == none {
-    cell.source = ""
-  }
+  cell = common.normalize-cell-source(cell)
+
   if "callisto" not in cell.metadata {
     cell.metadata.callisto = (:)
   }

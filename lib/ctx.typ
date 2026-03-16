@@ -133,18 +133,6 @@
     .join()
 }
 
-// Do minimal processing on unprocessed notebook JSON to ensure each cell
-// source is a single string.
-#let _normalize-cell-source(cell) = {
-  if "source" in cell and type(cell.source) == array {
-    cell.source = cell.source.join() // will be none if array is empty
-  }
-  if "source" not in cell or cell.source == none {
-    cell.source = ""
-  }
-  return cell
-}
-
 // Gather all LaTeX \newcommand definitions from the previous and current cells
 // in the notebook (if provided) or just in the current cell (if provided and
 // the notebook is not) and return the corresponding LaTeX preamble as string.
@@ -175,7 +163,7 @@
     cells = nb-json.cells
       .slice(0, cell.index)
       .filter(c => c.cell_type == "markdown")
-      .map(_normalize-cell-source)
+      .map(common.normalize-cell-source)
   }
   cells.push(cell)
 
