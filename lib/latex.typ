@@ -39,10 +39,6 @@
     "(?:\s*" + n-params + "(?:\s*" + default-value + ")?)?" + expression
   )
 }
-// Command definition regex with default nesting level of brace groups
-// (We might make the level user-configurable at some point if there's demand
-// for it.)
-#let command-definition = definition-regex()
 
 // Convert a command name text to the `\name` form (always starting
 // with a backslash, no surrounding spaces and braces).
@@ -110,8 +106,8 @@
 // - n-params: the number of parameters ('none' if there is no parameter)
 // - default-arg: default value for first parameter ('none' if unspecified)
 // - expression: the normalized expression
-#let definitions(txt) = {
-  txt.matches(command-definition)
+#let definitions(txt, group-depth: 5) = {
+  txt.matches(definition-regex(group-depth: group-depth))
     .map(_normalize-match)
 }
 
