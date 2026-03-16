@@ -144,6 +144,17 @@
   return items.at(item)
 }
 
+// Ensure the cell source is a single string
+#let normalize-cell-source(cell) = {
+  if "source" in cell and type(cell.source) == array {
+    cell.source = cell.source.join() // will be none if array is empty
+  }
+  if "source" not in cell or cell.source == none {
+    cell.source = ""
+  }
+  return cell
+}
+
 // Handle the given data using the handler registered for the given mime
 // type, forwarding the 'args' arguments to the handler.
 // Before calling the handler, the context is updated to include
@@ -219,6 +230,16 @@
   return handlers + user-handlers
 }
 
+// Build a minimal ctx for handlers used during preprocessing
+#let get-preprocessing-ctx(cell, cfg: none) = cfg + (
+  // Fields specific to ctx
+  cell: cell,
+  item-desc: none,
+  cfg: cfg,
+  // Resolved values for cfg fields
+  handlers: all-handlers(cfg: cfg),
+)
+
 // Return the notebook as JSON, without any processing
 #let nb-json(cfg: none) = {
   if type(cfg.nb) not in (str, bytes, dictionary) {
@@ -228,8 +249,8 @@
     return json(cfg.nb)
   }
   if type(cfg.nb) == str {
-    let handlers = all-handlers(cfg: cfg)
-    return json(handlers.at("path")(cfg.nb, ctx: none))
+    let ctx = get-preprocessing-ctx(none, cfg: cfg)
+    return json(handle(cfg.nb, mime: "path", ctx: ctx))
   }
   return cfg.nb
 }

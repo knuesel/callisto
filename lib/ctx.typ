@@ -28,15 +28,17 @@
 //    - metadata: the format-specific metadata if present, or full metadata
 //      dict associated with this item otherwise.
 // 
-// - nb: a processed version of the notebook, with metadata in cell source
-//   headers converted to metadata in the cell dict.
-// 
 // - handlers: the final list of handlers (including both default handlers
 //   and user handlers).
 // 
 // - lang: the language set by the user (equal to 'cfg.lang') or, if that value
 //   is 'auto', the language inferred from the notebook if available and 'none'
 //   'none' otherwise.
+//
+// Some handlers called early during notebook preprocessing leave some of
+// these fields to the original cfg value rather than the resolved value:
+// - The 'path' handler when reading the notebook itself
+// - The 'cell-preprocessing' handler
 
 // A handler function that composes the functions specified in the given list.
 // If a list value is 'none' instead of a function, the next function is called
@@ -133,18 +135,6 @@
     .join()
 }
 
-// Do minimal processing on unprocessed notebook JSON to ensure each cell
-// source is a single string.
-#let _normalize-cell-source(cell) = {
-  if "source" in cell and type(cell.source) == array {
-    cell.source = cell.source.join() // will be none if array is empty
-  }
-  if "source" not in cell or cell.source == none {
-    cell.source = ""
-  }
-  return cell
-}
-
 // Gather all LaTeX \newcommand definitions from the previous and current cells
 // in the notebook (if provided) or just in the current cell (if provided and
 // the notebook is not) and return the corresponding LaTeX preamble as string.
@@ -175,7 +165,7 @@
     cells = nb-json.cells
       .slice(0, cell.index)
       .filter(c => c.cell_type == "markdown")
-      .map(_normalize-cell-source)
+      .map(common.normalize-cell-source)
   }
   cells.push(cell)
 

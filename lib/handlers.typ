@@ -7,6 +7,7 @@
 #import "reading/stream.typ"
 #import "reading/error.typ"
 #import "reading/output.typ": outputs
+#import "reading/cell.typ": preprocess-cell
 #import "latex.typ"
 
 // A handler is a function called to render a value such as a cell's source,
@@ -18,8 +19,8 @@
 // (without slash character).
 //
 // Handlers are always called with a positional argument for the data to
-// render, and a 'ctx' keyword argument for contextual data. Some handlers also
-// take additional arguments:
+// render, and a 'ctx' keyword argument for contextual data.
+// Some handlers also take additional arguments:
 // 
 // - Image handlers must accept an 'alt' argument.
 // 
@@ -30,6 +31,8 @@
 //
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
+//
+// - The cell preprocessing handler gets an 'index' argument.
 //
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
@@ -274,6 +277,11 @@
   handle(cell, mime: cell.cell_type + "-cell", ctx: ctx, ..args)
 }
 
+// Handler for cell preprocessing.
+#let handler-cell-preprocessing(cell, ctx: none, index: none, ..args) = {
+  preprocess-cell(index, cell, cfg: ctx.cfg)
+}
+
 // Default handlers
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
@@ -314,6 +322,7 @@
   "code-cell": handler-code-cell,
   "cell": handler-cell, // called before the cell-type-specific handler
   // Other handlers
+  "cell-preprocessing": handler-cell-preprocessing,
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
   "path": handler-path,

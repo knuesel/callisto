@@ -34,18 +34,12 @@
 // array with one string per line) and convert source header metadata to cell
 // metadata, using cell-header-pattern to recognize and parse cell header lines.
 // Also ensures that the cell has a metadata.callisto dictionary.
-#let _process-cell(i, cell, cfg: none) = {
+#let preprocess-cell(i, cell, cfg: none) = {
+  cell = common.normalize-cell-source(cell)
   if "id" not in cell {
     cell.id = str(i)
   }
   cell.index = i
-  // Normalize source field to a single string
-  if "source" in cell and type(cell.source) == array {
-    cell.source = cell.source.join() // will be none if array is empty
-  }
-  if "source" not in cell or cell.source == none {
-    cell.source = ""
-  }
   if "callisto" not in cell.metadata {
     cell.metadata.callisto = (:)
   }
@@ -55,12 +49,17 @@
   return cell
 }
 
+// Call cell-preprocessing handler on each cell.
 #let _preprocess-nb(cfg: none) = {
   if cfg.nb == none { return none }
+  let handlers = common.all-handlers(cfg: cfg)
   let nb-json = common.nb-json(cfg: cfg)
-  nb-json.cells = nb-json.cells.enumerate().map(
-    ((i, c)) => _process-cell(i, c, cfg: cfg)
-  )
+  nb-json.cells = nb-json.cells.enumerate().map( ((i, c)) => common.handle(
+    c,
+    mime: "cell-preprocessing",
+    ctx: common.get-preprocessing-ctx(c, cfg: cfg),
+    index: i,
+  ))
   return nb-json
 }
 
