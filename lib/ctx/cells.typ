@@ -1,3 +1,19 @@
+#import "/lib/util.typ"
+
+// Default places to look in cell dict for cell "name"
+#let default-names = ("metadata.label", "id", "metadata.tags")
+
+// Resolve 'name-path' setting to an array of name paths
+#let resolve-name-path(path) = {
+  if path == auto {
+    return default-names
+  }
+  return util.ensure-array(path)
+}
+
+// For now a static value. In the future we might be smarter to automatically
+// support languages with other syntax (OCaml, C++, ...)
+#let default-header-pattern = "# | %key: %value"
 
 // A regex that matches every character that is special in a regex
 #let _metachar-regex = regex(`[.*+?|(){}^$\[\]\\]`.text)
@@ -20,32 +36,9 @@
   return regex("^" + translated + "\\s*$")
 }
 
-
-
-// For now a static value. In the future we might be smarter to automatically
-// support languages with other syntax (OCaml, C++, ...)
-#let default-cell-header-pattern = "# | %key: %value"
-
-#let _validate-header-pattern(pat) = {
-  let type-ok = type(pat) in (type(auto), type(none), str, dictionary)
-  let keys-ok = type(pat) != dictionary or pat.keys().all(
-    x => x in ("regex", "writer")
-  )
-  if not (type-ok and keys-ok) {
-    panic("cell-header-pattern must be a string, a dict with fields 'regex' " +
-      "and/or 'writer', or auto or none")
-  }
-}
-
 // Get header regex from cell-header-pattern setting
-#let cell-header-regex(pat) = {
-  _validate-header-pattern(pat)
-  if pat == auto {
-    pat = default-cell-header-pattern
-  }
-  if pat == none { return none }
+#let _regex(pat) = {
   if type(pat) == dictionary {
-    if "regex" not in pat { panic("regex missing from cell-header-pattern") }
     return pat.regex
   }
   // pat is a string
@@ -54,18 +47,34 @@
 
 // Get a header writer function from cell-header-pattern setting
 // (a function that takes a key and a value and returns a header line).
-#let cell-header-writer(pat) = {
-  _validate-header-pattern(pat)
-  if pat == auto {
-    pat = default-cell-header-pattern
-  }
-  if pat == none { return none }
+#let _writer(pat) = {
   if type(pat) == dictionary {
-    if "writer" not in pat { panic("writer missing from cell-header-pattern") }
     return pat.writer
   }
   // pat is a string
   return (key, value) => pat
     .replace("%key", key, count: 1)
     .replace("%value", value, count: 1)
+}
+
+#let resolve-header-pattern(pat) = {
+  // Validate pattern
+  let type-ok = type(pat) in (type(auto), str, dictionary)
+  let keys-ok = type(pat) != dictionary or pat.keys().sorted() == (
+    "regex",
+    "writer",
+  )
+  if not (type-ok and keys-ok) {
+    panic("cell-header-pattern must be a string, a dict with fields 'regex' " +
+      "and 'writer', or auto")
+  }
+
+  if pat == auto {
+    pat = default-header-pattern
+  }
+
+  return (
+    regex: _regex(pat),
+    writer: _writer(pat),
+  )
 }

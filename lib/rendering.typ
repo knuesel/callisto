@@ -1,6 +1,7 @@
-#import "reading.typ": cell.cells
-#import "common.typ": parse-main-args, handle, disabled
-#import "ctx.typ": get-ctx
+#import "reading/cell.typ": cells
+#import "util.typ": handle
+#import "config.typ": parse-main-args, disabled
+#import "ctx/ctx.typ": get-ctx
 
 // Render the specified cells according to the settings (see common.typ).
 // By default this function does apply the theme.

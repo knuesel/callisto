@@ -1,5 +1,6 @@
-#import "../common.typ": final-result, parse-main-args, handle, disabled
-#import "../ctx.typ": get-ctx
+#import "/lib/config.typ"
+#import "/lib/ctx/ctx.typ"
+#import "common.typ": final-result
 #import "cell.typ": cells
 
 // Return the lang of the cell's source
@@ -15,11 +16,11 @@
 ///   return for each matching cell a dict with fields 'cell' and 'value'.
 /// -> array of any | array of dict
 #let sources(..args) = {
-  let (cell-spec, cfg) = parse-main-args(..args)
-  if disabled(cfg: cfg) { return none }
+  let (cell-spec, cfg) = config.parse-main-args(..args)
+  if config.disabled(cfg: cfg) { return none }
   let srcs = ()
   for cell in cells(..args) {
-    let ctx = get-ctx(cell, cfg: cfg)
+    let ctx = ctx.get-ctx(cell, cfg: cfg)
     let cell-lang = _cell-lang(cell, ctx: ctx)
     let value = raw(cell.source, lang: cell-lang, block: true)
     srcs.push(final-result((text: cell.source), value, ctx: ctx))

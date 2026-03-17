@@ -1,4 +1,4 @@
-#import "../common.typ": handle
+#import "/lib/util.typ": handle
 
 // Functions to handle rich objects. A rich object is an object that can be
 // available in multiple formats. It is given as a dict with fields
@@ -13,43 +13,6 @@
 // This is how display_data/execute_result values and Markdown cell
 // attachments are stored in the notebook.
 
-// Default list of supported formats, in order of precedence: we will use
-// the first format in this list that is available in the object dict.
-#let default-formats = (
-  "image/svg+xml",
-  "image/png",
-  "image/jpeg",
-  "image/gif",
-  "text/markdown",
-  "text/latex",
-  "text/plain",
-)
-
-// Return a normalized list of desired formats:
-// - a single value is wrapped in an array
-// - if the array contains the value 'auto', the default list is spliced at
-//   that position
-#let normalize-formats(formats) = {
-  if type(formats) != array {
-    formats = (formats,)
-  }
-  let i = formats.position(x => x == auto)
-  if i != none {
-    // Replace auto value with list of default formats
-    formats = formats.slice(0, i) + default-formats + formats.slice(i + 1)
-  }
-  return formats
-}
-
-// Pick one format in the list of available formats according to the given
-// precedence which can be 'auto', a single format, or a list of formats
-// (which can itself contain 'auto' to represent the default list)
-#let pick-format(available, precedence: auto) = {
-  precedence = normalize-formats(precedence)
-  // Pick the first desired format that is available, or none
-  return precedence.find(f => f in available)
-}
-
 // Preprocess a "rich" object, which can be available in multiple formats.
 // The item is a dict with at least 'data' and 'metadata' fields, with 'data'
 // a dict keyed by MIME types.
@@ -59,8 +22,9 @@
 #let preprocess(item, ctx: none) = {
   // Ignore item with no format (data dict empty)
   if item.data.len() == 0 { return none }
-  // Choose format
-  let fmt = pick-format(item.data.keys(), precedence: ctx.cfg.format)
+  // Pick the first desired format that is available, or none
+  let available = item.data.keys()
+  let fmt = ctx.format.find(f => f in available)
   if fmt == none {
     if not ctx.cfg.ignore-wrong-format {
       panic("output item " + repr(ctx.item-desc) +

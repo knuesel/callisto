@@ -1,5 +1,5 @@
 #import "plain.typ"
-#import "/lib/common.typ": handle
+#import "/lib/util.typ": handle
 #import "/lib/reading/output.typ": outputs
 
 #let _fill = rgb(233, 236, 239)

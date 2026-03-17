@@ -5,26 +5,27 @@
 // of all exposed functions (doing this here avoids circular import issues).
 
 #import "themes/themes.typ"
-#import "lib/common.typ"
-#import "lib/reading.typ"
+#import "lib/config.typ": parse-main-args
+#import "lib/util.typ"
+#import "lib/reading/reading.typ"
 #import "lib/theming.typ"
 #import "lib/rendering.typ"
 #import "lib/handlers.typ"
 #import "lib/exporting.typ"
 
-#import common: handle
+#import util: handle
 
 #let cells = reading.cell.cells.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let cell(..args) = common.single-item(cells, args)
+#let cell(..args) = reading.single-item(cells, args)
 
 #let outputs = reading.output.outputs.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let output(..args) = common.single-item(outputs, args)
+#let output(..args) = reading.single-item(outputs, args)
 
 #let displays(..args)     = outputs(..args, output-type: "display")
 #let results(..args)      = outputs(..args, output-type: "result")
@@ -40,13 +41,13 @@
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let stream(..args) = common.single-item(streams, args)
+#let stream(..args) = reading.single-item(streams, args)
 
 #let sources = reading.source.sources.with(
   default-handlers: handlers.default,
   named-themes: themes.named,
 )
-#let source(..args) = common.single-item(sources, args)
+#let source(..args) = reading.single-item(sources, args)
 
 #let render = rendering.render.with(
   default-handlers: handlers.default,
@@ -77,7 +78,7 @@
     panic("unexpected positional argument(s): " + repr(args.pos()))
   }
   // Validate named arguments
-  let (cfg,) = common.parse-main-args(..args)
+  let (cfg,) = parse-main-args(..args)
   // Preconfigure functions with user args, not with cfg as cfg includes all
   // settings (using defaults for values not specified by the user) while we
   // want functions to be able to have defaults different from the global
