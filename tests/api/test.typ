@@ -166,3 +166,18 @@
   "(* some key: some value *)"),
 )
 
+// Check latex definition processing for literal cell
+#let my-cell = (
+  cell_type: "markdown",
+  id: "a",
+  source: ```
+$$
+  \newcommand{\AA}{A}
+  \newcommand{\BB}[1]{B(#1)}
+  \newcommand{\CC}{C}
+  \newcommand{\AA}{A}
+  \AA\BB{x}\CC
+$$
+```.text
+)
+#assert.eq(callisto.render(my-cell).children.at(1).func(), math.equation)

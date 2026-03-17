@@ -42,7 +42,7 @@
     .join()
 }
 
-// Gather all LaTeX \newcommand definitions from notebook cells
+// Gather all LaTeX \newcommand definitions from the given notebook cells
 // and return the corresponding LaTeX preamble as string.
 // Returns none if there is no notebook or no LaTeX definition in there.
 // This is done to support commands defined in one Markdown LaTeX equation and
@@ -60,18 +60,14 @@
 //    value) and raise an error otherwise. This covers the most common case
 //    of duplicate definitions, where an equation or cell is duplicated by
 //    copy-paste.
-#let latex-preamble(nb-json) = {
-  if nb-json == none {
-    return none
-  }
-
+#let latex-preamble(cells) = {
   // Get all Markdown cells and normalize source
-  let cells = nb-json.cells
+  let md-cells = cells
     .filter(c => c.cell_type == "markdown")
     .map(notebook.normalize-cell-source)
 
   // Get array of matches for command definitions
-  let defs = cells.map(_cell-latex-defs).join()
+  let defs = md-cells.map(_cell-latex-defs).join()
   if defs == none {
     return none
   }
