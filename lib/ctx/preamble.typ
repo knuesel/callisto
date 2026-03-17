@@ -44,6 +44,7 @@
 
 // Gather all LaTeX \newcommand definitions from notebook cells
 // and return the corresponding LaTeX preamble as string.
+// Returns none if there is no notebook or no LaTeX definition in there.
 // This is done to support commands defined in one Markdown LaTeX equation and
 // used in a later one (as supported by MathJax and often used in Jupyter
 // notebook although it's not valid in real LaTeX). There are two caveats:

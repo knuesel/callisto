@@ -149,8 +149,8 @@
 // Handler for LaTeX equations in Markdown cells.
 #let handler-math-markdown-cell(data, ctx: none, ..args) = {
   let txt = data
-  // If the preamble is defined, we'll use it and remove definitions from the
-  // math item itself to avoid duplicates.
+  // If using global preamble, we must remove definitions from the math item
+  // itself to avoid duplicates.
   if ctx.latex-preamble != none {
     // Remove definitions from this item's body and prepend all defs
     txt = ctx.latex-preamble + txt.replace(latex.definition-regex(), "")
