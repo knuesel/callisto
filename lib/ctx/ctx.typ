@@ -1,7 +1,7 @@
 #import "/lib/reading/notebook.typ"
 #import "/lib/theming.typ"
 #import "/lib/config.typ"
-#import "preamble.typ": latex-preamble
+#import "preamble.typ"
 #import "handling.typ"
 #import "outputs.typ"
 #import "cells.typ"
@@ -67,10 +67,6 @@
     ctx.lang = _nb-lang(nb-json)
   }
 
-  if ctx.latex-preamble == auto {
-    ctx.latex-preamble = latex-preamble(nb-json)
-  }
-
   ctx.name-path = cells.resolve-name-path(cfg.name-path)
 
   if ctx.format == auto {
@@ -90,9 +86,15 @@
 
   ctx.disabled = config.disabled(cfg: cfg)
 
+  let latex-preamble = none
+  if ctx.gather-latex-defs {
+    latex-preamble = preamble.latex-preamble(nb-json)
+  }
+
   return ctx + (
     cell: cell,
     item-desc: item-desc,
     cfg: cfg,
+    latex-preamble: latex-preamble,
   )
 }

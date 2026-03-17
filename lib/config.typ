@@ -6,7 +6,7 @@
   keep-cell-header: false,
   lang: auto,
   raw-lang: none,
-  latex-preamble: auto,
+  gather-latex-defs: true,
   // Cell selection
   count: "index",
   name-path: auto,
