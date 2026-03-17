@@ -1,5 +1,7 @@
-#import "../common.typ": final-result, ensure-array, parse-main-args, handle, disabled
-#import "../ctx.typ": get-ctx
+#import "/lib/util.typ": ensure-array, handle
+#import "/lib/config.typ": parse-main-args, disabled
+#import "/lib/ctx/ctx.typ": get-ctx
+#import "common.typ": final-result
 #import "cell.typ": cells
 #import "rich-object.typ"
 #import "stream.typ"

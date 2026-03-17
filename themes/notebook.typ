@@ -1,6 +1,6 @@
-#import "plain.typ"
-#import "/lib/common.typ": handle
+#import "/lib/util.typ": handle
 #import "/lib/reading/output.typ": outputs
+#import "plain.typ"
 
 // Make a string for a cell execution count, showing a space if missing
 #let _count-string(count) = if count == none { return " " } else { str(count) }

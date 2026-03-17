@@ -2,7 +2,7 @@
 #import "@preview/cmarker:0.1.8"
 #import "@preview/mitex:0.2.6"
 
-#import "common.typ": handle
+#import "util.typ": handle
 #import "reading/rich-object.typ"
 #import "reading/stream.typ"
 #import "reading/error.typ"

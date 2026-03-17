@@ -1,16 +1,16 @@
-#import "common.typ"
-#import "header-pattern.typ"
+#import "/lib/ctx/cells.typ": resolve-header-pattern
+#import "config.typ"
 
 // Make label for exported raw elements
 #let _export-label(name) = label("__callisto-export:" + name)
 
 #let export(..args) = {
   // The cell-spec is actually a raw element in this case
-  let (cell-spec: elem, cfg) = common.parse-main-args(..args)
+  let (cell-spec: elem, cfg) = config.parse-main-args(..args)
 
   let txt = elem.text
   if cfg.cell-label != none {
-    let header-writer = header-pattern.cell-header-writer(cfg.cell-header-pattern)
+    let header-writer = resolve-header-pattern(cfg.cell-header-pattern).writer
     txt = header-writer("label", cfg.cell-label) + "\n" + txt
   }
 
@@ -121,7 +121,7 @@
 // 
 // - nbformat: the Jupyter Notebook format version, as a string (default: "4.5")
 #let make-notebook(..args) = {
-  let (cell-spec, cfg) = common.parse-main-args(..args)
+  let (cell-spec, cfg) = config.parse-main-args(..args)
 
   // Check that no cell specification was given
   if cell-spec != none {
@@ -148,7 +148,7 @@
 }
 
 #let stage-notebook(..args) = context {
-  let (cfg,) = common.parse-main-args(..args)
+  let (cfg,) = config.parse-main-args(..args)
   let md = metadata(make-notebook(..args))
   return [#md#label(cfg.export-name)]
 }

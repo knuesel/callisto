@@ -1,13 +1,15 @@
-#import "../common.typ"
-#import "../header-pattern.typ"
+#import "/lib/util.typ"
+#import "/lib/config.typ"
+#import "/lib/ctx/cells.typ": resolve-header-pattern, resolve-name-path
+#import "notebook.typ"
 
-#let default-cell-names = ("metadata.label", "id", "metadata.tags")
+// All possible Jupyter cell types
 #let all-cell-types = ("code", "markdown", "raw")
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
   cell.metadata.callisto.header = none // initial value
-  let header-regex = header-pattern.cell-header-regex(cfg.cell-header-pattern)
+  let header-regex = resolve-header-pattern(cfg.cell-header-pattern).regex
   if header-regex == none {
     return cell
   }
@@ -41,7 +43,7 @@
   cell.index = i
 
   // Normalize source field to a single string
-  cell = common.normalize-cell-source(cell)
+  cell = notebook.normalize-cell-source(cell)
 
   if "callisto" not in cell.metadata {
     cell.metadata.callisto = (:)
@@ -52,9 +54,10 @@
   return cell
 }
 
+// Preprocess notebook dict
 #let _preprocess-nb(cfg: none) = {
   if cfg.nb == none { return none }
-  let nb-json = common.nb-json(cfg: cfg)
+  let nb-json = notebook.nb-json(cfg: cfg)
   nb-json.cells = nb-json.cells.enumerate().map(
     ((i, c)) => _process-cell(i, c, cfg: cfg)
   )
@@ -84,7 +87,7 @@
 // List of cell types for the given cell type spec
 #let _cell-types(cell-type) = {
   if cell-type == "all" { return all-cell-types }
-  let types = common.ensure-array(cell-type)
+  let types = util.ensure-array(cell-type)
   for typ in types {
     if typ not in all-cell-types {
       panic("invalid cell type: " + repr(typ))
@@ -97,12 +100,6 @@
 #let _filter-type(cells, cell-type) = {
   let types = _cell-types(cell-type)
   cells.filter(x => x.cell_type in types)
-}
-
-// Resolve 'name-path' setting to an array of name paths
-#let _name-paths(path) = {
-  if path == auto { return default-cell-names }
-  return common.ensure-array(path)
 }
 
 // Get cell indices for a single specification.
@@ -121,7 +118,7 @@
   }
   if type(spec) == str {
     // Match on any of the specified names
-    let names = _name-paths(cfg.name-path)
+    let names = resolve-name-path(cfg.name-path)
     return cells-of-type
       .filter(x => names.any(name-matches.with(x, spec)))
       .map(c => c.index)
@@ -190,7 +187,7 @@
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
-    return _filter-type(common.ensure-array(spec), cfg.cell-type)
+    return _filter-type(util.ensure-array(spec), cfg.cell-type)
   }
   let all-cells = _preprocess-nb(cfg: cfg).cells
   let cells-of-type = _filter-type(all-cells, cfg.cell-type)
@@ -199,7 +196,7 @@
     return cells-of-type
   }
   let indices = ()
-  for s in common.ensure-array(spec) {
+  for s in util.ensure-array(spec) {
     indices += _cell-indices(s, cells-of-type, all-cells, cfg: cfg)
   }
   return indices.dedup().sorted().map(i => all-cells.at(i))
@@ -208,8 +205,8 @@
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
-  let (cell-spec, cfg) = common.parse-main-args(..args)
-  if common.disabled(cfg: cfg) { return none }
+  let (cell-spec, cfg) = config.parse-main-args(..args)
+  if config.disabled(cfg: cfg) { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

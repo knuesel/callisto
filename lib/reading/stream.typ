@@ -1,6 +1,8 @@
+#import "/lib/config.typ": parse-main-args, disabled
+#import "/lib/util.typ": handle, ensure-array
+#import "/lib/ctx/ctx.typ": get-ctx
+#import "common.typ": final-result
 #import "cell.typ": cells
-#import "../common.typ": handle, parse-main-args, final-result, ensure-array, disabled
-#import "../ctx.typ": get-ctx
 
 #let all-stream-names = ("stdout", "stderr")
 

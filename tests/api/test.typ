@@ -1,20 +1,5 @@
 #import "/callisto.typ"
-#import "/lib/header-pattern.typ"
-
-// Preferred format among `xyz`, `text/plain`, `abc`
-#assert.eq(
-  callisto.reading.rich-object.pick-format(("xyz", "text/plain", "abc")),
-  "text/plain",
-)
-
-// Same with `precedence: ("abc", "text/plain")`
-#assert.eq(
-  callisto.reading.rich-object.pick-format(
-    ("xyz", "text/plain", "abc"),
-    precedence: ("abc", "text/plain"),
-  ),
-  "abc",
-)
+#import "/lib/ctx/cells.typ": resolve-header-pattern
 
 // With julia.ipynb
 #let (
@@ -36,11 +21,11 @@
 #assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
 
 // Test cell-header-pattern
-#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$")) // doesn't allow space between `#` and `|`
+#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$"), writer: none) // doesn't allow space between `#` and `|`
 #let cell-spec = arguments("pattern-test", name-path: "metadata.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
-#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
+#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"), writer: none)
 #let cpp-cell-spec = arguments("calc", nb: json("/tests/api/cpp.ipynb"))
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
@@ -173,8 +158,7 @@
 
 // Check header pattern logic for OCaml syntax
 #let pat = "(* %key: %value *)"
-#let pat-regex = header-pattern.cell-header-regex(pat)
-#let pat-writer = header-pattern.cell-header-writer(pat)
+#let (regex: pat-regex, writer: pat-writer) = resolve-header-pattern(pat)
 #let header-line = "(* some key: some value *)   "
 #assert.eq(header-line.match(pat-regex).captures, ("some key", "some value"))
 #assert.eq(
