@@ -88,7 +88,8 @@
 
   let latex-preamble = none
   if ctx.gather-latex-defs {
-    latex-preamble = preamble.latex-preamble(nb-json)
+    let cells = if nb-json == none { (cell,) } else { nb-json.cells }
+    latex-preamble = preamble.latex-preamble(cells)
   }
 
   return ctx + (

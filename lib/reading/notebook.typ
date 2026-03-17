@@ -2,8 +2,11 @@
 
 // Return the notebook as JSON, without any processing
 #let nb-json(cfg: none) = {
+  if cfg.nb == none {
+    return none
+  }
   if type(cfg.nb) not in (str, bytes, dictionary) {
-    panic("invalid notebook type: " + str(type(nb)))
+    panic("invalid notebook type: " + str(type(cfg.nb)))
   }
   if type(cfg.nb) == bytes {
     return json(cfg.nb)
