@@ -16,6 +16,17 @@ We can now call functions such as `callisto.render(nb: json("example.ipynb"))`, 
 #let (render, Cell, In, Out) = callisto.config(nb: json("example.ipynb"))
 ```
 
+However to support Markdown cells that reference external images (using Markdown such as `![](folder/image.png)` we must give Callisto a function that is allowed to read these files. This is done by specifying a "path" handler:
+
+```typst
+#let (render, Cell, In, Out) = callisto.config(
+  nb: "example.ipynb",
+  handlers: (path: (x, ..args) => read(x, encoding: none)),
+)
+```
+
+(With this path handler, Callisto can also access the notebook file so we don't need to call the `json` function ourselves.)
+
 The `config` call returns Callisto functions preconfigured with our settings. For a list of all functions (and all their parameters) that can be configured with `config`, see the [function reference](Reference.md).
 
 Here we only set the notebook, and from all the returned functions we only assign `render`, `Cell`, `In` and `Out`. Now let's use them!

@@ -86,6 +86,23 @@ Most functions accept a cell specification as positional argument. Below we use 
       #cells(range(5))
       ```
 
+   - `nb` can be the path to a notebook file as string (currently this requires defining a "path" handle as in the example below). It can also be the content of a notebook file as `bytes`, or as a dict as returned by the `json` function. Examples:
+
+      ```typst
+      // Specify the notebook by path
+      #let (output, render) = callisto.config(
+         nb: "notebook.ipynb",
+         handlers: (path: (x, ..args) => read(x, encoding: none)),
+      )
+
+      // Alternative: read notebook before passsing it to config
+      #let (output, render) = callisto.config(
+         nb: json("notebook.ipynb"),
+      )
+      ```
+
+      Typst 0.15 will probably introduce a `path` type that will make this "path" handler unnecessary in many cases (a similar handler will still be required to properly process Markdown cells that refer to external files).
+
    -  `count` can be `"index"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count. Example:
 
       ```typst

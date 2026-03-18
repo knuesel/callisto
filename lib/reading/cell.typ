@@ -189,6 +189,8 @@
   if type(spec) == dictionary or (
      type(spec) == array and spec.all(x => type(x) == dictionary)) {
     // No need to read the notebook
+    // (we assume the literal cells have been properly pre-processed, e.g.
+    // to convert header lines to metadata)
     return _filter-type(util.ensure-array(spec), cfg.cell-type)
   }
   let all-cells = _preprocess-nb(cfg: cfg).cells
