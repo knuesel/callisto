@@ -46,30 +46,21 @@ c
 
 == Control what part to show from the cell header
 
-// Get bool from cell metadata
-#let get-bool(c, key) = c.metadata.callisto.header.at(key, default: "true") == "true"
-
-#let render-conditional(it) = {
-  let c = cell(it)
-  if c == none { return }
-  render(c, input: get-bool(c, "echo"), output: get-bool(c, "output"))
-}
-
-#show <check-header>: it => export(it) + render-conditional(it)
+#show <with-header>: it => export(it) + Cell(it)
 
 Cell with `output: false` in header:
 
 ```python
 #| output: false
 2 + 3
-```<check-header>
+```<with-header>
 
 Cell with `echo: false` in header:
 
 ```python
 #| echo: false
 10 + 1
-```<check-header>
+```<with-header>
 
 == Get cell name
 

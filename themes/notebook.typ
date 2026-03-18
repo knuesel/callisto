@@ -21,7 +21,7 @@
 
 #let notebook-code-cell-input(cell, ctx: none) = block(
   above: 2em,
-  below: if ctx.cfg.output and cell.outputs.len() > 0 { 0pt } else { 2em },
+  below: if ctx.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
@@ -57,7 +57,7 @@
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   block(
-    above: if ctx.cfg.input { 0pt } else { 2em },
+    above: if ctx.input { 0pt } else { 2em },
     below: 2em,
     width: 100%,
     inset: 0.5em,
