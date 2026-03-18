@@ -8,10 +8,20 @@
   // The cell-spec is actually a raw element in this case
   let (cell-spec: elem, cfg) = config.parse-main-args(..args)
 
-  let txt = elem.text
-  if cfg.cell-label != none {
+  // Build header
+  let header = none
+  if cfg.cell-header != none {
+    if type(cfg.cell-header) != dictionary {
+      panic("cell header must be a dict")
+    }
     let header-writer = resolve-header-pattern(cfg.cell-header-pattern).writer
-    txt = header-writer("label", cfg.cell-label) + "\n" + txt
+    for (k, v) in cfg.cell-header {
+      if type(v) != str {
+        panic("cell header has key " + k + " of type " + type(v) +
+          " but only strings are supported")
+      }
+      header += header-writer(k, v) + "\n"
+    }
   }
 
   // We store the raw fields rather than the raw element itself, to avoid
@@ -19,7 +29,7 @@
   let dict = (
     export-name: cfg.export-name,
     kernel: cfg.kernel,
-    text: txt,
+    text: header + elem.text,
     lang: elem.at("lang", default: none),
     block: elem.at("block", default: true),
     label: elem.at("label", default: none),

@@ -47,7 +47,7 @@ c
 == Control what part to show from the cell header
 
 // Get bool from cell metadata
-#let get-bool(c, key) = c.metadata.at(key, default: "true") == "true"
+#let get-bool(c, key) = c.metadata.callisto.header.at(key, default: "true") == "true"
 
 #let render-conditional(it) = {
   let c = cell(it)
@@ -186,8 +186,8 @@ Code can be generated dynamically for execution:
 
 // Generate two cells for each expr: one for the expr, one for its derivative
 #for (i, expr) in exprs.enumerate() {
-  export-sympy(raw(expr), cell-label: str(i))
-  export-sympy(raw("diff(" + expr + ")"), cell-label: str(i) + "-diff")
+  export-sympy(raw(expr), cell-header: (label: str(i)))
+  export-sympy(raw("diff(" + expr + ")"), cell-header: (label: str(i) + "-diff"))
 }
 
 // Build table from results
