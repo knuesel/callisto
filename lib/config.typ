@@ -32,7 +32,7 @@
   // Export
   disabled: auto,
   export-name: "notebook",
-  cell-label: none,
+  cell-header: none,
   kernel: none,
 )
 
