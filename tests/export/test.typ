@@ -136,7 +136,7 @@ b = 42
 
 == Render exported cells using raw lang in cell metadata
 
-#render(c => c.metadata.callisto.lang == "python-x")
+#render(c => c.metadata.callisto.export.lang == "python-x")
 
 == Inline raw elements
 

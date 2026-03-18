@@ -113,7 +113,7 @@ The API is centered on the following main functions:
 
 The function parameters are described in detail in the [function reference](https://github.com/knuesel/callisto/blob/release-0.2/docs/Reference.md).
 
-The cell specification can be a cell index, execution count, tag, ID, metadata label, user-defined cell field or filter function. Code cells can start with header lines of the form `#| key: value` (this pattern can be configured). When a notebook is processed, header lines are used to define corresponding fields in the cell metadata, and are removed from the cell source.
+The cell specification can be a cell index, execution count, tag, ID, metadata label, or filter function. The cell label and other metadata can be defined in the cell code using a header line of the form `#| key: value` (this pattern can be configured). When a notebook is processed, header lines are removed from the cell source and converted to cell metadata.
 
 For convenience, many additional functions are derived from the main functions by setting some of their parameters to fixed values. For example, `render` has `Cell`, `In` and `Out` as aliases to render a single cell, either in entirety (`Cell`) or just the input or output (`In` and `Out`). And `outputs` has aliases such as `results` and `displays` to get an array of results or displays for the selected cells.
 

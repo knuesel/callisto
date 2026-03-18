@@ -25,7 +25,7 @@ Most functions accept a cell specification as positional argument. Below we use 
    render(1, count: "execution") // render cell with execution_count equal to 1
    ```
 
--  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell metadata. This field can be defined by adding a special [header](#cell-data-and-cell-header) at the top of the cell source:
+-  A string: by default this can be either a cell label, ID, or tag. A cell label refers to a `label` field in the cell `metadata.callisto.header` dict. The label of a cell can be defined by adding a special [header](#cell-data-and-cell-header) at the top of the cell source:
 
    ```
    #| label: xyz
@@ -51,13 +51,13 @@ Most functions accept a cell specification as positional argument. Below we use 
    #results(c => c.execution_count > 3)
    ```
 
--  A literal cell (a dictionary as returned by a `cells` call). Example:
+-  A literal cell (a dictionary as returned by a `cell` call). Example:
 
    ```typst
-   // Get the first three cells as dicts
-   #let c = cells(range(3))
-   // Render only the code cells among them
-   render(c, cell-type: "code")
+   // Get the cell with label "nice-plot"
+   #let c = cell("nice-plot")
+   // Render it with the "plain" theme
+   render(c, theme: "plain")
    ```
 
 -  An array of the above. Cells that match any of the array elements are included in the result. Examples:
@@ -428,7 +428,7 @@ The lower-level `cells` function (and its `cell` alias) can be used to retrieve 
 
 -  The cell source is normalized to be a simple string (nbformat also allows an array of strings).
 
--  For code cells, a **metadata header** is processed and removed if present: by default, if the first source lines are of the form `#| key: value` (optionally with an extra space between `#` and `|`), they are treated as metadata. The key-values pairs are added to the `cell.metadata` dictionary, and the header lines are removed from the cell source (unless `keep-cell-header` is set to `true`). For example, a code cell `c` containing the following source:
+-  For code cells, a **metadata header** is processed and removed if present: by default, if the first source lines are of the form `#| key: value` (optionally with an extra space between `#` and `|`), they are treated as metadata. The key-values pairs are added to the `cell.metadata.callisto.header` dictionary, and the header lines are removed from the cell source (unless `keep-cell-header` is set to `true`). For example, a code cell `c` containing the following source:
 
    ```
    #| label: plot1
@@ -436,7 +436,7 @@ The lower-level `cells` function (and its `cell` alias) can be used to retrieve 
    scatter(x)
    ```
 
-   will have the first two lines replaced by two entries in the cell dict: `c.metadata.label = "plot1"` and `c.metadata.type = "scatter"`.
+   will have the first two lines replaced by two entries in the cell dict: `c.metadata.callisto.header.label = "plot1"` and `c.metadata.callisto.header.type = "scatter"`.
 
    The format of header lines can be changed using the `cell-header-pattern` keyword.
 

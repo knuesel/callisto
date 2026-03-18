@@ -30,9 +30,11 @@
 // Make cell metadata for given raw element dict
 #let _cell-metadata(elem) = (
   callisto: (
-    lang: elem.lang,
-    block: elem.block,
-    typst-label: if elem.label == none { none } else { str(elem.label) },
+    export: (
+      lang: elem.lang,
+      block: elem.block,
+      typst-label: if elem.label == none { none } else { str(elem.label) },
+    ),
   ),
 )
 

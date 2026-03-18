@@ -86,7 +86,7 @@ plt.show()
 plt.plot([1, 2, 3, 4], [1, 3, 7, 3]);
 ```
 
-When Callisto reads the notebook, it will remove the two header lines and set `label = "plot3"` and `type = "lines"` in the cell metadata.
+When Callisto reads the notebook, it will remove the two header lines and set `label = "plot3"` and `type = "lines"` in the cell metadata (in a `callisto.header` dict).
 
 We can render this particular cell using its label:
 
@@ -100,8 +100,6 @@ We can also select cells by *tags*. Tags are not very visible in the Jupyter int
 // Render all cells with `plot` tag
 #render("plots")
 ```
-
-(By default, when cells are specified with a string Callisto will look for a match in the `metadata.label`, `id` and `metadata.tags` fields, in that order. This can be changed with the `name-path` keyword argument, see the [reference](Reference.md).)
 
 We can also specify multiple cells by position:
 

@@ -22,7 +22,7 @@
 
 // Test cell-header-pattern
 #let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$"), writer: none) // doesn't allow space between `#` and `|`
-#let cell-spec = arguments("pattern-test", name-path: "metadata.name")
+#let cell-spec = arguments("pattern-test", name-path: "metadata.callisto.header.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
 #let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"), writer: none)
@@ -33,17 +33,17 @@
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
-// Test header field in cell metadata
-#assert.eq(cell("plot3").metadata.callisto.header.split("\n").first(), "#| label: plot3")
+// Test header-text field in cell metadata
+#assert.eq(cell("plot3").metadata.callisto.header-text.split("\n").first(), "#| label: plot3")
 
 #assert("`aa` not defined" in error())
 
 #assert.eq(
-  catch(() => display("plots", name-path: "metadata.name", format: "x")),
+  catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x")),
   "panicked with: \"no matching item found\"",
 )
 #assert.eq(
-  catch(() => display("plots", name-path: "metadata.name", format: "x", ignore-wrong-format: true)),
+  catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true)),
   "panicked with: \"no matching item found\"",
 )
 
@@ -64,7 +64,7 @@
 
 #assert.eq(display("plot3", item: 0).func(), image)
 
-#assert.eq(display("scatter", name-path: "metadata.type", item: 1).func(), image)
+#assert.eq(display("scatter", name-path: "metadata.callisto.header.type", item: 1).func(), image)
 
 // Check override of a single handler by theme name
 #let out = error(
@@ -80,7 +80,7 @@
 #[
   #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
   #assert.eq(display("plot3").func(), image)
-  #assert.eq(result("scatter", name-path: "metadata.type", theme: "plain").func(), image)
+  #assert.eq(result("scatter", name-path: "metadata.callisto.header.type", theme: "plain").func(), image)
 ]
 
 

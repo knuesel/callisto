@@ -1,7 +1,7 @@
 #import "/lib/util.typ"
 
 // Default places to look in cell dict for cell "name"
-#let default-names = ("metadata.label", "id", "metadata.tags")
+#let default-names = ("metadata.callisto.header.label", "id", "metadata.tags")
 
 // Resolve 'name-path' setting to an array of name paths
 #let resolve-name-path(path) = {
