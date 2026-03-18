@@ -20,8 +20,8 @@
 // A function that replaces a special regex character by its escaped version
 #let _escape-metachar(match) = "\\" + match.text
 
-// Parse a header pattern string and return a regex for finding cell header
-// lines and extracting key and value.
+// Parse a header pattern string and return a regex for finding a cell header
+// line and extracting key and value.
 #let _header-regex-from-string(pat) = {
   // Escape every special character from the pattern string
   let escaped = pat.replace(_metachar-regex, _escape-metachar)
@@ -36,7 +36,8 @@
   return regex("^" + translated + "\\s*$")
 }
 
-// Get header regex from cell-header-pattern setting
+// Get header regex from cell-header-pattern setting (a regex that matches a
+// header line).
 #let _regex(pat) = {
   if type(pat) == dictionary {
     return pat.regex
