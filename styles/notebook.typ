@@ -65,7 +65,7 @@
   )
 }
 
-#let theme = plain.theme + (
+#let style = plain.style + (
   stream-stderr: notebook-stream-stderr,
   error: notebook-error,
   result: notebook-result,

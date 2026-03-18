@@ -17,8 +17,8 @@
 == Cell 2
 #Cell(2)
 
-=== Rendered input (plain theme)
-#In(2, theme: "plain")
+=== Rendered input (plain style)
+#In(2, style: "plain")
 
 === Rendered output (framed)
 #block(stroke: 1pt, Out(2))
@@ -28,14 +28,14 @@
 === Rendered error
 #Out(3, count: "execution", output-type: "error")
 
-=== Same but with plain theme
-#Out(3, count: "execution", output-type: "error", theme: "plain")
+=== Same but with plain style
+#Out(3, count: "execution", output-type: "error", style: "plain")
 
 == Raw cells
 #render(cell-type: "raw")
 
-=== With plain theme
-#render(cell-type: "raw", theme: "plain")
+=== With plain style
+#render(cell-type: "raw", style: "plain")
 
 #pagebreak()
 

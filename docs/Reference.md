@@ -56,8 +56,8 @@ Most functions accept a cell specification as positional argument. Below we use 
    ```typst
    // Get the cell with label "nice-plot"
    #let c = cell("nice-plot")
-   // Render it with the "plain" theme
-   render(c, theme: "plain")
+   // Render it with the "plain" style
+   render(c, style: "plain")
    ```
 
 -  An array of the above. Cells that match any of the array elements are included in the result. Examples:

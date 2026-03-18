@@ -2,7 +2,7 @@
 
 #let (render, Cell, In, Out) = callisto.config(nb: json("../../docs/example.ipynb"))
 #render()
-#render(theme: "plain")
+#render(style: "plain")
 #block(stroke: red)[
    #render(0)
 ]

@@ -66,13 +66,13 @@
 
 #assert.eq(display("scatter", name-path: "metadata.callisto.header.type", item: 1).func(), image)
 
-// Check override of a single handler by theme name
+// Check override of a single handler by style name
 #let out = error(
   5,
-  theme: callisto.themes.named.plain + (
+  style: callisto.styles.named.plain + (
     error: "notebook",
   ),
-  apply-theme: true,
+  apply-style: true,
 )
 #assert("Stacktrace" in out.body.text)
 
@@ -80,7 +80,7 @@
 #[
   #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
   #assert.eq(display("plot3").func(), image)
-  #assert.eq(result("scatter", name-path: "metadata.callisto.header.type", theme: "plain").func(), image)
+  #assert.eq(result("scatter", name-path: "metadata.callisto.header.type", style: "plain").func(), image)
 ]
 
 
@@ -185,6 +185,6 @@ $$
 
 
 // Check cell header functionality
-#let (Cell,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), theme: "plain")
+#let (Cell,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), style: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")

@@ -1,5 +1,5 @@
 #import "/lib/reading/notebook.typ"
-#import "/lib/theming.typ"
+#import "/lib/styling.typ"
 #import "/lib/config.typ"
 #import "preamble.typ"
 #import "handling.typ"

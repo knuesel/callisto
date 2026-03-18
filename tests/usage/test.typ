@@ -16,8 +16,8 @@
    nb: json("../../docs/example.ipynb"),
 )
 
-// Render the first 3 cells using the plain theme
-#render(range(3), theme: "plain")
+// Render the first 3 cells using the plain style
+#render(range(3), style: "plain")
 
 // Render only cell among the first two that is of type "code"
 #Cell(range(2), cell-type: "code")
@@ -33,9 +33,9 @@
 #In("plot2")
 #Out("plot2")
 
-// Use notebook theme for code inputs, custom theme for markdown cells
-#let repr-theme(cell, ..args) = repr(cell.source)
-#render(theme: (code-cell-input: "notebook", markdown-cell: repr-theme))
+// Use notebook style for code inputs, custom style for markdown cells
+#let repr-style(cell, ..args) = repr(cell.source)
+#render(style: (code-cell-input: "notebook", markdown-cell: repr-style))
 
 // Get more functions preconfigured for this notebook
 #let (display, result, source, output, outputs) = callisto.config(

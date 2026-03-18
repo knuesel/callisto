@@ -61,7 +61,7 @@
   )
 }
 
-#let theme = plain.theme + (
+#let style = plain.style + (
   template: neat-template,
   code-cell-input: neat-code-cell-input,
   code-cell-output: neat-code-cell-output,

@@ -3,7 +3,7 @@
 #import "notebook.typ"
 
 #let named = (
-  plain: plain.theme,
-  neat: neat.theme,
-  notebook: notebook.theme,
+  plain: plain.style,
+  neat: neat.style,
+  notebook: notebook.style,
 )

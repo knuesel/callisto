@@ -1,14 +1,14 @@
 // This file defines all the aliases of the main functions `cells`, `sources`,
 // `outputs`, `render` and `streams`.
 
-// It also pre-configures the `default-handlers` and `named-themes` parameters
+// It also pre-configures the `default-handlers` and `named-styles` parameters
 // of all exposed functions (doing this here avoids circular import issues).
 
-#import "themes/themes.typ"
+#import "styles/styles.typ"
 #import "lib/config.typ": parse-main-args
 #import "lib/util.typ"
 #import "lib/reading/reading.typ"
-#import "lib/theming.typ"
+#import "lib/styling.typ"
 #import "lib/rendering.typ"
 #import "lib/handlers.typ"
 #import "lib/exporting.typ"
@@ -17,13 +17,13 @@
 
 #let cells = reading.cell.cells.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let cell(..args) = reading.single-item(cells, args)
 
 #let outputs = reading.output.outputs.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let output(..args) = reading.single-item(outputs, args)
 
@@ -39,19 +39,19 @@
 
 #let streams = reading.stream.streams.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let stream(..args) = reading.single-item(streams, args)
 
 #let sources = reading.source.sources.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let source(..args) = reading.single-item(sources, args)
 
 #let render = rendering.render.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 // Render a single cell. The `keep` value is enforced.
 #let Cell(..args) = render(..args, keep: "unique")
@@ -62,15 +62,15 @@
 
 #let export = exporting.export.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let make-notebook = exporting.make-notebook.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 #let stage-notebook = exporting.stage-notebook.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-styles: styles.named,
 )
 
 #let config(..args) = {
@@ -83,9 +83,9 @@
   // settings (using defaults for values not specified by the user) while we
   // want functions to be able to have defaults different from the global
   // common.settings defaults. This is used by render() to have default true
-  // for apply-theme while the global default is false.
+  // for apply-style while the global default is false.
   return (
-    template: theming.resolve(cfg.theme, cfg.named-themes).template,
+    template: styling.resolve(cfg.style, cfg.named-styles).template,
     cells:            cells           .with(..args),
     cell:             cell            .with(..args),
     outputs:          outputs         .with(..args),
@@ -111,7 +111,7 @@
     stage-notebook:   stage-notebook  .with(..args),
   )
 }
-// Preconfigure named-themes in a way that they are included in
+// Preconfigure named-styles in a way that they are included in
 // the 'args' of the above config definition, and without introducing another
 // exported binding in this module.
-#let config = config.with(named-themes: themes.named)
+#let config = config.with(named-styles: styles.named)

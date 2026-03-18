@@ -12,13 +12,13 @@
 
 #pagebreak()
 
-== `neat` theme with customization to show cell indices
+== `neat` style with customization to show cell indices
 
 #v(1em)
 #[
   #let (render, template) = callisto.config(
     nb: json("python.ipynb"),
-    theme: "neat",
+    style: "neat",
   )
   #show: template
   #render(handlers: ("cell": (
@@ -33,20 +33,20 @@
 #pagebreak()
 
 
-== `plain` theme, styled raw blocks
+== `plain` style, styled raw blocks
 
 #[
   #show raw.where(block: true, lang: "python"): set block(
     inset: (left: 1.2em, y: 1em),
     stroke: (left: 3pt+luma(96%)),
   )
-  #render(theme: "plain")
+  #render(style: "plain")
 ]
 #pagebreak()
 
-== Custom theme for `code` cells
+== Custom style for `code` cells
 
-#render(theme: (
+#render(style: (
   code-cell: (c, ..args) => block(inset: (left: 1em), spacing: 2em)[
     [cell #c.index]
     #raw(block: true, c.source)
@@ -72,7 +72,7 @@
   ),
 )
 
-// == `neat` theme with stderr from notebook
+// == `neat` style with stderr from notebook
 
-// // #render(4, theme: "neat", handlers: (stream-stderr: "notebook"))
-// #render(4, theme: callisto.themes.named.neat + (stream-stderr: "notebook"))
+// // #render(4, style: "neat", handlers: (stream-stderr: "notebook"))
+// #render(4, style: callisto.styles.named.neat + (stream-stderr: "notebook"))

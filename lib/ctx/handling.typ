@@ -1,4 +1,4 @@
-#import "/lib/theming.typ"
+#import "/lib/styling.typ"
 
 // A handler function that composes the functions specified in the given list.
 // If a list value is 'none' instead of a function, the next function is called
@@ -45,12 +45,12 @@
   }
 }
 
-// Get final handlers from default, theme and user handlers.
+// Get final handlers from default, style and user handlers.
 #let all-handlers(cfg: none) = {
   let handlers = cfg.default-handlers
-  if cfg.apply-theme {
-    let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
-    handlers += theme-handlers
+  if cfg.apply-style {
+    let (template, ..style-handlers) = styling.resolve(cfg.style, cfg.named-styles)
+    handlers += style-handlers
   }
   let user-handlers = _resolve-user-handlers(handlers, cfg.handlers)
   return handlers + user-handlers
