@@ -8,7 +8,8 @@
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
-  cell.metadata.callisto.header = none // initial value
+  cell.metadata.callisto.header = (:)
+  cell.metadata.callisto.header-text = none // initial value
   let header-regex = resolve-header-pattern(cfg.cell-header-pattern).regex
   if header-regex == none {
     return cell
@@ -22,8 +23,9 @@
     }
     n += 1
     let (key, value) = m.captures
-    cell.metadata.insert(key, value)
-    cell.metadata.callisto.header += line + "\n"
+    if "header" not in cell.metadata.callisto { panic(cell.metadata) }
+    cell.metadata.callisto.header.insert(key, value)
+    cell.metadata.callisto.header-text += line + "\n"
   }
   // Remove header from source if necessary
   if not cfg.keep-cell-header and n > 0 {
@@ -124,9 +126,9 @@
       .map(c => c.index)
   }
   if type(spec) == label {
-    // Typst label: find matches in cell.metadata.callisto.label
+    // Typst label: find matches in cell.metadata.callisto.export.typst-label
     return cells-of-type
-      .filter(x => name-matches(x, str(spec), "metadata.callisto.typst-label"))
+      .filter(x => name-matches(x, str(spec), "metadata.callisto.export.typst-label"))
       .map(c => c.index)
   }
   if type(spec) == content and spec.func() == raw {
@@ -135,7 +137,7 @@
     // We still work on cells-of-type so if the user filtered for non-code
     // cells there will be no match.
     return _filter-type(cells-of-type, "code")
-      .filter(x => x.metadata.callisto.header + x.source == spec.text)
+      .filter(x => x.metadata.callisto.header-text + x.source == spec.text)
       .map(c => c.index)
   }
   if type(spec) == int {
