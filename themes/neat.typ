@@ -39,7 +39,7 @@
 }
 
 #let neat-code-cell-input(cell, ctx: none) = {
-  let has-output = ctx.cfg.output and cell.outputs.len() > 0
+  let has-output = ctx.output and cell.outputs.len() > 0
   set text(rgb("#005979"))
   show raw: set block(.._raw-block-cfg, above: 1em)
   show raw: set block(below: 1em) if not has-output
@@ -55,7 +55,7 @@
   block(
     .._raw-block-cfg,
     fill: none,
-    above: if ctx.cfg.input { 0pt } else { 1em },
+    above: if ctx.input { 0pt } else { 1em },
     below: 1em,
     outs.join(),
   )

@@ -23,8 +23,8 @@
   item: "unique",
   output-type: "all",
   // Rendering
-  input: true,
-  output: true,
+  input: auto,
+  output: auto,
   default-handlers: (:), // to be filled in callisto.typ
   named-themes: (:), // to be filled in callisto.typ
   theme: "notebook",

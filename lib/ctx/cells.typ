@@ -11,6 +11,31 @@
   return util.ensure-array(path)
 }
 
+// Gets a boolean value from the cell header
+#let _get-header-bool(cell, key, default) = {
+  let value = cell.metadata.callisto.header.at(key, default: default)
+  if value not in ("true", "false") {
+    panic("value for " + key + " in cell header must be \"true\" or \"false\"")
+  }
+  return value == "true"
+}
+
+// Resolves cfg.input using the cell header if auto
+#let resolve-input(cell, cfg: none) = {
+  if cfg.input == auto {
+    return _get-header-bool(cell, "echo", "true")
+  }
+  return cfg.input
+}
+
+// Resolves cfg.output using the cell header if auto
+#let resolve-output(cell, cfg: none) = {
+  if cfg.output == auto {
+    return _get-header-bool(cell, "output", "true")
+  }
+  return cfg.output
+}
+
 // For now a static value. In the future we might be smarter to automatically
 // support languages with other syntax (OCaml, C++, ...)
 #let default-header-pattern = "# | %key: %value"

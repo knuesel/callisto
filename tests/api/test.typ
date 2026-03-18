@@ -170,6 +170,7 @@
 #let my-cell = (
   cell_type: "markdown",
   id: "a",
+  metadata: (callisto: (header: (:))),
   source: ```
 $$
   \newcommand{\AA}{A}
@@ -181,3 +182,9 @@ $$
 ```.text
 )
 #assert.eq(callisto.render(my-cell).children.at(1).func(), math.equation)
+
+
+// Check cell header functionality
+#let (Cell,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), theme: "plain")
+#assert.eq(Cell("only-input").text, "10 + 1")
+#assert.eq(Cell("only-output").text, "12")

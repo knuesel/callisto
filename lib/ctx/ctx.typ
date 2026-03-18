@@ -76,12 +76,12 @@
 
   ctx.handlers = handling.all-handlers(cfg: cfg)
 
-  if ctx.input == auto and cell != none {
-    ctx.input = cell.metadata.at("echo", default: "true") == "true"
+  if ctx.input == auto and cell != none and cell.cell_type == "code" {
+    ctx.input = cells.resolve-input(cell, cfg: cfg)
   }
 
-  if ctx.output == auto and cell != none {
-    ctx.output = cell.metadata.at("output", default: "true") == "true"
+  if ctx.output == auto and cell != none and cell.cell_type == "code" {
+    ctx.output = cells.resolve-output(cell, cfg: cfg)
   }
 
   ctx.disabled = config.disabled(cfg: cfg)
