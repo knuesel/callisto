@@ -1,5 +1,3 @@
-#import "ctx/handling.typ": all-handlers
-
 // Wrap the argument in an array if it is not itself an array
 #let ensure-array(x) = if type(x) == array { x } else { (x,) }
 

@@ -188,3 +188,8 @@ $$
 #let (Cell,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), style: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")
+
+// TODO: must be possible to change default style and still allow cell header to override it!
+#let (Out,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), style: auto)
+#assert.eq(Out("only-output").func(), block)
+#assert.eq(Out("with-plain").func(), raw)

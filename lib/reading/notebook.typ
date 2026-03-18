@@ -12,7 +12,9 @@
     return json(cfg.nb)
   }
   if type(cfg.nb) == str {
-    let handlers = all-handlers(cfg: cfg)
+    // Resolve handlers without any style (we don't have the resolved style
+    // and don't need it for the path handler)
+    let handlers = all-handlers(none, cfg: cfg)
     return json(handlers.at("path")(cfg.nb, ctx: none))
   }
   return cfg.nb

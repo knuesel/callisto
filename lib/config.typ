@@ -27,7 +27,7 @@
   output: auto,
   default-handlers: (:), // to be filled in callisto.typ
   named-styles: (:), // to be filled in callisto.typ
-  style: "notebook",
+  style: auto,
   apply-style: false, // default for all but render functions
   // Export
   disabled: auto,

@@ -46,10 +46,12 @@
 }
 
 // Get final handlers from default, style and user handlers.
-#let all-handlers(cfg: none) = {
+// This function gets the resolved style as parameter, rather than the
+// non-resolved value from cfg.
+#let all-handlers(style, cfg: none) = {
   let handlers = cfg.default-handlers
   if cfg.apply-style {
-    let (template, ..style-handlers) = styling.resolve(cfg.style, cfg.named-styles)
+    let (template, ..style-handlers) = styling.resolve(style, cfg.named-styles)
     handlers += style-handlers
   }
   let user-handlers = _resolve-user-handlers(handlers, cfg.handlers)

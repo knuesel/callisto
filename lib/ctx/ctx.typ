@@ -74,15 +74,11 @@
   }
   ctx.format = outputs.normalize-formats(ctx.format)
 
-  ctx.handlers = handling.all-handlers(cfg: cfg)
+  ctx.input = cells.resolve-input(cell, cfg: cfg)
+  ctx.output = cells.resolve-output(cell, cfg: cfg)
+  ctx.style = cells.resolve-style(cell, cfg: cfg)
 
-  if ctx.input == auto and cell != none and cell.cell_type == "code" {
-    ctx.input = cells.resolve-input(cell, cfg: cfg)
-  }
-
-  if ctx.output == auto and cell != none and cell.cell_type == "code" {
-    ctx.output = cells.resolve-output(cell, cfg: cfg)
-  }
+  ctx.handlers = handling.all-handlers(ctx.style, cfg: cfg)
 
   ctx.disabled = config.disabled(cfg: cfg)
 

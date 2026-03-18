@@ -1,3 +1,5 @@
+#let default-style = "notebook"
+
 // Default doc template
 #let default-template(doc) = doc
 
@@ -33,6 +35,10 @@
   (template: default-template)
 
   if value == none { return }
+
+  if value == auto {
+    value = default-style
+  }
 
   if type(value) == str {
     value = _resolve-name(value, named-styles)

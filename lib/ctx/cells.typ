@@ -1,4 +1,5 @@
 #import "/lib/util.typ"
+#import "/lib/styling.typ"
 
 // Default places to look in cell dict for cell "name"
 #let default-names = ("metadata.callisto.header.label", "id", "metadata.tags")
@@ -11,8 +12,25 @@
   return util.ensure-array(path)
 }
 
+// Gets a string from the cell header if user value is auto
+#let _resolve-with-header(cell, key, user: none, default: none) = {
+  if user != auto {
+    return user
+  }
+  if cell == none or cell.cell_type != "code" {
+    return default
+  }
+  return cell.metadata.callisto.header.at(key, default: default)
+}
+
 // Gets a boolean value from the cell header
-#let _get-header-bool(cell, key, default) = {
+#let _resolve-bool-with-header(cell, key, user: none, default: none) = {
+  if user != auto {
+    return user
+  }
+  if cell == none or cell.cell_type != "code" {
+    return default
+  }
   let value = cell.metadata.callisto.header.at(key, default: default)
   if value not in ("true", "false") {
     panic("value for " + key + " in cell header must be \"true\" or \"false\"")
@@ -21,19 +39,19 @@
 }
 
 // Resolves cfg.input using the cell header if auto
-#let resolve-input(cell, cfg: none) = {
-  if cfg.input == auto {
-    return _get-header-bool(cell, "echo", "true")
-  }
-  return cfg.input
+#let resolve-input(cell, cfg: none) = { 
+  _resolve-bool-with-header(cell, "echo", user: cfg.input, default: "true")
 }
 
 // Resolves cfg.output using the cell header if auto
 #let resolve-output(cell, cfg: none) = {
-  if cfg.output == auto {
-    return _get-header-bool(cell, "output", "true")
-  }
-  return cfg.output
+  _resolve-bool-with-header(cell, "output", user: cfg.output, default: "true")
+}
+
+// Resolves cfg.style using the cell header if auto
+#let resolve-style(cell, cfg: none) = {
+  // Using auto as default: this will eventually
+  _resolve-with-header(cell, "style", user: cfg.style, default: styling.default-style)
 }
 
 // For now a static value. In the future we might be smarter to automatically
