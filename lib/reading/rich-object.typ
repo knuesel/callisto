@@ -26,12 +26,12 @@
   let available = item.data.keys()
   let fmt = ctx.format.find(f => f in available)
   if fmt == none {
-    if not ctx.cfg.ignore-wrong-format {
+    if not ctx.ignore-wrong-format {
       panic("output item " + repr(ctx.item-desc) +
       " from cell " + str(ctx.cell.index) +
       " has no appropriate format: item has " +
         repr(item.data.keys()) + ", we want " +
-        repr(normalize-formats(ctx.cfg.format)))
+        repr(normalize-formats(ctx.format)))
     }
     return none
   }

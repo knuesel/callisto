@@ -20,8 +20,8 @@
 
 // Get stream item text as a single string, if the item is a stream with
 // name matching ctx.stream. Returns none otherwise.
-#let _stream-text(item, cfg: none) = {
-  let names = _stream-names(cfg.stream)
+#let _stream-text(item, ctx: none) = {
+  let names = _stream-names(ctx.stream)
   if item.name not in names { return none }
   if type(item.text) == array {
     return item.text.join()
@@ -31,7 +31,7 @@
 
 // Generic preprocessing that doesn't require context
 #let preprocess(item, ctx: none) = {
-  item.text = _stream-text(item, cfg: ctx.cfg)
+  item.text = _stream-text(item, ctx: ctx)
   if item.text == none { return none }
   return item
 }
@@ -45,15 +45,15 @@
   let cs = cells(..args, cell-type: "code")
   let outs = ()
   for cell in cs {
+    // item-desc.index is undefined since we gather outputs from different cells
+    let ctx = get-ctx(cell, cfg: cfg, item-desc: (type: "stream", index: none))
     // Concatenate all stream items
     let txt = for item in cell.outputs {
       if item.output_type == "stream" {
-        _stream-text(item, cfg: cfg)
+        _stream-text(item, ctx: ctx)
       }
     }
     if txt == none { continue }
-    // item.index is undefined since we gather outputs from different cells
-    let ctx = get-ctx(cell, cfg: cfg, item-desc: (type: "stream", index: none))
     let preprocessed = (output_type: "stream", name: cfg.stream, text: txt)
     let value = handle(preprocessed, mime: "stream", ctx: ctx)
     outs.push(final-result(preprocessed, value, ctx: ctx))

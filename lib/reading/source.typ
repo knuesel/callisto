@@ -6,7 +6,7 @@
 // Return the lang of the cell's source
 #let _cell-lang(cell, ctx: none) = (
   markdown: "markdown",
-  raw: ctx.cfg.raw-lang,
+  raw: ctx.raw-lang,
   code: ctx.lang,
 ).at(cell.cell_type)
 

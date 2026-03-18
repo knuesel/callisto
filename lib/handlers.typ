@@ -120,7 +120,7 @@
     image: handle.with(mime: "image-markdown-cell", ctx: ctx),
   ),
   heading-labels: "jupyter",
-  h1-level: ctx.cfg.h1-level,
+  h1-level: ctx.h1-level,
   ..args,
 )
 
@@ -231,7 +231,7 @@
     cell.source,
     mime: "source-code-generic",
     ctx: ctx,
-    lang: ctx.cfg.raw-lang,
+    lang: ctx.raw-lang,
     ..args,
   )
 }
