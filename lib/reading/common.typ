@@ -33,16 +33,16 @@
 }
 
 // Final result for an output item.
-// Depending on ctx.cfg.result, this returns either 'value', or the
+// Depending on ctx.result, this returns either 'value', or the
 // 'preprocessed' dict with 'output_type' renamed to 'type' and with additional
 // fields:
 // - value: the rendered item
 // - cell (dict): the cell index, id, metadata and type.
 #let final-result(preprocessed, value, ctx: none) = {
-  if ctx.cfg.result not in ("value", "dict") {
-    panic("invalid result specification: " + repr(ctx.cfg.result))
+  if ctx.result not in ("value", "dict") {
+    panic("invalid result specification: " + repr(ctx.result))
   }
-  if ctx.cfg.result == "value" {
+  if ctx.result == "value" {
     return value
   }
   // Remove "output_type" field if present (will be replaced by type field from
