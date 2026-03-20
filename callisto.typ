@@ -4,7 +4,7 @@
 // It also pre-configures the `default-handlers` and `named-themes` parameters
 // of all exposed functions (doing this here avoids circular import issues).
 
-#import "themes/themes.typ"
+#import "themes/themes.typ": themes
 #import "lib/config.typ": parse-main-args
 #import "lib/util.typ"
 #import "lib/reading/reading.typ"
@@ -17,13 +17,13 @@
 
 #let cells = reading.cell.cells.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let cell(..args) = reading.single-item(cells, args)
 
 #let outputs = reading.output.outputs.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let output(..args) = reading.single-item(outputs, args)
 
@@ -39,19 +39,19 @@
 
 #let streams = reading.stream.streams.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let stream(..args) = reading.single-item(streams, args)
 
 #let sources = reading.source.sources.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let source(..args) = reading.single-item(sources, args)
 
 #let render = rendering.render.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 // Render a single cell. The `keep` value is enforced.
 #let Cell(..args) = render(..args, keep: "unique")
@@ -62,15 +62,15 @@
 
 #let export = exporting.export.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let make-notebook = exporting.make-notebook.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 #let stage-notebook = exporting.stage-notebook.with(
   default-handlers: handlers.default,
-  named-themes: themes.named,
+  named-themes: themes,
 )
 
 #let config(..args) = {
@@ -114,4 +114,4 @@
 // Preconfigure named-themes in a way that they are included in
 // the 'args' of the above config definition, and without introducing another
 // exported binding in this module.
-#let config = config.with(named-themes: themes.named)
+#let config = config.with(named-themes: themes)

@@ -75,4 +75,4 @@
 // == `neat` theme with stderr from notebook
 
 // // #render(4, theme: "neat", handlers: (stream-stderr: "notebook"))
-// #render(4, theme: callisto.themes.named.neat + (stream-stderr: "notebook"))
+// #render(4, theme: callisto.themes.neat + (stream-stderr: "notebook"))
