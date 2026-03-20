@@ -62,7 +62,7 @@ Cell with `echo: false` in header:
 10 + 1
 ```<with-header>
 
-== Get cell name
+== Get cell by name
 
 Cell `x`:
 #Cell("x")

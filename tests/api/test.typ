@@ -69,7 +69,7 @@
 // Check override of a single handler by theme name
 #let out = error(
   5,
-  theme: callisto.themes.named.plain + (
+  theme: callisto.themes.plain + (
     error: "notebook",
   ),
   apply-theme: true,

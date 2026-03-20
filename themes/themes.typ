@@ -2,7 +2,7 @@
 #import "neat.typ"
 #import "notebook.typ"
 
-#let named = (
+#let themes = (
   plain: plain.theme,
   neat: neat.theme,
   notebook: notebook.theme,
