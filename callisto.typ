@@ -72,6 +72,14 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
+#let execute = exporting.execute.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
+#let evaluate = exporting.evaluate.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 
 #let config(..args) = {
   if args.pos().len() > 0 {
@@ -83,7 +91,9 @@
   // settings (using defaults for values not specified by the user) while we
   // want functions to be able to have defaults different from the global
   // common.settings defaults. This is used by render() to have default true
-  // for apply-theme while the global default is false.
+  // for apply-theme while the global default is false, and by evaluate() to
+  // have default auto for the export argument while the global default is
+  // true.
   return (
     template: theming.resolve(cfg.theme, cfg.named-themes).template,
     cells:            cells           .with(..args),
@@ -109,6 +119,8 @@
     export:           export          .with(..args),
     make-notebook:    make-notebook   .with(..args),
     stage-notebook:   stage-notebook  .with(..args),
+    execute:          execute         .with(..args),
+    evaluate:         evaluate        .with(..args),
   )
 }
 // Preconfigure named-themes in a way that they are included in
