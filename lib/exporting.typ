@@ -1,4 +1,6 @@
 #import "/lib/ctx/cells.typ": resolve-header-pattern
+#import "/lib/rendering.typ": render
+#import "/lib/reading/reading.typ"
 #import "config.typ"
 
 // Make label for exported raw elements
@@ -7,6 +9,10 @@
 #let export(..args) = {
   // The cell-spec is actually a raw element in this case
   let (cell-spec: elem, cfg) = config.parse-main-args(..args)
+  if type(elem) != content or elem.func() != raw {
+    panic("expecting a raw element, got " +
+      repr(if type(elem) == content { elem.func() } else { type(elem) }))
+  }
 
   // Build header
   let header = none
@@ -159,8 +165,33 @@
   return notebook-from-raw-elements(elems, kernel, cfg.lang)
 }
 
+// Return the labelled metadata that should be inserted in the document so that
+// `typst query` can find the exported notebook.
 #let stage-notebook(..args) = context {
   let (cfg,) = config.parse-main-args(..args)
   let md = metadata(make-notebook(..args))
   return [#md#label(cfg.export-name)]
+}
+
+// Export the given raw element and render it.
+// The export is always done unless explicitly disabled with export=false.
+#let execute(..args) = export(..args) + render(..args, keep: "unique")
+
+// Copy export binding for when it's shadowed by a function parameter
+#let _export = export
+
+// Return the export metadata if callisto-export is "true", or return the
+// single execution output otherwise.
+// The export metadata can be included together with the output during a
+// normal compilation (callisto-export="false") by setting export=true.
+// This function defines a non-standard default value for export.
+#let evaluate(..args, export: auto) = {
+  if export == auto {
+    export = sys.inputs.at("callisto-export", default: "false") == "true"
+  }
+  let all-args = arguments(..args, export: export)
+  if export {
+    _export(..all-args)
+  }
+  reading.single-item(reading.output.outputs, all-args)
 }

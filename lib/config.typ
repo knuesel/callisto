@@ -34,6 +34,7 @@
   export-name: "notebook",
   cell-header: none,
   kernel: none,
+  export: true,
 )
 
 // Parse the arguments of the main functions

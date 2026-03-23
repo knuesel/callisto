@@ -6,7 +6,19 @@
 // Work around https://github.com/typst/typst/issues/1331
 #show raw: set text(8.8pt)
 
-#let (cell, result, render, Cell, In, Out, export, make-notebook, stage-notebook) = callisto.config(
+#let (
+  cell,
+  result,
+  render,
+  Cell,
+  In,
+  Out,
+  export,
+  make-notebook,
+  stage-notebook,
+  execute,
+  evaluate,
+) = callisto.config(
   nb: "export.ipynb",
   kernel: "python3",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
@@ -30,7 +42,7 @@
 
 == Show rule to show + export + render
 
-#show <g>: it => rect(it, width: 100%) + export(it) + render(it)
+#show <g>: it => rect(it, width: 100%) + execute(it)
 
 ```python
 #| label: x
@@ -46,7 +58,7 @@ c
 
 == Control what part to show from the cell header
 
-#show <with-header>: it => export(it) + Cell(it)
+#show <with-header>: execute
 
 Cell with `output: false` in header:
 
@@ -67,16 +79,16 @@ Cell with `echo: false` in header:
 Cell `x`:
 #Cell("x")
 
-== Render all exported cells with a given label
+== Render all exported cells with a given Typst label
 #render(<g>)
 
 == Render input/output/both based on label
 
-#show <cell>: it => export(it) + Cell(it)
-#show <in>:   it => export(it) + In(it)
-#show <out>:  it => export(it) + Out(it)
+#show <cell>: execute
+#show <in>:   execute.with(output: false)
+#show <out>:  execute.with(input: false)
 
-Whole cells:
+Cells that should be rendered in whole:
 
 ```python
 10 + 1
@@ -86,13 +98,13 @@ Whole cells:
 10 + 2
 ```<cell>
 
-Only input:
+Cell that should show only input:
 
 ```python
 10 + 3
 ```<in>
 
-Only output:
+Cell that should show only output:
 
 ```python
 10 + 4
@@ -110,14 +122,14 @@ Only output:
 ```
 
 ```python-x
-a = 23
+a = 23; a
 ```<a>
 
 ```python-x
-b = 42
+b = 42; b
 ```<b>
 
-== Render cell selected by label
+== Cell exported by lang and selected for render using Typst label
 
 #Cell(<a>)
 
@@ -129,18 +141,25 @@ b = 42
 
 #render(c => c.metadata.callisto.export.lang == "python-x")
 
-== Inline raw elements
+== Inline raw elements with `evaluate`
 
-#let compute(it) = export(it) + result(it)
-
-The square of 3 is #compute(`3*3`).
+The square of 3 is #evaluate(`3*3`).
 
 == Inline raw exported by label
 
 // Outputs in the the context of a raw element so will use monospace font
-#show <x>: it => export(it) + result(it)
+#show <x>: evaluate
 
 The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
+
+== With workaround for issue of raw context in show rule
+
+// Add something in cell header to avoid exporting twice exactly the same thing
+#show <x2>: evaluate.with(cell-header: (dedup: "2"))
+
+#show <x2>: set text(font: "Libertinus Serif", size: 1em/0.8)
+
+The square of 4 is `4*4`<x2>, and that of 5 is `5*5`<x2>.
 
 = Second export with another name
 
@@ -154,7 +173,6 @@ The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
   export-name: "sympy",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
-
 
 #stage-sympy()
 
