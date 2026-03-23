@@ -214,23 +214,45 @@ Code can be generated dynamically for execution:
   }
 )
 
-= Third export with another kernel
+= Third export with another kernel and with "neat" theme
 
 #let (
+  template,
   In: In-julia,
   Out: Out-julia,
+  output: output-julia,
   export: export-julia,
   stage-notebook: stage-julia,
+  execute: execute-julia,
+  evaluate: evaluate-julia,
 ) = callisto.config(
   nb: "export-julia.ipynb",
   kernel: "julia-1.11",
   export-name: "julia",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
+  theme: "neat",
 )
 
 #stage-julia()
 
+// #let raw-elements = raw.where(lang: "julia").or(raw.where(lang: none))
+// #let raw-elements = raw
+#show: template.with(set-fonts: false)
+// Simulate a template that also applies show-set rules on inline raws
+// (to check that we can avoid styling evaluation outputs that aren't raw)
+#show: it => {
+  // show selector(raw-elements).and(raw.where(block: false)): set text(red)
+  show raw.where(block: false): set text(red)
+  it
+}
+
 #show <exec>: export-julia
+
+```julia
+# Regular raw block (not exported/executed)
+2 + 2
+```
+
 
 ```
 #| label: sin
@@ -245,3 +267,45 @@ kernel):
 And here is the result:
 
 #Out-julia("sin")
+
+== Rendering through `execute`
+
+#show <exec2>: execute-julia
+
+```
+#| label: cos
+cos(1.2)
+```<exec2>
+
+== Custom handler to handle fig-cap in cell metadata
+
+#let fig-wrapper(it, ctx: none, ..args) =  {
+  let caption = ctx.cell.metadata.callisto.header.at("fig-cap", default: none)
+  if caption != none {
+    figure(caption: caption, rect(it))
+  } else {
+    it
+  }
+}
+
+#show raw.where(lang: "julia-x"): execute-julia.with(
+  handlers: (
+    path: (x, ..args) => read(x, encoding: none),
+    code-cell-output: (auto, fig-wrapper),
+  ),
+)
+#show raw.where(lang: "julia-x"): set text(font: "Libertinus Serif", size: 1em/0.8)
+#show raw.where(lang: "julia-x"): set block(fill: none, inset: 0pt)
+
+```julia-x
+#| label: tan
+#| fig-cap: Tangent of 1.2
+tan(1.2)
+```
+
+== Inline computations
+
+#show raw.where(lang: "jx").or(<jx>): evaluate-julia
+#show raw.where(lang: "jx").or(<jx>): set text(font: "Libertinus Serif", size: 1em/0.8, fill: black)
+
+Here's an inline computation: ```jx 2+3``` and another one: `2+4`<jx>
