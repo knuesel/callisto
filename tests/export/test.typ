@@ -146,6 +146,30 @@ b = 42; b
 // Using keep to disambiguate between several evaluations of `3*3`
 The square of 3 is #evaluate(`3*3`, keep: 0).
 
+== Transforming the evaluation result
+
+A table with $3^2$ cells:
+
+#{
+  let n = evaluate(`3*3`, keep: 1)
+  if type(n) == str {
+    table(
+      columns: int(n),
+      ..range(int(n)).map(str),
+    )
+  } else {
+    n
+  }
+}
+
+== Using `transform`
+
+#evaluate(
+  `3*3`,
+  cell-header: (label: "transform"), // to disambiguate
+  transform: x => int(x) * 10,
+)
+
 == Inline raw exported by label
 
 // Outputs in the the context of a raw element so will use monospace font
