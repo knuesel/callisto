@@ -169,18 +169,22 @@
 // Copy export binding for when it's shadowed by a function parameter
 #let _export = export
 
-// Return the export metadata if callisto-export is "true", or return the
-// single execution output otherwise.
-// The export metadata can be included together with the output during a
-// normal compilation (callisto-export="false") by setting export=true.
+// Return the export metadata if export is true (or auto and the
+// callisto-export sys.input is "true") or return the single execution output
+// otherwise.
 // This function defines a non-standard default value for export.
 #let evaluate(..args, export: auto) = {
   if export == auto {
     export = sys.inputs.at("callisto-export", default: "false") == "true"
   }
   let all-args = arguments(..args, export: export)
+  let (cell-spec: elem, cfg) = config.parse-main-args(..all-args)
   if export {
-    _export(..all-args)
+    return _export(..all-args)
   }
-  reading.single-item(reading.output.outputs, all-args)
+  let item = reading.single-item(reading.output.outputs, all-args)
+  if cfg.transform == none {
+    return item
+  }
+  return (cfg.transform)(item)
 }
