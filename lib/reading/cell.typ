@@ -122,11 +122,17 @@
   }
   if type(spec) == content and spec.func() == raw {
     // Raw element: find code cells with perfect match for source text
-    // (including the cell header).
+    // (including the cell header from cfg for spec, and from cell metadata
+    // for the notebook cells).
     // We still work on cells-of-type so if the user filtered for non-code
     // cells there will be no match.
+    let spec-header = header-pattern.make-header-text(
+      cfg.cell-header-pattern,
+      cfg.cell-header,
+    )
+    let spec-text = spec-header + spec.text
     return _filter-type(cells-of-type, "code")
-      .filter(x => x.metadata.callisto.header-text + x.source == spec.text)
+      .filter(x => x.metadata.callisto.header-text + x.source == spec-text)
       .map(c => c.index)
   }
   if type(spec) == int {

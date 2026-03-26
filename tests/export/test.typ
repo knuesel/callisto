@@ -143,7 +143,8 @@ b = 42; b
 
 == Inline raw elements with `evaluate`
 
-The square of 3 is #evaluate(`3*3`).
+// Using keep to disambiguate between several evaluations of `3*3`
+The square of 3 is #evaluate(`3*3`, keep: 0).
 
 == Inline raw exported by label
 
