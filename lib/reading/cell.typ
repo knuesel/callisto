@@ -205,7 +205,7 @@
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
   let (cell-spec, cfg) = config.parse-main-args(..args)
-  if config.disabled(cfg: cfg) { return none }
+  if config.read-enabled(cfg: cfg) == false { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

@@ -1,4 +1,4 @@
-#import "/lib/config.typ": parse-main-args, disabled
+#import "/lib/config.typ": parse-main-args, read-enabled
 #import "/lib/util.typ": handle, ensure-array
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "common.typ": final-result
@@ -40,7 +40,7 @@
 // of the same cell.
 #let streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if disabled(cfg: cfg) { return none }
+  if read-enabled(cfg: cfg) == false { return none }
   let names = _stream-names(cfg.stream)
   let cs = cells(..args, cell-type: "code")
   let outs = ()

@@ -17,7 +17,7 @@
 /// -> array of any | array of dict
 #let sources(..args) = {
   let (cell-spec, cfg) = config.parse-main-args(..args)
-  if config.disabled(cfg: cfg) { return none }
+  if config.read-enabled(cfg: cfg) == false { return none }
   let srcs = ()
   for cell in cells(..args) {
     let ctx = ctx.get-ctx(cell, cfg: cfg)

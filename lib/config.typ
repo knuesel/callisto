@@ -30,7 +30,7 @@
   theme: "notebook",
   apply-theme: false, // default for all but render functions
   // Export
-  disabled: auto,
+  read: auto,
   export-name: "notebook",
   cell-header: none,
   kernel: none,
@@ -59,19 +59,19 @@
   )
 }
 
-// Return true if notebook functions should be disabled in this configuration,
-// that is if the user set disabled=true or if disabled=auto and export was
+// Return false if notebook functions should be disabled in this configuration,
+// that is if the user set read=false or if read=auto and export was
 // enabled on the command-line (--input callisto-export=true).
-#let disabled(cfg: none) = {
-  if cfg.disabled != auto {
-    return cfg.disabled
+#let read-enabled(cfg: none) = {
+  if cfg.read != auto {
+    return cfg.read
   }
   let cli-export = sys.inputs.at("callisto-export", default: "false")
   if cli-export == "false" {
-    return false
+    return true
   }
   if cli-export == "true" {
-    return true
+    return false
   }
   panic("unsupported value for callisto-export input: " + cli-export)
 }
