@@ -1,4 +1,4 @@
-#import "/lib/ctx/cells.typ": resolve-header-pattern
+#import "/lib/header-pattern.typ": make-header-text
 #import "/lib/rendering.typ": render
 #import "/lib/reading/reading.typ"
 #import "config.typ"
@@ -14,21 +14,7 @@
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
   }
 
-  // Build header
-  let header = none
-  if cfg.cell-header != none {
-    if type(cfg.cell-header) != dictionary {
-      panic("cell header must be a dict")
-    }
-    let header-writer = resolve-header-pattern(cfg.cell-header-pattern).writer
-    for (k, v) in cfg.cell-header {
-      if type(v) != str {
-        panic("cell header has key " + k + " of type " + type(v) +
-          " but only strings are supported")
-      }
-      header += header-writer(k, v) + "\n"
-    }
-  }
+  let header = make-header-text(cfg.cell-header-pattern,  cfg.cell-header)
 
   // We store the raw fields rather than the raw element itself, to avoid
   // having it show up in query(raw)

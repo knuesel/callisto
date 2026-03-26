@@ -1,6 +1,7 @@
 #import "/lib/util.typ"
 #import "/lib/config.typ"
-#import "/lib/ctx/cells.typ": resolve-header-pattern, resolve-name-path
+#import "/lib/ctx/cells.typ": resolve-name-path
+#import "/lib/header-pattern.typ"
 #import "notebook.typ"
 
 // All possible Jupyter cell types
@@ -8,28 +9,16 @@
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
-  cell.metadata.callisto.header = (:)
-  cell.metadata.callisto.header-text = none // initial value
-  let header-regex = resolve-header-pattern(cfg.cell-header-pattern).regex
-  if header-regex == none {
-    return cell
-  }
-  let source_lines = cell.source.split("\n")
-  let n = 0
-  for line in source_lines {
-    let m = line.match(header-regex)
-    if m == none {
-      break
-    }
-    n += 1
-    let (key, value) = m.captures
-    if "header" not in cell.metadata.callisto { panic(cell.metadata) }
-    cell.metadata.callisto.header.insert(key, value)
-    cell.metadata.callisto.header-text += line + "\n"
-  }
+  let header = header-pattern.parse-header-text(
+    cfg.cell-header-pattern,
+    cell.source,
+  )
+  cell.metadata.callisto.header = header.dict
+  cell.metadata.callisto.header-text = header.text
+
   // Remove header from source if necessary
-  if not cfg.keep-cell-header and n > 0 {
-    cell.source = source_lines.slice(n).join("\n")
+  if not cfg.keep-cell-header and header.dict.len() > 0 {
+    cell.source = cell.source.slice(header.text.len())
   }
   return cell
 }

@@ -53,3 +53,12 @@
     value: value,
   )
 }
+
+// Gets a boolean value from the cell header
+#let get-header-bool(cell, key, default) = {
+  let value = cell.metadata.callisto.header.at(key, default: default)
+  if value not in ("true", "false") {
+    panic("value for " + key + " in cell header must be \"true\" or \"false\"")
+  }
+  return value == "true"
+}
