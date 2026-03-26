@@ -54,7 +54,7 @@
     "writer",
   )
   if not (type-ok and keys-ok) {
-    panic("cell-header-pattern must be a string, a dict with fields 'regex' " +
+    panic("cell header pattern must be a string, a dict with fields 'regex' " +
       "and 'writer', or auto")
   }
 
@@ -69,7 +69,7 @@
 }
 
 // Build a cell header string for the given dict, based on the given pattern
-#let make-header-text(pat, header-dict) = {
+#let make-header-text(header-dict, pattern: none) = {
   if header-dict == none {
     return none
   }
@@ -78,7 +78,7 @@
   }
   // Build header
   let header = none
-  let header-writer = resolve(pat).writer
+  let header-writer = resolve(pattern).writer
   for (k, v) in header-dict {
     if type(v) != str {
       panic("cell header has key " + k + " of type " + type(v) +
@@ -92,9 +92,9 @@
 // Parse the given cell source text to find the header and convert it to a
 // dictionary. The returned value is a dict with `text` field holding the full
 // header as a string, and `dict` holding the dictionary.
-#let parse-header-text(pat, cell-source) = {
+#let parse-header-text(cell-source, pattern: none) = {
   let header = (text: none, dict: (:))
-  let header-regex = resolve(pat).regex
+  let header-regex = resolve(pattern).regex
   if header-regex == none {
     return header
   }

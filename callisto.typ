@@ -12,6 +12,7 @@
 #import "lib/rendering.typ"
 #import "lib/handlers.typ"
 #import "lib/exporting.typ"
+#import "lib/header-pattern.typ": make-header-text, parse-header-text
 
 #import util: handle
 
