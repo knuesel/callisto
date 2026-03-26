@@ -6,6 +6,8 @@
 // Make label for exported raw elements
 #let _export-label(name) = label("__callisto-export:" + name)
 
+// Return the export metadata for the given raw element.
+// Note that the 'export' setting makes no difference for this function.
 #let export(..args) = {
   // The cell-spec is actually a raw element in this case
   let (cell-spec: elem, cfg) = config.parse-main-args(..args)
@@ -156,33 +158,44 @@
 
 // Return the labelled metadata that should be inserted in the document so that
 // `typst query` can find the exported notebook.
-#let stage-notebook(..args) = context {
+#let stage-notebook(..args) = {
   let (cfg,) = config.parse-main-args(..args)
-  let md = metadata(make-notebook(..args))
-  return [#md#label(cfg.export-name)]
+  if not config.export-enabled(cfg: cfg) {
+    return none
+  }
+  return context {
+    let md = metadata(make-notebook(..args))
+    return [#md#label(cfg.export-name)]
+  }
 }
-
-// Export the given raw element and render it.
-// The export is always done unless explicitly disabled with export=false.
-#let execute(..args) = export(..args) + render(..args, keep: "unique")
 
 // Copy export binding for when it's shadowed by a function parameter
 #let _export = export
 
+// Export the given raw element and render it.
+// This function defines a non-standard default value for export:
+// the export is always done unless explicitly disabled with export=false.
+#let execute(..args, export: true) = {
+  let all-args = arguments(..args, export: export)
+  let (cfg,) = config.parse-main-args(..all-args)
+  if config.export-enabled(cfg: cfg) {
+    _export(..all-args)
+  }
+  render(..all-args, keep: "unique")
+}
+
 // Return the export metadata if export is true (or auto and the
 // callisto-export sys.input is "true") or return the single execution output
 // otherwise.
-// This function defines a non-standard default value for export.
-#let evaluate(..args, export: auto) = {
-  if export == auto {
-    export = sys.inputs.at("callisto-export", default: "false") == "true"
+#let evaluate(..args) = {
+  let (cfg,) = config.parse-main-args(..args)
+  if config.export-enabled(cfg: cfg) {
+    return _export(..args)
   }
-  let all-args = arguments(..args, export: export)
-  let (cell-spec: elem, cfg) = config.parse-main-args(..all-args)
-  if export {
-    return _export(..all-args)
+  if config.read-enabled(cfg: cfg) == false {
+    return none
   }
-  let item = reading.single-item(reading.output.outputs, all-args)
+  let item = reading.single-item(reading.output.outputs, args)
   if cfg.transform == none {
     return item
   }

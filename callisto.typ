@@ -92,9 +92,9 @@
   // settings (using defaults for values not specified by the user) while we
   // want functions to be able to have defaults different from the global
   // common.settings defaults. This is used by render() to have default true
-  // for apply-theme while the global default is false, and by evaluate() to
-  // have default auto for the export argument while the global default is
-  // true.
+  // for apply-theme while the global default is false, and by execute() to
+  // have default true for the export argument while the global default is
+  // auto (meaning get the value from the CLI and default to false).
   return (
     template: theming.resolve(cfg.theme, cfg.named-themes).template,
     cells:            cells           .with(..args),
