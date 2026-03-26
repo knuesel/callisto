@@ -85,7 +85,7 @@
     ctx.output = cells.resolve-output(cell, cfg: cfg)
   }
 
-  ctx.disabled = config.disabled(cfg: cfg)
+  ctx.read = config.read-enabled(cfg: cfg)
 
   let latex-preamble = none
   if ctx.gather-latex-defs {

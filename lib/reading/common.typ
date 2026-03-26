@@ -1,11 +1,11 @@
-#import "/lib/config.typ": parse-main-args, disabled
+#import "/lib/config.typ": parse-main-args, read-enabled
 
 // Calls the specified function with the given arguments and returns a single
 // item as specified in by the `item` setting, raising an error if the list is
 // empty or if 'item' is "unique" and the list contains more than one.
 #let single-item(func, args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if disabled(cfg: cfg) { return none }
+  if read-enabled(cfg: cfg) == false { return none }
 
   let items = func(..args)
   let item = cfg.item

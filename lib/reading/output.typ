@@ -1,5 +1,5 @@
 #import "/lib/util.typ": ensure-array, handle
-#import "/lib/config.typ": parse-main-args, disabled
+#import "/lib/config.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "common.typ": final-result
 #import "cell.typ": cells
@@ -42,7 +42,7 @@
 // Can return several outputs per cell. The return value is always an array.
 #let outputs(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if disabled(cfg: cfg) { return none }
+  if read-enabled(cfg: cfg) == false { return none }
   let output-types = _output-types(cfg.output-type)
   let outs = ()
   for cell in cells(..args, cell-type: "code") {

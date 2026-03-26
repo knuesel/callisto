@@ -1,6 +1,6 @@
 #import "reading/cell.typ": cells
 #import "util.typ": handle
-#import "config.typ": parse-main-args, disabled
+#import "config.typ": parse-main-args, read-enabled
 #import "ctx/ctx.typ": get-ctx
 
 // Render the specified cells according to the settings (see common.typ).
@@ -12,7 +12,7 @@
     apply-theme: apply-theme,
     result: "value",
   )
-  if disabled(cfg: cfg) { return none }
+  if read-enabled(cfg: cfg) == false { return none }
   for cell in cells(..args) {
     handle(cell, mime: "cell", ctx: get-ctx(cell, cfg: cfg))
   }
