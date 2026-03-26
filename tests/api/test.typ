@@ -1,5 +1,5 @@
 #import "/callisto.typ"
-#import "/lib/ctx/cells.typ": resolve-header-pattern
+#import "/lib/header-pattern.typ"
 
 // With julia.ipynb
 #let (
@@ -158,7 +158,7 @@
 
 // Check header pattern logic for OCaml syntax
 #let pat = "(* %key: %value *)"
-#let (regex: pat-regex, writer: pat-writer) = resolve-header-pattern(pat)
+#let (regex: pat-regex, writer: pat-writer) = header-pattern.resolve(pat)
 #let header-line = "(* some key: some value *)   "
 #assert.eq(header-line.match(pat-regex).captures, ("some key", "some value"))
 #assert.eq(

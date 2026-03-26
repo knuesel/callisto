@@ -1,6 +1,7 @@
 #import "/lib/reading/notebook.typ"
 #import "/lib/theming.typ"
 #import "/lib/config.typ"
+#import "/lib/header-pattern.typ"
 #import "preamble.typ"
 #import "handling.typ"
 #import "outputs.typ"
@@ -60,7 +61,7 @@
   let nb-json = notebook.nb-json(cfg: cfg)
   let ctx = cfg
 
-  ctx.cell-header-pattern = cells.resolve-header-pattern(
+  ctx.cell-header-pattern = header-pattern.resolve(
     cfg.cell-header-pattern)
   
   if ctx.lang == auto {
