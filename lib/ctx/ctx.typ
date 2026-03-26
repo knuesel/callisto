@@ -86,6 +86,7 @@
   }
 
   ctx.read = config.read-enabled(cfg: cfg)
+  ctx.export = config.export-enabled(cfg: cfg)
 
   let latex-preamble = none
   if ctx.gather-latex-defs {
