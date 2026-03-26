@@ -10,8 +10,8 @@
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
   let header = header-pattern.parse-header-text(
-    cfg.cell-header-pattern,
     cell.source,
+    pattern: cfg.cell-header-pattern,
   )
   cell.metadata.callisto.header = header.dict
   cell.metadata.callisto.header-text = header.text
@@ -127,8 +127,8 @@
     // We still work on cells-of-type so if the user filtered for non-code
     // cells there will be no match.
     let spec-header = header-pattern.make-header-text(
-      cfg.cell-header-pattern,
       cfg.cell-header,
+      pattern: cfg.cell-header-pattern,
     )
     let spec-text = spec-header + spec.text
     return _filter-type(cells-of-type, "code")

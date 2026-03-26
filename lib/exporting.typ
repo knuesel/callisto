@@ -14,7 +14,10 @@
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
   }
 
-  let header = make-header-text(cfg.cell-header-pattern,  cfg.cell-header)
+  let header = make-header-text(
+    cfg.cell-header,
+    pattern: cfg.cell-header-pattern,
+  )
 
   // We store the raw fields rather than the raw element itself, to avoid
   // having it show up in query(raw)
