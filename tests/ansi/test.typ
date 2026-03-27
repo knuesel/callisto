@@ -28,7 +28,16 @@
  esc + "[34m Level 4 " +
  esc + "[35m Level 5 " +
  esc + "[36m Level 6 " +
- esc + "[0m - Normal"
+ esc + "[0m Normal"
+)
+
+// With fg/bg reverse
+#raw(lang: "ansi",
+  esc + "[31m Red text " +
+  esc + "[7m Inverted red " +
+  esc + "[34m Still Inverted but blue " +
+  esc + "[27m Uninverted blue " +
+  esc + "[0m Normal"
 )
 
 // #show raw: set text(font: "DejaVu Sans Mono")
