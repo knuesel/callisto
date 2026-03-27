@@ -1,6 +1,10 @@
 #import "/callisto.typ"
 #import "/lib/ansi.typ"
 
+#set heading(numbering: "1.")
+
+= Test strings
+
 #show raw.where(lang: "ansi"): it => ansi.render(it.text)
 
 #let esc = "\u{1b}"
@@ -68,14 +72,34 @@
   elem
 }
 
-#let (render, output) = callisto.config(
+= `ansi-table.ipynb`
+
+#let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   handlers: (
     "stream": (auto, ansi-handler),
   )
 )
-
 #render()
+
+== Custom foreground and background colors
+
+#let (Out,) = callisto.config(
+  nb: json("ansi-table.ipynb"),
+  theme: "plain",
+  handlers: (
+    "stream": (auto, ansi-handler, (it, ..args) => {
+      show raw: set block(fill: eastern.darken(70%))
+      show raw: set text(yellow)
+      it
+    }),
+  )
+)
+#Out(0)
+
+#pagebreak()
+
+= `errors.ipynb`
 
 #callisto.render(
   nb: json("errors.ipynb"),
