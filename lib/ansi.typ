@@ -16,8 +16,8 @@
 #let fg-colors = color-dict(fg-codes, palette)
 #let bg-colors = color-dict(bg-codes, palette)
 
-// Use a tiling to represent an illegal text fill
-#let illegal-text-fill = tiling(size: (3pt, 3pt))[
+// Use a tiling to represent a missing (unknown) color
+#let missing-color-tiling = tiling(size: (3pt, 3pt))[
   #place(line(start: (0%, 0%), end: (100%, 100%)))
   #place(line(start: (0%, 100%), end: (100%, 0%)))
 ]
@@ -60,7 +60,10 @@
   let weight = "regular"
   let style = "normal"
   let under = false
+  let over = false
   let strike = false
+  let dimmed = false
+  let conceal = false
   let reverse = false
   
   let result = ()
@@ -101,7 +104,10 @@
               weight = "regular"
               style = "normal"
               under = false
+              over = false
               strike = false
+              dimmed = false
+              conceal = false
               reverse = false
             } 
             // TrueColor modes: 38 for foreground, 48 for background
@@ -125,19 +131,23 @@
             } 
             // Styles
             else if code == "1" { weight = "bold" }
-            else if code == "22" { weight = "regular" }
+            else if code == "2" { dimmed = true }
+            else if code == "22" { weight = "regular"; dimmed = false }
             else if code == "3" { style = "italic" }
             else if code == "23" { style = "normal" }
             else if code == "4" { under = true }
             else if code == "24" { under = false }
+            else if code == "53" { over = true }
+            else if code == "55" { over = false }
             else if code == "9" { strike = true }
             else if code == "29" { strike = false }
+            else if code == "8" { conceal = true }
+            else if code == "28" { conceal = false }
+            else if code == "7" { reverse = true }
+            else if code == "27" { reverse = false }
             // Default Resets
             else if code == "39" { fg = default-fg }
             else if code == "49" { bg = default-bg }
-            // Reverse on/off
-            else if code == "7" { reverse = true }
-            else if code == "27" { reverse = false }
             // Basic Palette
             else if code in fg-colors { fg = fg-colors.at(code) }
             else if code in bg-colors { bg = bg-colors.at(code) }
@@ -157,26 +167,41 @@
       if weight == "bold" { node = strong(node) }
       if style == "italic" { node = emph(node) }
       if under { node = underline(node) }
+      if over { node = overline(node) }
       if strike { node = strike(node) }
 
-      // Apply reverse
+      // Apply reverse but without changing "current" fg, bg
       let final-fg = if reverse { bg } else { fg }
       let final-bg = if reverse { fg } else { bg }
 
+      if dimmed and final-fg != none {
+        final-fg = final-fg.transparentize(50%)
+      }
+
+      if conceal {
+        // Transparent text
+        final-fg = rgb(0, 0, 0, 0)
+      }
+      
       // The bg color can be none (from default-bg=none) but that's not a valid
       // text fill.
       if final-fg == none {
-        final-fg = illegal-text-fill
+        final-fg = missing-color-tiling
       }
-      
-      if final-fg != none { node = text(fill: final-fg)[#node] }
-      if final-bg != none { node = highlight(fill: final-bg)[#node] }
+
+      // Apply fg color
+      node = text(fill: final-fg, node)
+
+      // Apply bg color
+      if final-bg != none {
+        node = highlight(fill: final-bg, node)
+      }
 
       result.push(node)
     }
   }
   
-  // Join the array of styled text nodes together
+  // Join styled nodes
   result.join()
 }
 

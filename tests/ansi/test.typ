@@ -40,6 +40,16 @@
   esc + "[0m Normal"
 )
 
+// Dimming, concealed text and overline
+#raw(lang: "ansi",
+  esc + "[34;2m Dim blue " + 
+  esc + "[22m Normal blue " + 
+  esc + "[53m Overline blue " + 
+  esc + "[39;55m Default " + 
+  " | Password: [" + esc + "[8mSecret123" + esc + "[28m] | " + 
+  esc + "[0m Reset"
+)
+
 // #show raw: set text(font: "DejaVu Sans Mono")
 // #show raw: set text(font: "Noto Sans Mono")
 // #show raw: set text(font: "JuliaMono")
