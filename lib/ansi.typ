@@ -8,11 +8,15 @@
   rgb("3b78ff"), rgb("b4009e"), rgb("61d6d6"), rgb("ffffff")
 )
 
+// Codes for foreground and background colors
+// (corresponding to palette color at same index)
 #let fg-codes = (30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97)
 #let bg-codes = (40, 41, 42, 43, 44, 45, 46, 47, 100, 101, 102, 103, 104, 105, 106, 107)
 
+// Build a dict of code to color
 #let color-dict(codes, palette) = codes.map(str).zip(palette).to-dict()
 
+// Mapping of color codes to colors
 #let fg-colors = color-dict(fg-codes, palette)
 #let bg-colors = color-dict(bg-codes, palette)
 
@@ -66,6 +70,7 @@
   let conceal = false
   let reverse = false
   
+  // Array of styled chunks
   let result = ()
   
   // Regex for escape sequence. The first groups capture the numeric parameters
@@ -161,11 +166,10 @@
       }
     }
     
-    // 3. Apply the current state stack to whatever text follows the code
+    // Apply state
     if text-content != "" {
       let node = text-content
-      if weight == "bold" { node = strong(node) }
-      if style == "italic" { node = emph(node) }
+
       if under { node = underline(node) }
       if over { node = overline(node) }
       if strike { node = strike(node) }
@@ -189,8 +193,13 @@
         final-fg = missing-color-tiling
       }
 
-      // Apply fg color
-      node = text(fill: final-fg, node)
+      // Apply text style
+      node = text(
+        fill: final-fg,
+        weight: weight,
+        style: style,
+        node,
+      )
 
       // Apply bg color
       if final-bg != none {
