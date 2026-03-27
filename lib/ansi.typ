@@ -16,6 +16,12 @@
 #let fg-colors = color-dict(fg-codes, palette)
 #let bg-colors = color-dict(bg-codes, palette)
 
+// Use a tiling to represent an illegal text fill
+#let illegal-text-fill = tiling(size: (3pt, 3pt))[
+  #place(line(start: (0%, 0%), end: (100%, 100%)))
+  #place(line(start: (0%, 100%), end: (100%, 0%)))
+]
+
 // Takes an R/G/B code from 8-bit color spec and returns the corresponding
 // value in 0-255.
 #let rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
@@ -55,6 +61,7 @@
   let style = "normal"
   let under = false
   let strike = false
+  let reverse = false
   
   let result = ()
   
@@ -95,6 +102,7 @@
               style = "normal"
               under = false
               strike = false
+              reverse = false
             } 
             // TrueColor modes: 38 for foreground, 48 for background
             else if code == "38" or code == "48" {
@@ -127,6 +135,9 @@
             // Default Resets
             else if code == "39" { fg = default-fg }
             else if code == "49" { bg = default-bg }
+            // Reverse on/off
+            else if code == "7" { reverse = true }
+            else if code == "27" { reverse = false }
             // Basic Palette
             else if code in fg-colors { fg = fg-colors.at(code) }
             else if code in bg-colors { bg = bg-colors.at(code) }
@@ -147,9 +158,20 @@
       if style == "italic" { node = emph(node) }
       if under { node = underline(node) }
       if strike { node = strike(node) }
-      if fg != none { node = text(fill: fg)[#node] }
-      if bg != none { node = highlight(fill: bg)[#node] }
+
+      // Apply reverse
+      let final-fg = if reverse { bg } else { fg }
+      let final-bg = if reverse { fg } else { bg }
+
+      // The bg color can be none (from default-bg=none) but that's not a valid
+      // text fill.
+      if final-fg == none {
+        final-fg = illegal-text-fill
+      }
       
+      if final-fg != none { node = text(fill: final-fg)[#node] }
+      if final-bg != none { node = highlight(fill: final-bg)[#node] }
+
       result.push(node)
     }
   }
