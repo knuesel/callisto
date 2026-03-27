@@ -55,6 +55,9 @@
 // The default-fg and default-bg can be set to change the initial/default
 // colors.
 #let render(string, default-fg: black, default-bg: none) = {
+  // Strip OSC sequences (such as terminal hyperlinks)
+  string = string.replace(regex("\u{1b}\].*?(?:\u{07}|\u{1b}\\\\)"), "")
+
   // Split string on escape-bracket
   let chunks = string.split("\u{1b}[")
   

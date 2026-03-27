@@ -76,3 +76,11 @@
 )
 
 #render()
+
+#callisto.render(
+  nb: json("errors.ipynb"),
+  handlers: (
+    "stream": (auto, ansi-handler),
+    "error": (auto, ansi-handler),
+  )
+)
