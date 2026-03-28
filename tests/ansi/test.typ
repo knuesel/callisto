@@ -58,7 +58,7 @@
 // #show raw: set text(font: "Noto Sans Mono")
 // #show raw: set text(font: "JuliaMono")
 
-#let ansi-handler(elem, ..args) = {
+#let ansi-handler(elem, ..args, palette: auto) = {
   // Works well with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
   set par(leading: 0pt)
   set text(top-edge: 1.1em, bottom-edge: 0pt)
@@ -68,6 +68,7 @@
     it.text,
     default-bg: block.fill,
     default-fg: text.fill,
+    palette: palette,
   )
   elem
 }
@@ -82,13 +83,21 @@
 )
 #render()
 
-== Custom foreground and background colors
+== Custom foreground and background colors and Gruvbox palette
+
+
+#let gruvbox = (
+  rgb("#282828"), rgb("#cc241d"), rgb("#98971a"), rgb("#d79921"),
+  rgb("#458588"), rgb("#b16286"), rgb("#689d6a"), rgb("#a89984"),
+  rgb("#928374"), rgb("#fb4934"), rgb("#b8bb26"), rgb("#fabd2f"),
+  rgb("#83a598"), rgb("#d3869b"), rgb("#8ec07c"), rgb("#ebdbb2"),
+)
 
 #let (Out,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   theme: "plain",
   handlers: (
-    "stream": (auto, ansi-handler, (it, ..args) => {
+    "stream": (auto, ansi-handler.with(palette: gruvbox), (it, ..args) => {
       show raw: set block(fill: eastern.darken(70%))
       show raw: set text(yellow)
       it

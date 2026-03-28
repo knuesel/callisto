@@ -1,7 +1,7 @@
 // Issue with nested backgrounds: see  https://github.com/typst/typst/issues/5766
 
 // Default colors: Campbell color scheme
-#let palette = (
+#let default-palette = (
   rgb("0c0c0c"), rgb("c50f1f"), rgb("13a10e"), rgb("c19c00"),
   rgb("0037da"), rgb("881798"), rgb("3a96dd"), rgb("cccccc"),
   rgb("767676"), rgb("e74856"), rgb("16c60c"), rgb("f9f1a5"),
@@ -16,10 +16,6 @@
 // Build a dict of code to color
 #let color-dict(codes, palette) = codes.map(str).zip(palette).to-dict()
 
-// Mapping of color codes to colors
-#let fg-colors = color-dict(fg-codes, palette)
-#let bg-colors = color-dict(bg-codes, palette)
-
 // Use a tiling to represent a missing (unknown) color
 #let missing-color-tiling = tiling(size: (3pt, 3pt))[
   #place(line(start: (0%, 0%), end: (100%, 100%)))
@@ -30,7 +26,7 @@
 // value in 0-255.
 #let rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
 
-#let get-8bit-color(idx-str) = {
+#let get-8bit-color(palette, idx-str) = {
   let idx = int(idx-str)
   if idx < 16 {
     // Standard palette
@@ -54,7 +50,15 @@
 // for italic, underline and strike.
 // The default-fg and default-bg can be set to change the initial/default
 // colors.
-#let render(string, default-fg: black, default-bg: none) = {
+#let render(string, palette: auto, default-fg: black, default-bg: none) = {
+  if palette == auto {
+    palette = default-palette
+  }
+
+  // Mapping of color codes to colors
+  let fg-colors = color-dict(fg-codes, palette)
+  let bg-colors = color-dict(bg-codes, palette)
+
   // Strip OSC sequences (such as terminal hyperlinks)
   string = string.replace(regex("\u{1b}\].*?(?:\u{07}|\u{1b}\\\\)"), "")
 
@@ -123,7 +127,7 @@
               let is-bg = (code == "48")
               if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
                 // Code "5" is for 8-bit
-                let color = get-8bit-color(codes.at(idx+2))
+                let color = get-8bit-color(palette, codes.at(idx+2))
                 if is-bg { bg = color } else { fg = color }
                 idx += 3; continue
               } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
