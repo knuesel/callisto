@@ -16,12 +16,6 @@
 // Build a dict of code to color
 #let color-dict(codes, palette) = codes.map(str).zip(palette).to-dict()
 
-// Use a tiling to represent a missing (unknown) color
-#let missing-color-tiling = tiling(size: (3pt, 3pt))[
-  #place(line(start: (0%, 0%), end: (100%, 100%)))
-  #place(line(start: (0%, 100%), end: (100%, 0%)))
-]
-
 // Takes an R/G/B code from 8-bit color spec and returns the corresponding
 // value in 0-255.
 #let rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
@@ -109,6 +103,20 @@
   return state
 }
 
+// Return fg and bg colors taking the reverse state into account
+#let final-colors(state) = {
+  let (fg, bg, reverse) = state
+  if reverse {
+    // bg can be none but that's not a valid fg. In that case we assume white
+    // background, so white text when reversed.
+    (fg, bg) = (
+      if bg == none { white } else { bg },
+      fg,
+    )
+  }
+  return (fg: fg, bg: bg)
+}
+
 // TODO: update docstring
 // Parse a string to convert ANSI escape sequences to styled text using
 // text.fill for fg, highlight.fill for bg, text.weight for bold, text.style
@@ -190,7 +198,7 @@
           )
         }
       } else {
-        // Malformed sequence, print it as-is
+        // Malformed sequence: print it as-is
         text-content = "\u{1b}[" + chunk
       }
     }
@@ -199,44 +207,33 @@
     if text-content != "" {
       let node = text-content
 
-      // Apply conceal at inner-most level to avoid leaking secrets if they
-      // must be hidden
-      // if conceal { node =
+      // Apply reverse but without changing "current" state.fg, state.bg
+      let final = final-colors(state)
 
       if state.under { node = underline(node) }
       if state.over { node = overline(node) }
       if state.strike { node = std.strike(node) }
 
-      // Apply reverse but without changing "current" state.fg, state.bg
-      let final-fg = if state.reverse { state.bg } else { state.fg }
-      let final-bg = if state.reverse { state.fg } else { state.bg }
-
-      if state.dimmed and final-fg != none {
-        final-fg = final-fg.transparentize(50%)
+      if state.dimmed and final.fg != none {
+        final.fg = final.fg.transparentize(50%)
       }
 
       if state.conceal {
         // Transparent text
-        final-fg = rgb(0, 0, 0, 0)
+        final.fg = rgb(0, 0, 0, 0)
       }
       
-      // The state.bg color can be none (from default-bg=none) but that's not a valid
-      // text fill.
-      if final-fg == none {
-        final-fg = missing-color-tiling
-      }
-
       // Apply text style
       node = text(
-        fill: final-fg,
+        fill: final.fg,
         weight: state.weight,
         style: state.style,
         node,
       )
 
       // Apply state.bg color
-      if final-bg != none {
-        node = highlight(fill: final-bg, node)
+      if final.bg != none {
+        node = highlight(fill: final.bg, node)
       }
 
       result.push(node)
