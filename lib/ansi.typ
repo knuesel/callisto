@@ -10,9 +10,9 @@
 
 // Takes an R/G/B code from 8-bit color spec and returns the corresponding
 // value in 0-255.
-#let rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
+#let _rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
 
-#let color-8bit(palette, idx-str) = {
+#let _color-8bit(palette, idx-str) = {
   let idx = int(idx-str)
   if idx < 16 {
     // Standard palette
@@ -23,7 +23,7 @@
     let r = int(n / 36)
     let g = int(calc.rem(n, 36) / 6)
     let b = calc.rem(n, 6)
-    return rgb(rgb-channel(r), rgb-channel(g), rgb-channel(b))
+    return rgb(_rgb-channel(r), _rgb-channel(g), _rgb-channel(b))
   } else {
     // Grayscale ramp
     let v = (idx - 232) * 10 + 8
@@ -31,7 +31,7 @@
   }
 }
 
-#let chunk-style(codes-str, state: none, default: none, palette: none) = {
+#let _chunk-style(codes-str, state: none, default: none, palette: none) = {
   let codes = codes-str.split(";")
   // Keep track of how many numerical values have been processed
   // (we sometimes process several together
@@ -48,7 +48,7 @@
       let is-bg = (code == "48")
       if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
         // Code "5" is for 8-bit
-        let color = color-8bit(palette, codes.at(idx+2))
+        let color = _color-8bit(palette, codes.at(idx+2))
         if is-bg { state.bg = color } else { state.fg = color }
         idx += 3; continue
       } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
@@ -100,7 +100,7 @@
 }
 
 // Return fg and bg colors taking the reverse state into account
-#let final-colors(state, bold: none, bold-is-bright: none, palette: none) = {
+#let _final-colors(state, bold: none, bold-is-bright: none, palette: none) = {
   let (fg, bg, reverse) = state
   if reverse {
     // bg can be none but that's not a valid fg. In that case we assume white
@@ -123,12 +123,26 @@
   return (fg: fg, bg: bg)
 }
 
-// TODO: update docstring
-// Parse a string to convert ANSI escape sequences to styled text using
-// text.fill for fg, highlight.fill for bg, text.weight for bold, text.style
-// for italic, underline and strike.
-// The default-fg and default-bg can be set to change the initial/default
-// colors.
+// Convert a string with ANSI escape sequences into styled text.
+// - palette: an array of 16 colors to use for the standard ANSI colors.
+//   Default is auto for the Campbell palette.
+// - default-fg: initial color for text (default: black). Cannot be none.
+// - default-bg: initial background color (default: none). Can be none; in this
+//   case, when colors are reversed, the text will be rendered in white.
+// - bold-is-bright: if true, bold text in standard normal color (one of the
+//   first 8 colors in the palette) will also be rendered "bright" by using
+//   the corresponding bright color from the palette. Default false.
+// - fg, bg, bold, italic, overline, underline, strike, dim, conceal: functions
+//   to apply the corresponding style, each taking content as first positional
+//   argument, as well as `fg` and `bg` keyword arguments for the current
+//   colors.
+//
+//   The default function for "dim" makes the text 50% transparent.
+// 
+//   The default "conceal" is to use "hide" to prevent secrets from leaking
+//   into compiled documents. To instead make the text "invisible" but still
+//   present and selectable, use
+//     conceal: (it, ..args) => text(it, fill: rgb(0, 0, 0, 0))
 #let render(
   string,
   palette: auto,
@@ -144,8 +158,6 @@
   strike:    (it, ..args) => strike(it),
   dim:       (it, fg: none, ..args) => text(it, fill: fg.transparentize(50%)),
   conceal:   (it, ..args) => hide(it),
-  // Alternative implementation that doesn't really remove secrets
-  // conceal:   (it, ..args) => text(it, fill: rgb(0, 0, 0, 0)),
 ) = {
   if palette == auto {
     palette = default-palette
@@ -199,7 +211,7 @@
         
         // Ignore all commands except 'm' which is for styling
         if cmd == "m" {
-          state = chunk-style(
+          state = _chunk-style(
             codes-str,
             state: state,
             default: default-state,
@@ -217,7 +229,7 @@
       let node = text-content
 
       // Apply reverse without changing state.fg, state.bg
-      let final = final-colors(
+      let final = _final-colors(
         state,
         bold: state.bold,
         bold-is-bright: bold-is-bright,
