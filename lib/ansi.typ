@@ -45,6 +45,70 @@
   }
 }
 
+#let get-chunk-style(codes-str, state: none, default: none, palette: none) = {
+  // Mapping of color codes to colors
+  let fg-colors = color-dict(fg-codes, palette)
+  let bg-colors = color-dict(bg-codes, palette)
+
+  let codes = codes-str.split(";")
+  // Keep track of how many numerical values have been processed
+  // (we sometimes process several together
+  let idx = 0
+  while idx < codes.len() {
+    let code = codes.at(idx)
+
+    // "0" or empty string (\x1b[m) = reset
+    if code == "0" or code == "" {
+      state = default
+    }
+    // TrueColor modes: 38 for foreground, 48 for background
+    else if code == "38" or code == "48" {
+      let is-bg = (code == "48")
+      if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
+        // Code "5" is for 8-bit
+        let color = get-8bit-color(palette, codes.at(idx+2))
+        if is-bg { state.bg = color } else { state.fg = color }
+        idx += 3; continue
+      } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
+        // Code "2" is for 24-bit
+        let color = rgb(
+          int(codes.at(idx+2)),
+          int(codes.at(idx+3)),
+          int(codes.at(idx+4)),
+        )
+        if is-bg { state.bg = color } else { state.fg = color }
+        idx += 5; continue
+      }
+    } 
+    // Styles
+    else if code == "1" { state.weight = "bold" }
+    else if code == "2" { state.dimmed = true }
+    else if code == "22" { state.weight = "regular"; state.dimmed = false }
+    else if code == "3" { state.style = "italic" }
+    else if code == "23" { state.style = "normal" }
+    else if code == "4" { state.under = true }
+    else if code == "24" { state.under = false }
+    else if code == "53" { state.over = true }
+    else if code == "55" { state.over = false }
+    else if code == "9" { state.strike = true }
+    else if code == "29" { state.strike = false }
+    else if code == "8" { state.conceal = true }
+    else if code == "28" { state.conceal = false }
+    else if code == "7" { state.reverse = true }
+    else if code == "27" { state.reverse = false }
+    // Default Resets
+    else if code == "39" { state.fg = default.fg }
+    else if code == "49" { state.bg = default.bg }
+    // Basic Palette
+    else if code in fg-colors { state.fg = fg-colors.at(code) }
+    else if code in bg-colors { state.bg = bg-colors.at(code) }
+
+    idx += 1
+  }
+
+  return state
+}
+
 // TODO: update docstring
 // Parse a string to convert ANSI escape sequences to styled text using
 // text.fill for fg, highlight.fill for bg, text.weight for bold, text.style
@@ -70,10 +134,6 @@
     palette = default-palette
   }
 
-  // Mapping of color codes to colors
-  let fg-colors = color-dict(fg-codes, palette)
-  let bg-colors = color-dict(bg-codes, palette)
-
   // Strip OSC sequences (such as terminal hyperlinks)
   string = string.replace(regex("\u{1b}\].*?(?:\u{07}|\u{1b}\\\\)"), "")
 
@@ -81,7 +141,7 @@
   let chunks = string.split("\u{1b}[")
   
   // Default state
-  let default = (
+  let default-state = (
     fg: default-fg,
     bg: default-bg,
     weight: "regular",
@@ -95,7 +155,7 @@
   )
 
   // Initial state
-  let current = default
+  let state = default-state
   
   // Array of styled chunks
   let result = ()
@@ -122,61 +182,12 @@
         
         // Ignore all commands except 'm' which is for styling
         if cmd == "m" {
-          let codes = codes-str.split(";")
-          // Keep track of how many numerical values have been processed
-          // (we sometimes process several together
-          let idx = 0
-          while idx < codes.len() {
-            let code = codes.at(idx)
-            
-            // "0" or empty string (\x1b[m) = reset
-            if code == "0" or code == "" {
-              current = default
-            } 
-            // TrueColor modes: 38 for foreground, 48 for background
-            else if code == "38" or code == "48" {
-              let is-bg = (code == "48")
-              if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
-                // Code "5" is for 8-bit
-                let color = get-8bit-color(palette, codes.at(idx+2))
-                if is-bg { current.bg = color } else { current.fg = color }
-                idx += 3; continue
-              } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
-                // Code "2" is for 24-bit
-                let color = rgb(
-                  int(codes.at(idx+2)),
-                  int(codes.at(idx+3)),
-                  int(codes.at(idx+4)),
-                )
-                if is-bg { current.bg = color } else { current.fg = color }
-                idx += 5; continue
-              }
-            } 
-            // Styles
-            else if code == "1" { current.weight = "bold" }
-            else if code == "2" { current.dimmed = true }
-            else if code == "22" { current.weight = "regular"; current.dimmed = false }
-            else if code == "3" { current.style = "italic" }
-            else if code == "23" { current.style = "normal" }
-            else if code == "4" { current.under = true }
-            else if code == "24" { current.under = false }
-            else if code == "53" { current.over = true }
-            else if code == "55" { current.over = false }
-            else if code == "9" { current.strike = true }
-            else if code == "29" { current.strike = false }
-            else if code == "8" { current.conceal = true }
-            else if code == "28" { current.conceal = false }
-            else if code == "7" { current.reverse = true }
-            else if code == "27" { current.reverse = false }
-            // Default Resets
-            else if code == "39" { current.fg = default-fg }
-            else if code == "49" { current.bg = default-bg }
-            // Basic Palette
-            else if code in fg-colors { current.fg = fg-colors.at(code) }
-            else if code in bg-colors { current.bg = bg-colors.at(code) }
-            
-            idx += 1
-          }
+          state = get-chunk-style(
+            codes-str,
+            state: state,
+            default: default-state,
+            palette: palette,
+          )
         }
       } else {
         // Malformed sequence, print it as-is
@@ -192,24 +203,24 @@
       // must be hidden
       // if conceal { node =
 
-      if current.under { node = underline(node) }
-      if current.over { node = overline(node) }
-      if current.strike { node = std.strike(node) }
+      if state.under { node = underline(node) }
+      if state.over { node = overline(node) }
+      if state.strike { node = std.strike(node) }
 
-      // Apply reverse but without changing "current" current.fg, current.bg
-      let final-fg = if current.reverse { current.bg } else { current.fg }
-      let final-bg = if current.reverse { current.fg } else { current.bg }
+      // Apply reverse but without changing "current" state.fg, state.bg
+      let final-fg = if state.reverse { state.bg } else { state.fg }
+      let final-bg = if state.reverse { state.fg } else { state.bg }
 
-      if current.dimmed and final-fg != none {
+      if state.dimmed and final-fg != none {
         final-fg = final-fg.transparentize(50%)
       }
 
-      if current.conceal {
+      if state.conceal {
         // Transparent text
         final-fg = rgb(0, 0, 0, 0)
       }
       
-      // The current.bg color can be none (from default-bg=none) but that's not a valid
+      // The state.bg color can be none (from default-bg=none) but that's not a valid
       // text fill.
       if final-fg == none {
         final-fg = missing-color-tiling
@@ -218,12 +229,12 @@
       // Apply text style
       node = text(
         fill: final-fg,
-        weight: current.weight,
-        style: current.style,
+        weight: state.weight,
+        style: state.style,
         node,
       )
 
-      // Apply current.bg color
+      // Apply state.bg color
       if final-bg != none {
         node = highlight(fill: final-bg, node)
       }
@@ -235,5 +246,3 @@
   // Join styled nodes
   result.join()
 }
-
-
