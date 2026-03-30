@@ -1,11 +1,11 @@
 // Issue with nested backgrounds: see  https://github.com/typst/typst/issues/5766
 
-// Default colors: Campbell color scheme
+// Default colors: Tango color scheme
 #let default-palette = (
-  rgb("0c0c0c"), rgb("c50f1f"), rgb("13a10e"), rgb("c19c00"),
-  rgb("0037da"), rgb("881798"), rgb("3a96dd"), rgb("cccccc"),
-  rgb("767676"), rgb("e74856"), rgb("16c60c"), rgb("f9f1a5"),
-  rgb("3b78ff"), rgb("b4009e"), rgb("61d6d6"), rgb("ffffff")
+  rgb("#2e3436"), rgb("#cc0000"), rgb("#4e9a06"), rgb("#c4a000"),
+  rgb("#3465a4"), rgb("#75507b"), rgb("#06989a"), rgb("#d3d7cf"),
+  rgb("#555753"), rgb("#ef2929"), rgb("#8ae234"), rgb("#fce94f"),
+  rgb("#729fcf"), rgb("#ad7fa8"), rgb("#34e2e2"), rgb("#eeeeec"),
 )
 
 // Takes an R/G/B code from 8-bit color spec and returns the corresponding
