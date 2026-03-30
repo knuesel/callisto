@@ -40,8 +40,20 @@
     inset: (left: 1.2em, y: 1em),
     stroke: (left: 3pt+luma(96%)),
   )
-  #render(theme: "plain")
+  #render(range(4), theme: "plain")
 ]
+
+=== With Codly
+
+#[
+  #import "@preview/codly:1.3.0": *
+  #import "@preview/codly-languages:0.1.1": *
+
+  #show raw.where(block: true, lang: "python"): codly-init
+  #codly(languages: codly-languages)
+  #render(range(4), theme: "plain")
+]
+
 #pagebreak()
 
 == Custom theme for `code` cells
@@ -72,7 +84,3 @@
   ),
 )
 
-// == `neat` theme with stderr from notebook
-
-// // #render(4, theme: "neat", handlers: (stream-stderr: "notebook"))
-// #render(4, theme: callisto.themes.neat + (stream-stderr: "notebook"))
