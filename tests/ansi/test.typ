@@ -15,7 +15,6 @@
   esc + "[38;2;255;128;0;44;1m TrueColor on blue " + 
   esc + "[2J" + // ignored cursor wipe
   esc + "[39m Default fg " + 
-  esc + "[4m Underlined " + 
   esc + "[m Reset (empty m)\n" + 
   esc + "[38;5;199m 8-bit cube pink" +
   esc + "[38;5;6m 8-bit cyan" +
@@ -46,11 +45,13 @@
 
 // Dimming, concealed text and overline
 #raw(lang: "ansi",
-  esc + "[34;2m Dim blue " + 
-  esc + "[22m Normal blue " + 
-  esc + "[53m Overline blue " + 
-  esc + "[39;55m Default " + 
-  " | Password: [" + esc + "[8mSecret123" + esc + "[28m] | " + 
+  esc + "[34;2m Dim blue " +
+  esc + "[22m Normal " +
+  esc + "[53m Overline " +
+  esc + "[4m Underline " +
+  esc + "[9m Strike " +
+  esc + "[24;29;55m Default " +
+  esc + "[39;m| Password: [" + esc + "[8mSecret123" + esc + "[28m] | " +
   esc + "[0m Reset"
 )
 

@@ -179,7 +179,7 @@
 
       if under { node = underline(node) }
       if over { node = overline(node) }
-      if strike { node = strike(node) }
+      if strike { node = std.strike(node) }
 
       // Apply reverse but without changing "current" fg, bg
       let final-fg = if reverse { bg } else { fg }
