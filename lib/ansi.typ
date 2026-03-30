@@ -8,19 +8,11 @@
   rgb("3b78ff"), rgb("b4009e"), rgb("61d6d6"), rgb("ffffff")
 )
 
-// Codes for foreground and background colors
-// (corresponding to palette color at same index)
-#let fg-codes = (30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97)
-#let bg-codes = (40, 41, 42, 43, 44, 45, 46, 47, 100, 101, 102, 103, 104, 105, 106, 107)
-
-// Build a dict of code to color
-#let color-dict(codes, palette) = codes.map(str).zip(palette).to-dict()
-
 // Takes an R/G/B code from 8-bit color spec and returns the corresponding
 // value in 0-255.
 #let rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
 
-#let get-8bit-color(palette, idx-str) = {
+#let color-8bit(palette, idx-str) = {
   let idx = int(idx-str)
   if idx < 16 {
     // Standard palette
@@ -39,11 +31,7 @@
   }
 }
 
-#let get-chunk-style(codes-str, state: none, default: none, palette: none) = {
-  // Mapping of color codes to colors
-  let fg-colors = color-dict(fg-codes, palette)
-  let bg-colors = color-dict(bg-codes, palette)
-
+#let chunk-style(codes-str, state: none, default: none, palette: none) = {
   let codes = codes-str.split(";")
   // Keep track of how many numerical values have been processed
   // (we sometimes process several together
@@ -60,7 +48,7 @@
       let is-bg = (code == "48")
       if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
         // Code "5" is for 8-bit
-        let color = get-8bit-color(palette, codes.at(idx+2))
+        let color = color-8bit(palette, codes.at(idx+2))
         if is-bg { state.bg = color } else { state.fg = color }
         idx += 3; continue
       } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
@@ -75,11 +63,11 @@
       }
     } 
     // Styles
-    else if code == "1" { state.weight = "bold" }
+    else if code == "1" { state.bold = true }
     else if code == "2" { state.dimmed = true }
-    else if code == "22" { state.weight = "regular"; state.dimmed = false }
-    else if code == "3" { state.style = "italic" }
-    else if code == "23" { state.style = "normal" }
+    else if code == "22" { state.bold = false; state.dimmed = false }
+    else if code == "3" { state.italic = true }
+    else if code == "23" { state.italic = false }
     else if code == "4" { state.under = true }
     else if code == "24" { state.under = false }
     else if code == "53" { state.over = true }
@@ -93,9 +81,17 @@
     // Default Resets
     else if code == "39" { state.fg = default.fg }
     else if code == "49" { state.bg = default.bg }
-    // Basic Palette
-    else if code in fg-colors { state.fg = fg-colors.at(code) }
-    else if code in bg-colors { state.bg = bg-colors.at(code) }
+    else {
+      // Basic Palette: we store the palette index to allow for easy
+      // bold-is-bright implementation.
+      // fg codes: 30 31 32 33 34 35 36 37, 90 91 92 93 94 95 96 97
+      // bg codes: 40 41 42 43 44 45 46 47, 100 101 102 103 104 105 106 107
+      let num = int(code)
+      if num >= 30 and num <= 37 { state.fg = num - 30 }
+      else if num >= 90 and num <= 97 { state.fg = num - 90 + 8 }
+      else if num >= 40 and num <= 47 { state.bg = num - 40 }
+      else if num >= 100 and num <= 107 { state.bg = num - 100 + 8 }
+    }
 
     idx += 1
   }
@@ -104,7 +100,7 @@
 }
 
 // Return fg and bg colors taking the reverse state into account
-#let final-colors(state) = {
+#let final-colors(state, bold: none, bold-is-bright: none, palette: none) = {
   let (fg, bg, reverse) = state
   if reverse {
     // bg can be none but that's not a valid fg. In that case we assume white
@@ -113,6 +109,16 @@
       if bg == none { white } else { bg },
       fg,
     )
+  }
+  // Handle colors given as palette index
+  if type(fg) == int {
+    if bold and bold-is-bright and fg < 8 {
+      fg = fg + 8
+    }
+    fg = palette.at(fg)
+  }
+  if type(bg) == int {
+    bg = palette.at(bg)
   }
   return (fg: fg, bg: bg)
 }
@@ -128,6 +134,7 @@
   palette: auto,
   default-fg: black,
   default-bg: none,
+  bold-is-bright: false,
   fg:        (it, fg: none, ..args) => text(it, fill: fg),
   bg:        (it, bg: none, ..args) => highlight(it, fill: bg),
   bold:      (it, ..args) => text(it, weight: "bold"),
@@ -135,8 +142,10 @@
   overline:  (it, ..args) => overline(it),
   underline: (it, ..args) => underline(it),
   strike:    (it, ..args) => strike(it),
+  dim:       (it, fg: none, ..args) => text(it, fill: fg.transparentize(50%)),
   conceal:   (it, ..args) => hide(it),
-  dim:       (it, fg: none) => text(it, fill: fg.transparentize(50%)),
+  // Alternative implementation that doesn't really remove secrets
+  // conceal:   (it, ..args) => text(it, fill: rgb(0, 0, 0, 0)),
 ) = {
   if palette == auto {
     palette = default-palette
@@ -152,8 +161,8 @@
   let default-state = (
     fg: default-fg,
     bg: default-bg,
-    weight: "regular",
-    style: "normal",
+    bold: false,
+    italic: false,
     under: false,
     over: false,
     strike: false,
@@ -190,7 +199,7 @@
         
         // Ignore all commands except 'm' which is for styling
         if cmd == "m" {
-          state = get-chunk-style(
+          state = chunk-style(
             codes-str,
             state: state,
             default: default-state,
@@ -207,34 +216,28 @@
     if text-content != "" {
       let node = text-content
 
-      // Apply reverse but without changing "current" state.fg, state.bg
-      let final = final-colors(state)
-
-      if state.under { node = underline(node) }
-      if state.over { node = overline(node) }
-      if state.strike { node = std.strike(node) }
-
-      if state.dimmed and final.fg != none {
-        final.fg = final.fg.transparentize(50%)
-      }
-
-      if state.conceal {
-        // Transparent text
-        final.fg = rgb(0, 0, 0, 0)
-      }
-      
-      // Apply text style
-      node = text(
-        fill: final.fg,
-        weight: state.weight,
-        style: state.style,
-        node,
+      // Apply reverse without changing state.fg, state.bg
+      let final = final-colors(
+        state,
+        bold: state.bold,
+        bold-is-bright: bold-is-bright,
+        palette: palette,
       )
 
-      // Apply state.bg color
-      if final.bg != none {
-        node = highlight(fill: final.bg, node)
-      }
+      // Apply conceal at the innermost level, so the effect won't be
+      // accidentally undone by other transformations (which could leak secrets)
+      if state.conceal { node = conceal(node, ..final) }
+
+      if state.under { node = underline(node, ..final) }
+      if state.over { node = overline(node, ..final) }
+      if state.strike { node = strike(node, ..final) }
+      if state.italic { node = italic(node, ..final) }
+      if state.dimmed { node = dim(node, ..final) }
+      if state.bold { node = bold(node, ..final) }
+      if final.bg != none { node = highlight(node, fill: final.bg) }
+
+      // Apply fg color
+      node = text(node, fill: final.fg)
 
       result.push(node)
     }

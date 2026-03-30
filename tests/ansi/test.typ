@@ -5,14 +5,18 @@
 
 = Test strings
 
-#show raw.where(lang: "ansi"): it => ansi.render(it.text)
+#show raw.where(lang: "ansi"): it => ansi.render(
+  it.text,
+  conceal: (it, ..args) => text(rgb(0, 0, 0, 50), it),
+  bold-is-bright: true,
+)
 
 #let esc = "\u{1b}"
 
 // Big mix
 #raw(lang: "ansi",
-  esc + "[32m Green " +
-  esc + "[38;2;255;128;0;44;1m TrueColor on blue " + 
+  esc + "[32;1m Green bold " +
+  esc + "[38;2;255;128;0;44m TrueColor on blue " + 
   esc + "[2J" + // ignored cursor wipe
   esc + "[39m Default fg " + 
   esc + "[m Reset (empty m)\n" + 
@@ -55,6 +59,8 @@
   esc + "[0m Reset"
 )
 
+= `ansi-table.ipynb`
+
 // #show raw: set text(font: "DejaVu Sans Mono")
 // #show raw: set text(font: "Noto Sans Mono")
 // #show raw: set text(font: "JuliaMono")
@@ -73,8 +79,6 @@
   )
   elem
 }
-
-= `ansi-table.ipynb`
 
 #let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
