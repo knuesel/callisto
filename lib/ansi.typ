@@ -45,12 +45,27 @@
   }
 }
 
+// TODO: update docstring
 // Parse a string to convert ANSI escape sequences to styled text using
 // text.fill for fg, highlight.fill for bg, text.weight for bold, text.style
 // for italic, underline and strike.
 // The default-fg and default-bg can be set to change the initial/default
 // colors.
-#let render(string, palette: auto, default-fg: black, default-bg: none) = {
+#let render(
+  string,
+  palette: auto,
+  default-fg: black,
+  default-bg: none,
+  fg:        (it, fg: none, ..args) => text(it, fill: fg),
+  bg:        (it, bg: none, ..args) => highlight(it, fill: bg),
+  bold:      (it, ..args) => text(it, weight: "bold"),
+  italic:    (it, ..args) => text(it, style: "italic"),
+  overline:  (it, ..args) => overline(it),
+  underline: (it, ..args) => underline(it),
+  strike:    (it, ..args) => strike(it),
+  conceal:   (it, ..args) => hide(it),
+  dim:       (it, fg: none) => text(it, fill: fg.transparentize(50%)),
+) = {
   if palette == auto {
     palette = default-palette
   }
@@ -65,17 +80,22 @@
   // Split string on escape-bracket
   let chunks = string.split("\u{1b}[")
   
+  // Default state
+  let default = (
+    fg: default-fg,
+    bg: default-bg,
+    weight: "regular",
+    style: "normal",
+    under: false,
+    over: false,
+    strike: false,
+    dimmed: false,
+    conceal: false,
+    reverse: false,
+  )
+
   // Initial state
-  let fg = default-fg
-  let bg = default-bg
-  let weight = "regular"
-  let style = "normal"
-  let under = false
-  let over = false
-  let strike = false
-  let dimmed = false
-  let conceal = false
-  let reverse = false
+  let current = default
   
   // Array of styled chunks
   let result = ()
@@ -111,16 +131,7 @@
             
             // "0" or empty string (\x1b[m) = reset
             if code == "0" or code == "" {
-              fg = default-fg
-              bg = default-bg
-              weight = "regular"
-              style = "normal"
-              under = false
-              over = false
-              strike = false
-              dimmed = false
-              conceal = false
-              reverse = false
+              current = default
             } 
             // TrueColor modes: 38 for foreground, 48 for background
             else if code == "38" or code == "48" {
@@ -128,7 +139,7 @@
               if idx + 2 < codes.len() and codes.at(idx+1) == "5" {
                 // Code "5" is for 8-bit
                 let color = get-8bit-color(palette, codes.at(idx+2))
-                if is-bg { bg = color } else { fg = color }
+                if is-bg { current.bg = color } else { current.fg = color }
                 idx += 3; continue
               } else if idx + 4 < codes.len() and codes.at(idx+1) == "2" {
                 // Code "2" is for 24-bit
@@ -137,32 +148,32 @@
                   int(codes.at(idx+3)),
                   int(codes.at(idx+4)),
                 )
-                if is-bg { bg = color } else { fg = color }
+                if is-bg { current.bg = color } else { current.fg = color }
                 idx += 5; continue
               }
             } 
             // Styles
-            else if code == "1" { weight = "bold" }
-            else if code == "2" { dimmed = true }
-            else if code == "22" { weight = "regular"; dimmed = false }
-            else if code == "3" { style = "italic" }
-            else if code == "23" { style = "normal" }
-            else if code == "4" { under = true }
-            else if code == "24" { under = false }
-            else if code == "53" { over = true }
-            else if code == "55" { over = false }
-            else if code == "9" { strike = true }
-            else if code == "29" { strike = false }
-            else if code == "8" { conceal = true }
-            else if code == "28" { conceal = false }
-            else if code == "7" { reverse = true }
-            else if code == "27" { reverse = false }
+            else if code == "1" { current.weight = "bold" }
+            else if code == "2" { current.dimmed = true }
+            else if code == "22" { current.weight = "regular"; current.dimmed = false }
+            else if code == "3" { current.style = "italic" }
+            else if code == "23" { current.style = "normal" }
+            else if code == "4" { current.under = true }
+            else if code == "24" { current.under = false }
+            else if code == "53" { current.over = true }
+            else if code == "55" { current.over = false }
+            else if code == "9" { current.strike = true }
+            else if code == "29" { current.strike = false }
+            else if code == "8" { current.conceal = true }
+            else if code == "28" { current.conceal = false }
+            else if code == "7" { current.reverse = true }
+            else if code == "27" { current.reverse = false }
             // Default Resets
-            else if code == "39" { fg = default-fg }
-            else if code == "49" { bg = default-bg }
+            else if code == "39" { current.fg = default-fg }
+            else if code == "49" { current.bg = default-bg }
             // Basic Palette
-            else if code in fg-colors { fg = fg-colors.at(code) }
-            else if code in bg-colors { bg = bg-colors.at(code) }
+            else if code in fg-colors { current.fg = fg-colors.at(code) }
+            else if code in bg-colors { current.bg = bg-colors.at(code) }
             
             idx += 1
           }
@@ -177,24 +188,28 @@
     if text-content != "" {
       let node = text-content
 
-      if under { node = underline(node) }
-      if over { node = overline(node) }
-      if strike { node = std.strike(node) }
+      // Apply conceal at inner-most level to avoid leaking secrets if they
+      // must be hidden
+      // if conceal { node =
 
-      // Apply reverse but without changing "current" fg, bg
-      let final-fg = if reverse { bg } else { fg }
-      let final-bg = if reverse { fg } else { bg }
+      if current.under { node = underline(node) }
+      if current.over { node = overline(node) }
+      if current.strike { node = std.strike(node) }
 
-      if dimmed and final-fg != none {
+      // Apply reverse but without changing "current" current.fg, current.bg
+      let final-fg = if current.reverse { current.bg } else { current.fg }
+      let final-bg = if current.reverse { current.fg } else { current.bg }
+
+      if current.dimmed and final-fg != none {
         final-fg = final-fg.transparentize(50%)
       }
 
-      if conceal {
+      if current.conceal {
         // Transparent text
         final-fg = rgb(0, 0, 0, 0)
       }
       
-      // The bg color can be none (from default-bg=none) but that's not a valid
+      // The current.bg color can be none (from default-bg=none) but that's not a valid
       // text fill.
       if final-fg == none {
         final-fg = missing-color-tiling
@@ -203,12 +218,12 @@
       // Apply text style
       node = text(
         fill: final-fg,
-        weight: weight,
-        style: style,
+        weight: current.weight,
+        style: current.style,
         node,
       )
 
-      // Apply bg color
+      // Apply current.bg color
       if final-bg != none {
         node = highlight(fill: final-bg, node)
       }
