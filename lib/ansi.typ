@@ -126,16 +126,16 @@
 // Convert a string with ANSI escape sequences into styled text.
 // - palette: an array of 16 colors to use for the standard ANSI colors.
 //   Default is auto for the Campbell palette.
-// - default-fg: initial color for text (default: black). Cannot be none.
-// - default-bg: initial background color (default: none). Can be none; in this
+// - fg: initial color for text (default: black). Cannot be none.
+// - bg: initial background color (default: none). Can be none; in this
 //   case, when colors are reversed, the text will be rendered in white.
 // - bold-is-bright: if true, bold text in standard normal color (one of the
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
-// - fg, bg, bold, italic, overline, underline, strike, dim, conceal: functions
-//   to apply the corresponding style, each taking content as first positional
-//   argument, as well as `fg` and `bg` keyword arguments for the current
-//   colors.
+// - apply-fg, apply-bg, bold, italic, overline, underline, strike, dim,
+//   conceal: functions to apply the corresponding style, each taking content
+//   as first positional argument, as well as `fg` and `bg` keyword
+//   arguments for the current colors.
 //
 //   The default function for "dim" makes the text 50% transparent.
 // 
@@ -146,11 +146,11 @@
 #let render(
   string,
   palette: auto,
-  default-fg: black,
-  default-bg: none,
+  fg: black,
+  bg: none,
   bold-is-bright: false,
-  fg:        (it, fg: none, ..args) => text(it, fill: fg),
-  bg:        (it, bg: none, ..args) => highlight(it, fill: bg),
+  apply-fg:  (it, fg: none, ..args) => text(it, fill: fg),
+  apply-bg:  (it, bg: none, ..args) => highlight(it, fill: bg),
   bold:      (it, ..args) => text(it, weight: "bold"),
   italic:    (it, ..args) => text(it, style: "italic"),
   overline:  (it, ..args) => overline(it),
@@ -171,8 +171,8 @@
   
   // Default state
   let default-state = (
-    fg: default-fg,
-    bg: default-bg,
+    fg: fg,
+    bg: bg,
     bold: false,
     italic: false,
     under: false,
@@ -224,35 +224,37 @@
       }
     }
     
-    // Apply state
-    if text-content != "" {
-      let node = text-content
-
-      // Apply reverse without changing state.fg, state.bg
-      let final = _final-colors(
-        state,
-        bold: state.bold,
-        bold-is-bright: bold-is-bright,
-        palette: palette,
-      )
-
-      // Apply conceal at the innermost level, so the effect won't be
-      // accidentally undone by other transformations (which could leak secrets)
-      if state.conceal { node = conceal(node, ..final) }
-
-      if state.under { node = underline(node, ..final) }
-      if state.over { node = overline(node, ..final) }
-      if state.strike { node = strike(node, ..final) }
-      if state.italic { node = italic(node, ..final) }
-      if state.dimmed { node = dim(node, ..final) }
-      if state.bold { node = bold(node, ..final) }
-      if final.bg != none { node = highlight(node, fill: final.bg) }
-
-      // Apply fg color
-      node = text(node, fill: final.fg)
-
-      result.push(node)
+    if text-content == "" {
+      continue
     }
+
+    // Apply state
+    let node = text-content
+
+    // Apply reverse without changing state.fg, state.bg
+    let final = _final-colors(
+      state,
+      bold: state.bold,
+      bold-is-bright: bold-is-bright,
+      palette: palette,
+    )
+
+    // Apply conceal at the innermost level, so the effect won't be
+    // accidentally undone by other transformations (which could leak secrets)
+    if state.conceal { node = conceal(node, ..final) }
+
+    if state.under  { node = underline(node, ..final) }
+    if state.over   { node = overline(node, ..final) }
+    if state.strike { node = strike(node, ..final) }
+    if state.italic { node = italic(node, ..final) }
+    if state.dimmed { node = dim(node, ..final) }
+    if state.bold   { node = bold(node, ..final) }
+
+    if final.bg != none { node = apply-bg(node, ..final) }
+
+    node = apply-fg(node, ..final)
+
+    result.push(node)
   }
   
   // Join styled nodes

@@ -73,8 +73,8 @@
 
   show raw: it => ansi.render(
     it.text,
-    default-bg: block.fill,
-    default-fg: text.fill,
+    bg: block.fill,
+    fg: text.fill,
     palette: palette,
   )
   elem
