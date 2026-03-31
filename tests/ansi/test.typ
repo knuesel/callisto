@@ -9,6 +9,7 @@
   it.text,
   conceal: (it, ..args) => text(rgb(0, 0, 0, 50), it),
   bold-is-bright: true,
+  bg: white,
 )
 
 #let esc = "\u{1b}"

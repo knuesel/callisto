@@ -111,12 +111,7 @@
 #let _final-colors(state, bold: none, bold-is-bright: none, palette: none) = {
   let (fg, bg, reverse) = state
   if reverse {
-    // bg can be none but that's not a valid fg. In that case we assume white
-    // background, so white text when reversed.
-    (fg, bg) = (
-      if bg == none { white } else { bg },
-      fg,
-    )
+    (fg, bg) = (bg, fg)
   }
   // Handle colors given as palette index
   if type(fg) == int {
@@ -134,16 +129,18 @@
 // Convert a string with ANSI escape sequences into styled text.
 // - palette: an array of 16 colors to use for the standard ANSI colors.
 //   Default is auto for the Campbell palette.
-// - fg: initial color for text (default: black). Cannot be none.
-// - bg: initial background color (default: none). Can be none; in this
-//   case, when colors are reversed, the text will be rendered in white.
+// - fg: initial color for text (default: none). If none, by default the text
+//   color (or background color when reverse) is left as-is and dimming has no
+//   effect.
+// - bg: initial background color (default: none). If none, by default the
+//   background color (or text color when reversed) is left as-is.
 // - bold-is-bright: if true, bold text in standard normal color (one of the
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
 // - apply-fg, apply-bg, bold, italic, overline, underline, strike, dim,
 //   conceal: functions to apply the corresponding style, each taking content
 //   as first positional argument, as well as `fg` and `bg` keyword
-//   arguments for the current colors.
+//   arguments for the current colors, which are always of type color or none.
 //
 //   The default function for "dim" makes the text 50% transparent.
 // 
@@ -154,17 +151,17 @@
 #let render(
   string,
   palette: auto,
-  fg: black,
+  fg: none,
   bg: none,
   bold-is-bright: false,
-  apply-fg:  (it, fg: none, ..args) => text(it, fill: fg),
-  apply-bg:  (it, bg: none, ..args) => highlight(it, fill: bg),
+  apply-fg:  (it, fg: none, ..args) => if fg == none { it } else { text(it, fill: fg) },
+  apply-bg:  (it, bg: none, ..args) => if bg == none { it } else { highlight(it, fill: bg) },
   bold:      (it, ..args) => text(it, weight: "bold"),
   italic:    (it, ..args) => text(it, style: "italic"),
   overline:  (it, ..args) => overline(it),
   underline: (it, ..args) => underline(it),
   strike:    (it, ..args) => strike(it),
-  dim:       (it, fg: none, ..args) => text(it, fill: fg.transparentize(50%)),
+  dim:       (it, fg: none, ..args) => if fg == none { it } else { text(it, fill: fg.transparentize(50%)) },
   conceal:   (it, ..args) => hide(it),
 ) = {
   if palette == auto {
@@ -258,9 +255,7 @@
     if state.italic { node = italic(node, ..final) }
     if state.dimmed { node = dim(node, ..final) }
     if state.bold   { node = bold(node, ..final) }
-
-    if final.bg != none { node = apply-bg(node, ..final) }
-
+    node = apply-bg(node, ..final)
     node = apply-fg(node, ..final)
 
     result.push(node)
