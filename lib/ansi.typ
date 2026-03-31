@@ -137,6 +137,9 @@
 // - bold-is-bright: if true, bold text in standard normal color (one of the
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
+// - line-by-line: if true (default false), chunks will be split at newlines
+//   so that styling functions (see below) are always applied on content
+//   without newline.
 // - apply-fg, apply-bg, bold, italic, overline, underline, strike, dim,
 //   conceal: functions to apply the corresponding style, each taking content
 //   as first positional argument, as well as `fg` and `bg` keyword
@@ -154,6 +157,7 @@
   fg: none,
   bg: none,
   bold-is-bright: false,
+  line-by-line: false,
   apply-fg:  (it, fg: none, ..args) => if fg == none { it } else { text(it, fill: fg) },
   apply-bg:  (it, bg: none, ..args) => if bg == none { it } else { highlight(it, fill: bg) },
   bold:      (it, ..args) => text(it, weight: "bold"),
@@ -243,8 +247,13 @@
     )
 
     // Apply state
+    let parts = if line-by-line {
+      text-content.split("\n")
+    } else {
+      (text-content,)
+    }
     let chunk-results = ()
-    for node in text-content.split("\n") {
+    for node in parts {
       // Apply conceal at the innermost level, so the effect won't be
       // accidentally undone by other transformations (which could leak secrets)
       if state.conceal { node = conceal(node, ..final) }

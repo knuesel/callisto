@@ -52,8 +52,8 @@
 #raw(lang: "ansi",
   esc + "[34;2m Dim blue " +
   esc + "[22m Normal " +
-  esc + "[53m Overline " +
-  esc + "[4m Underline " +
+  esc + "[53m Over " +
+  esc + "[4m Under " +
   esc + "[9m Strike " +
   esc + "[24;29;55m Default " +
   esc + "[39;m| Password: [" + esc + "[8mSecret123" + esc + "[28m] | " +
@@ -86,6 +86,22 @@
       palette: gruvbox,
       fg: yellow,
       bg: eastern.darken(70%),
+    ),
+  )
+)
+#Out(0)
+
+== Custom styling functions
+
+#let (Out,) = callisto.config(
+  nb: json("ansi-table.ipynb"),
+  theme: "plain",
+  handlers: (
+    "text-ansi-generic": (data, ..args) => ansi.render(
+      data,
+      line-by-line: true,
+      apply-fg: (it, ..args) => text(eastern, it),
+      apply-bg: (it, ..args) => box(fill: black, it),
     ),
   )
 )
