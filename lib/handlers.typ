@@ -167,34 +167,36 @@
   return none
 }
 
-// Render escape sequences in given text, or leave as-is if no sequence found
-#let _ansi-maybe-render(data, ctx: none, ..args) = {
-  if data.match(ansi.escape-regex) == none {
-    return data
-  }
-  return handle(
-    data,
-    mime: "text-ansi-generic",
-    ctx: ctx,
-    fg: _guess-fg-color(),
-    bg: _guess-bg-color(),
-    ..args,
-  )
-}
-
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
 #let handler-text-ansi-block(data, ctx: none, ..args) = {
+  let elem = raw(block: true, lang: "txt", data)
+  let target = raw.where(block: true, lang: "txt")
+
+  // Settings that work well to avoid gaps between rows (in background color
+  // or between box drawing characters) and overlaps.
+  // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
+  show target: set par(leading: 0pt)
+  show target: set text(top-edge: 1.1em, bottom-edge: 0pt)
+  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
+
   // We go through a raw block (replaced by a simple block in the show rule)
   // to apply raw font and to allow the user to set show-set rules on raw.
-
-  // Settings that work well with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
-  show raw.where(block: true, lang: "txt"): set par(leading: 0pt)
-  show raw.where(block: true, lang: "txt"): set text(top-edge: 1.1em, bottom-edge: 0pt)
-  show raw.where(block: true, lang: "txt"): set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
-
-  show raw.where(block: true, lang: "txt"): r => block(
-    _ansi-maybe-render(data, ctx: ctx, ..args)
+  // This is done in all cases for consistency.
+  show target: r => block(
+    // Avoid any text styling if no escape sequence found
+    if data.match(ansi.escape-regex) == none {
+      r.text
+    } else {
+      handle(
+          r.text,
+          mime: "text-ansi-generic",
+          ctx: ctx,
+          fg: _guess-fg-color(),
+          bg: _guess-bg-color(),
+          ..args,
+        )
+    }
   )
 
   raw(block: true, lang: "txt", data)

@@ -234,9 +234,6 @@
       continue
     }
 
-    // Apply state
-    let node = text-content
-
     // Apply reverse without changing state.fg, state.bg
     let final = _final-colors(
       state,
@@ -245,20 +242,23 @@
       palette: palette,
     )
 
-    // Apply conceal at the innermost level, so the effect won't be
-    // accidentally undone by other transformations (which could leak secrets)
-    if state.conceal { node = conceal(node, ..final) }
-
-    if state.under  { node = underline(node, ..final) }
-    if state.over   { node = overline(node, ..final) }
-    if state.strike { node = strike(node, ..final) }
-    if state.italic { node = italic(node, ..final) }
-    if state.dimmed { node = dim(node, ..final) }
-    if state.bold   { node = bold(node, ..final) }
-    node = apply-bg(node, ..final)
-    node = apply-fg(node, ..final)
-
-    result.push(node)
+    // Apply state
+    let chunk-results = ()
+    for node in text-content.split("\n") {
+      // Apply conceal at the innermost level, so the effect won't be
+      // accidentally undone by other transformations (which could leak secrets)
+      if state.conceal { node = conceal(node, ..final) }
+      if state.under  { node = underline(node, ..final) }
+      if state.over   { node = overline(node, ..final) }
+      if state.strike { node = strike(node, ..final) }
+      if state.italic { node = italic(node, ..final) }
+      if state.dimmed { node = dim(node, ..final) }
+      if state.bold   { node = bold(node, ..final) }
+      node = apply-bg(node, ..final)
+      node = apply-fg(node, ..final)
+      chunk-results.push(node)
+    }
+    result.push(chunk-results.join("\n"))
   }
   
   // Join styled nodes
