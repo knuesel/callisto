@@ -144,7 +144,9 @@
 // Handler for LaTeX markup
 #let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
 
-// Handler for rendering text that includes ANSI escape sequences
+// Handler for rendering text that includes ANSI escape sequences.
+// This handler is designed to be easily swappable by the user, e.g. to change
+// the ANSI color palette.
 #let handler-text-ansi-generic(data, ctx: none, fg: none, bg: none, ..args) = ansi.render(
   data,
   fg: fg,
@@ -165,6 +167,21 @@
   return none
 }
 
+// Render escape sequences in given text, or leave as-is if no sequence found
+#let _ansi-maybe-render(data, ctx: none, ..args) = {
+  if data.match(ansi.escape-regex) == none {
+    return data
+  }
+  return handle(
+    data,
+    mime: "text-ansi-generic",
+    ctx: ctx,
+    fg: _guess-fg-color(),
+    bg: _guess-bg-color(),
+    ..args,
+  )
+}
+
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
 #let handler-text-ansi-block(data, ctx: none, ..args) = {
@@ -177,15 +194,9 @@
   show raw.where(block: true, lang: "txt"): set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
 
   show raw.where(block: true, lang: "txt"): r => block(
-    handle(
-      r.text,
-      mime: "text-ansi-generic",
-      ctx: ctx,
-      fg: _guess-fg-color(),
-      bg: _guess-bg-color(),
-      ..args,
-    ),
+    _ansi-maybe-render(data, ctx: ctx, ..args)
   )
+
   raw(block: true, lang: "txt", data)
 }
 
