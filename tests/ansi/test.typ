@@ -61,30 +61,8 @@
 
 = `ansi-table.ipynb`
 
-// #show raw: set text(font: "DejaVu Sans Mono")
-// #show raw: set text(font: "Noto Sans Mono")
-// #show raw: set text(font: "JuliaMono")
-
-#let ansi-handler(elem, ..args, palette: auto) = {
-  // Works well with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
-  set par(leading: 0pt)
-  set text(top-edge: 1.1em, bottom-edge: 0pt)
-  set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
-
-  show raw: it => ansi.render(
-    it.text,
-    bg: block.fill,
-    fg: text.fill,
-    palette: palette,
-  )
-  elem
-}
-
 #let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
-  handlers: (
-    "stream": (auto, ansi-handler),
-  )
 )
 #render()
 
@@ -102,11 +80,12 @@
   nb: json("ansi-table.ipynb"),
   theme: "plain",
   handlers: (
-    "stream": (auto, ansi-handler.with(palette: gruvbox), (it, ..args) => {
-      show raw: set block(fill: eastern.darken(70%))
-      show raw: set text(yellow)
-      it
-    }),
+    "text-ansi-generic": (data, ..args) => ansi.render(
+      data,
+      palette: gruvbox,
+      fg: yellow,
+      bg: eastern.darken(70%),
+    ),
   )
 )
 #Out(0)
@@ -117,8 +96,4 @@
 
 #callisto.render(
   nb: json("errors.ipynb"),
-  handlers: (
-    "stream": (auto, ansi-handler),
-    "error": (auto, ansi-handler),
-  )
 )

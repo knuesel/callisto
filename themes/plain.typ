@@ -1,5 +1,8 @@
+#import "/lib/util.typ": handle
+
 #let theme = (
-  "text/plain": (data, ..args) => raw(data, block: true, lang: "txt"),
-  stream-generic: (data, ..args) => raw(data, block: true, lang: "txt"),
-  error: (data, ..args) => raw(data.evalue, block: true, lang: "txt"),
+  // Render text outputs as raw blocks
+  "text/plain": handle.with(mime: "text-ansi-block"),
+  stream-generic: handle.with(mime: "text-ansi-block"),
+  error: (data, ..args) => handle(data.evalue, ..args, mime: "text-ansi-block"),
 )

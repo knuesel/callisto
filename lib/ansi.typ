@@ -1,5 +1,13 @@
 // Issue with nested backgrounds: see  https://github.com/typst/typst/issues/5766
 
+// A regex that should match any escape sequence (CSI and OSC)
+#let esc = "\u{1b}"
+#let _csi-regex-text = `\[[0-9:;<=>?]*[ -/]*[@-~]`.text
+#let _osc-regex-text = `\][^\x07\x1B]*(?:\x07|\x1B\\)`.text
+#let csi-regex = regex(esc + "(?:" + _csi-regex-text + ")")
+#let osc-regex = regex(esc + "(?:" + _osc-regex-text + ")")
+#let escape-regex = regex(esc + "(?:" + _csi-regex-text + "|" + _osc-regex-text + ")")
+
 // Default colors: Tango color scheme
 #let default-palette = (
   rgb("#2e3436"), rgb("#cc0000"), rgb("#4e9a06"), rgb("#c4a000"),
@@ -164,9 +172,9 @@
   }
 
   // Strip OSC sequences (such as terminal hyperlinks)
-  string = string.replace(regex("\u{1b}\].*?(?:\u{07}|\u{1b}\\\\)"), "")
+  string = string.replace(osc-regex, "")
 
-  // Split string on escape-bracket
+  // Split string on CSI escape-bracket
   let chunks = string.split("\u{1b}[")
   
   // Default state
@@ -189,8 +197,9 @@
   // Array of styled chunks
   let result = ()
   
-  // Regex for escape sequence. The first groups capture the numeric parameters
-  // and the last one the command character (e.g. 'm' or 'J'). 
+  // Regex for recognized CSI escape sequence (without escape-bracket).
+  // The first group captures the numeric parameters and the last one the
+  // command character (e.g. 'm' or 'J').
   let seq-regex = regex("^([0-9;]*)([a-zA-Z])")
   
   for (i, chunk) in chunks.enumerate() {

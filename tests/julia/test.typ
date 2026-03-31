@@ -26,10 +26,10 @@
 == Cell with execution count = 3
 
 === Rendered error
-#Out(3, count: "execution", output-type: "error")
+#Out("error", output-type: "error")
 
 === Same but with plain theme
-#Out(3, count: "execution", output-type: "error", theme: "plain")
+#Out("error", output-type: "error", theme: "plain")
 
 == Raw cells
 #render(cell-type: "raw")

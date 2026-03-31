@@ -7,6 +7,7 @@
 #import "reading/stream.typ"
 #import "reading/error.typ"
 #import "reading/output.typ": outputs
+#import "ansi.typ"
 #import "latex.typ"
 
 // A handler is a function called to render a value such as a cell's source,
@@ -30,6 +31,9 @@
 //
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
+//
+// - The "text-ansi-generic" handler gets 'fg' and 'bg' arguments (either
+//   colors or none).
 //
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
@@ -139,6 +143,51 @@
 
 // Handler for LaTeX markup
 #let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+
+// Handler for rendering text that includes ANSI escape sequences
+#let handler-text-ansi-generic(data, ctx: none, fg: none, bg: none, ..args) = ansi.render(
+  data,
+  fg: fg,
+  bg: bg,
+  ..args,
+)
+
+// Return a guess for the "active" foreground color, or none.
+#let _guess-fg-color() = {
+  if type(text.fill) == color { return text.fill }
+  return none
+}
+
+// Return a guess for the "active" background color, or none.
+#let _guess-bg-color() = {
+  if type(block.fill) == color { return block.fill }
+  if block.fill ==  none and type(page.fill) == color { return page.fill }
+  return none
+}
+
+// Handler for text to render as console output, in particular text that can
+// include ANSI escape sequences for colors, etc.
+#let handler-text-ansi-block(data, ctx: none, ..args) = {
+  // We go through a raw block (replaced by a simple block in the show rule)
+  // to apply raw font and to allow the user to set show-set rules on raw.
+
+  // Settings that work well with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
+  show raw.where(block: true, lang: "txt"): set par(leading: 0pt)
+  show raw.where(block: true, lang: "txt"): set text(top-edge: 1.1em, bottom-edge: 0pt)
+  show raw.where(block: true, lang: "txt"): set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
+
+  show raw.where(block: true, lang: "txt"): r => block(
+    handle(
+      r.text,
+      mime: "text-ansi-generic",
+      ctx: ctx,
+      fg: _guess-fg-color(),
+      bg: _guess-bg-color(),
+      ..args,
+    ),
+  )
+  raw(block: true, lang: "txt", data)
+}
 
 // Handler for simple text
 #let handler-text-plain(data, ctx: none, ..args) = data
@@ -301,8 +350,8 @@
   "stream": handler-stream, // called before stream-type-specific handler
   "output": handler-output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
-  "markdown-generic": handler-markdown-generic,
-  "markdown-par": handler-markdown-par,
+  "markdown-generic": handler-markdown-generic, // returns inline content
+  "markdown-par": handler-markdown-par, // returns paragraph(s) (without block)
   // Handlers for LaTeX math
   "math-generic": handler-math-generic, // base handler for math
   "math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
@@ -314,6 +363,8 @@
   "code-cell": handler-code-cell,
   "cell": handler-cell, // called before the cell-type-specific handler
   // Other handlers
+  "text-ansi-generic": handler-text-ansi-generic,
+  "text-ansi-block": handler-text-ansi-block,
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
   "path": handler-path,
