@@ -173,12 +173,21 @@
   let elem = raw(block: true, lang: "txt", data)
   let target = raw.where(block: true, lang: "txt")
 
-  // Settings that work well to avoid gaps between rows (in background color
-  // or between box drawing characters) and overlaps.
+  // Settings that work well:
+  // - Zero leading to avoid gaps (in bg color) between rows.
+  // - Text edges large enough to have some spacing between rows and some bg
+  //   color above the text of the first row, but small enough to have
+  //   box-drawing characters connect correctly between rows. The slightly
+  //   negative bottom edge seems necessary in DejaVu Sans Mono to have the
+  //   underscores rendered properly.
+  // - Highlight not too high to avoid overlap with previous row, low enough to
+  //   avoid gaps in bg color, with small extensions in absolute length to
+  //   avoid artifacts on edges between adjacent highlights.
+  // 
   // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
   show target: set par(leading: 0pt)
-  show target: set text(top-edge: 1.1em, bottom-edge: 0pt)
-  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.2em)
+  show target: set text(top-edge: 1.1em, bottom-edge: -0.05em)
+  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
 
   // We go through a raw block (replaced by a simple block in the show rule)
   // to apply raw font and to allow the user to set show-set rules on raw.

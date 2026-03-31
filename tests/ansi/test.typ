@@ -77,6 +77,10 @@
   rgb("#83a598"), rgb("#d3869b"), rgb("#8ec07c"), rgb("#ebdbb2"),
 )
 
+// #show raw: set text(font: "DejaVu Sans Mono")
+// #show raw: set text(font: "JuliaMono")
+// #show raw: set text(font: "Noto Sans Mono")
+
 #let (Out,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   theme: "plain",

@@ -138,8 +138,8 @@
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
 // - line-by-line: if true (default false), chunks will be split at newlines
-//   so that styling functions (see below) are always applied on content
-//   without newline.
+//   so that styling functions (see below) are never called with content that
+//   spans multiple lines.
 // - apply-fg, apply-bg, bold, italic, overline, underline, strike, dim,
 //   conceal: functions to apply the corresponding style, each taking content
 //   as first positional argument, as well as `fg` and `bg` keyword
