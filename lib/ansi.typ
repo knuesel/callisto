@@ -155,8 +155,6 @@
   fg: none,
   bg: none,
   bold-is-bright: false,
-  line-by-line: false,
-  line-joiner: x => x.join(linebreak()),
   apply-fg:  (it, fg: none, ..args) => if fg == none { it } else { text(it, fill: fg) },
   apply-bg:  (it, bg: none, ..args) => if bg == none { it } else { highlight(it, fill: bg) },
   bold:      (it, ..args) => text(it, weight: "bold"),
@@ -189,91 +187,80 @@
   let state = default-state
 
   // Strip OSC sequences (such as terminal hyperlinks)
-  string = string.replace(osc-regex, "")
+  let stripped = string.replace(osc-regex, "")
 
-  // Parts to process: either a single part, or one part per line
-  let parts = if line-by-line {
-    string.split("\n")
-  } else {
-    (string,)
-  }
-  let results-by-part = ()
+  // Split txt on CSI escape-bracket
+  let chunks = stripped.split("\u{1b}[")
 
-  for part in parts {
-    // Split part on CSI escape-bracket
-    let chunks = part.split("\u{1b}[")
+  // Array of styled chunks
+  let chunk-results = ()
+
+  // Regex for recognized CSI escape sequence (without escape-bracket).
+  // The first group captures the numeric parameters and the last one the
+  // command character (e.g. 'm' or 'J').
+  let seq-regex = regex("^([0-9;]*)([a-zA-Z])")
+
+  for (i, chunk) in chunks.enumerate() {
+    // Chunk content without escape sequence
+    let text-content = ""
   
-    // Array of styled chunks
-    let chunk-results = ()
-  
-    // Regex for recognized CSI escape sequence (without escape-bracket).
-    // The first group captures the numeric parameters and the last one the
-    // command character (e.g. 'm' or 'J').
-    let seq-regex = regex("^([0-9;]*)([a-zA-Z])")
-  
-    for (i, chunk) in chunks.enumerate() {
-      // Chunk content without escape sequence
-      let text-content = ""
-    
-      if i == 0 {
-        // Chunk 0 comes before any escape sequence
-        text-content = chunk
-      } else {
-        let m = chunk.match(seq-regex)
-        if m != none {
-          let codes-str = m.captures.at(0)
-          let cmd = m.captures.at(1)
-        
-          // Everything after the command character is text
-          text-content = chunk.slice(m.text.len()) 
-        
-          // Ignore all commands except 'm' which is for styling
-          if cmd == "m" {
-            state = _chunk-style(
-              codes-str,
-              state: state,
-              default: default-state,
-              palette: palette,
-            )
-          }
-        } else {
-          // Malformed sequence: print it as-is
-          text-content = "\u{1b}[" + chunk
+    if i == 0 {
+      // Chunk 0 comes before any escape sequence
+      text-content = chunk
+    } else {
+      let m = chunk.match(seq-regex)
+      if m != none {
+        let codes-str = m.captures.at(0)
+        let cmd = m.captures.at(1)
+      
+        // Everything after the command character is text
+        text-content = chunk.slice(m.text.len()) 
+      
+        // Ignore all commands except 'm' which is for styling
+        if cmd == "m" {
+          state = _chunk-style(
+            codes-str,
+            state: state,
+            default: default-state,
+            palette: palette,
+          )
         }
+      } else {
+        // Malformed sequence: print it as-is
+        text-content = "\u{1b}[" + chunk
       }
-    
-      if text-content == "" {
-        continue
-      }
-
-      // Apply reverse without changing state.fg, state.bg
-      let final = _final-colors(
-        state,
-        bold: state.bold,
-        bold-is-bright: bold-is-bright,
-        palette: palette,
-      )
-
-      // Apply state
-      // Conceal is applied at the innermost level, so the effect won't be
-      // accidentally undone by other transformations (which could leak secrets)
-      let node = text-content
-      if state.conceal { node = conceal(node, ..final) }
-      if state.under   { node = underline(node, ..final) }
-      if state.over    { node = overline(node, ..final) }
-      if state.strike  { node = strike(node, ..final) }
-      if state.italic  { node = italic(node, ..final) }
-      if state.dimmed  { node = dim(node, ..final) }
-      if state.bold    { node = bold(node, ..final) }
-      node = apply-bg(node, ..final)
-      node = apply-fg(node, ..final)
-      chunk-results.push(node)
     }
-    results-by-part.push(chunk-results.join())
+  
+    if text-content == "" {
+      continue
+    }
+
+    // Apply reverse without changing state.fg, state.bg
+    let final = _final-colors(
+      state,
+      bold: state.bold,
+      bold-is-bright: bold-is-bright,
+      palette: palette,
+    )
+
+    // Apply state
+    // Conceal is applied at the innermost level, so the effect won't be
+    // accidentally undone by other transformations (which could leak secrets)
+    let node = text-content
+    if state.conceal { node = conceal(node, ..final) }
+    if state.under   { node = underline(node, ..final) }
+    if state.over    { node = overline(node, ..final) }
+    if state.strike  { node = strike(node, ..final) }
+    if state.italic  { node = italic(node, ..final) }
+    if state.dimmed  { node = dim(node, ..final) }
+    if state.bold    { node = bold(node, ..final) }
+    node = apply-bg(node, ..final)
+    node = apply-fg(node, ..final)
+    chunk-results.push(node)
   }
   
   // Join parts
-  return line-joiner(results-by-part)
+  return chunk-results.join()
 }
 
 
@@ -281,9 +268,12 @@
 // form of a dict with fields fg and bg.
 // Where no guess can be made, none is used (meaning that no color will be
 // set). Using black text and white background as defaults would often be
-// wrong: for example when the text is inside a #block(fill: red, ...), we
-// would still see block.fill==none on the style chain yet a white background
-// would be wrong.
+// wrong, for the background at least: for example when the text is inside a
+// #block(fill: red, ...), we would still see block.fill==none on the style
+// chain yet a white background would be wrong, and this wrong background would
+// be applied on most text. Better default to none in this case: this way we
+// we don't apply styles uselessly, and the result is wrong only in the rare
+// cases where colors are reversed.
 #let pick-colors(fg: auto, bg: auto) = {
   if fg == auto {
     fg = if type(text.fill) == color {

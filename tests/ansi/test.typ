@@ -65,12 +65,15 @@
 
 = `ansi-table.ipynb`
 
+// The text color when colors are reversed will be wrong here as the background
+// cannot be guessed.
+
 #let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
 )
 #render()
 
-== Custom foreground, ambient background and Gruvbox palette
+== Custom fg/bg and Gruvbox palette
 
 #let gruvbox = (
   rgb("#282828"), rgb("#cc241d"), rgb("#98971a"), rgb("#d79921"),
@@ -87,10 +90,11 @@
   nb: json("ansi-table.ipynb"),
   theme: "plain",
   handlers: (
-    "text-ansi-generic": (data, ctx: none, fg: none, ..args) => ansi.render(
+    "text-ansi-generic": (data, ctx: none, fg: none, bg: none, ..args) => ansi.render(
       data,
       palette: gruvbox,
-      fg: orange, // override
+      fg: orange,
+      bg: gruvbox.first(),
       ..args,
     ),
   )
@@ -98,7 +102,7 @@
 #[
   // The block fill set here should be picked up as background color and
   // used as text color in the reversed "Summary"
-  #set block(fill: eastern.darken(50%))
+  // #set block(fill: eastern.darken(50%))
   #Out(0)
 ]
 
