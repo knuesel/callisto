@@ -158,6 +158,7 @@
   bg: none,
   bold-is-bright: false,
   line-by-line: false,
+  line-joiner: x => x.join(linebreak()),
   apply-fg:  (it, fg: none, ..args) => if fg == none { it } else { text(it, fill: fg) },
   apply-bg:  (it, bg: none, ..args) => if bg == none { it } else { highlight(it, fill: bg) },
   bold:      (it, ..args) => text(it, weight: "bold"),
@@ -172,12 +173,6 @@
     palette = default-palette
   }
 
-  // Strip OSC sequences (such as terminal hyperlinks)
-  string = string.replace(osc-regex, "")
-
-  // Split string on CSI escape-bracket
-  let chunks = string.split("\u{1b}[")
-  
   // Default state
   let default-state = (
     fg: fg,
@@ -194,82 +189,91 @@
 
   // Initial state
   let state = default-state
-  
-  // Array of styled chunks
-  let result = ()
-  
-  // Regex for recognized CSI escape sequence (without escape-bracket).
-  // The first group captures the numeric parameters and the last one the
-  // command character (e.g. 'm' or 'J').
-  let seq-regex = regex("^([0-9;]*)([a-zA-Z])")
-  
-  for (i, chunk) in chunks.enumerate() {
-    // Chunk content without escape sequence
-    let text-content = ""
-    
-    if i == 0 {
-      // Chunk 0 comes before any escape sequence
-      text-content = chunk
-    } else {
-      let m = chunk.match(seq-regex)
-      if m != none {
-        let codes-str = m.captures.at(0)
-        let cmd = m.captures.at(1)
-        
-        // Everything after the command character is text
-        text-content = chunk.slice(m.text.len()) 
-        
-        // Ignore all commands except 'm' which is for styling
-        if cmd == "m" {
-          state = _chunk-style(
-            codes-str,
-            state: state,
-            default: default-state,
-            palette: palette,
-          )
-        }
-      } else {
-        // Malformed sequence: print it as-is
-        text-content = "\u{1b}[" + chunk
-      }
-    }
-    
-    if text-content == "" {
-      continue
-    }
 
-    // Apply reverse without changing state.fg, state.bg
-    let final = _final-colors(
-      state,
-      bold: state.bold,
-      bold-is-bright: bold-is-bright,
-      palette: palette,
-    )
+  // Strip OSC sequences (such as terminal hyperlinks)
+  string = string.replace(osc-regex, "")
 
-    // Apply state
-    let parts = if line-by-line {
-      text-content.split("\n")
-    } else {
-      (text-content,)
-    }
+  // Parts to process: either a single part, or one part per line
+  let parts = if line-by-line {
+    string.split("\n")
+  } else {
+    (string,)
+  }
+  let results-by-part = ()
+
+  for part in parts {
+    // Split part on CSI escape-bracket
+    let chunks = part.split("\u{1b}[")
+  
+    // Array of styled chunks
     let chunk-results = ()
-    for node in parts {
-      // Apply conceal at the innermost level, so the effect won't be
+  
+    // Regex for recognized CSI escape sequence (without escape-bracket).
+    // The first group captures the numeric parameters and the last one the
+    // command character (e.g. 'm' or 'J').
+    let seq-regex = regex("^([0-9;]*)([a-zA-Z])")
+  
+    for (i, chunk) in chunks.enumerate() {
+      // Chunk content without escape sequence
+      let text-content = ""
+    
+      if i == 0 {
+        // Chunk 0 comes before any escape sequence
+        text-content = chunk
+      } else {
+        let m = chunk.match(seq-regex)
+        if m != none {
+          let codes-str = m.captures.at(0)
+          let cmd = m.captures.at(1)
+        
+          // Everything after the command character is text
+          text-content = chunk.slice(m.text.len()) 
+        
+          // Ignore all commands except 'm' which is for styling
+          if cmd == "m" {
+            state = _chunk-style(
+              codes-str,
+              state: state,
+              default: default-state,
+              palette: palette,
+            )
+          }
+        } else {
+          // Malformed sequence: print it as-is
+          text-content = "\u{1b}[" + chunk
+        }
+      }
+    
+      if text-content == "" {
+        continue
+      }
+
+      // Apply reverse without changing state.fg, state.bg
+      let final = _final-colors(
+        state,
+        bold: state.bold,
+        bold-is-bright: bold-is-bright,
+        palette: palette,
+      )
+
+      // Apply state
+      // Conceal is applied at the innermost level, so the effect won't be
       // accidentally undone by other transformations (which could leak secrets)
+      let node = text-content
       if state.conceal { node = conceal(node, ..final) }
-      if state.under  { node = underline(node, ..final) }
-      if state.over   { node = overline(node, ..final) }
-      if state.strike { node = strike(node, ..final) }
-      if state.italic { node = italic(node, ..final) }
-      if state.dimmed { node = dim(node, ..final) }
-      if state.bold   { node = bold(node, ..final) }
+      if state.under   { node = underline(node, ..final) }
+      if state.over    { node = overline(node, ..final) }
+      if state.strike  { node = strike(node, ..final) }
+      if state.italic  { node = italic(node, ..final) }
+      if state.dimmed  { node = dim(node, ..final) }
+      if state.bold    { node = bold(node, ..final) }
       node = apply-bg(node, ..final)
       node = apply-fg(node, ..final)
       chunk-results.push(node)
     }
-    result.push(chunk-results.join("\n"))
+    results-by-part.push(chunk-results.join())
   }
   
-  // Join styled nodes
-  result.join()
+  // Join parts
+  return line-joiner(results-by-part)
 }

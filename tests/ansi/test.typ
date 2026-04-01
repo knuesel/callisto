@@ -105,7 +105,7 @@
       data,
       line-by-line: true,
       apply-fg: (it, ..args) => text(eastern, it),
-      apply-bg: (it, ..args) => box(fill: black, it),
+      apply-bg: (it, ..args) => box(baseline: 0.5pt, outset: 0.1pt, fill: black, it),
     ),
   )
 )
