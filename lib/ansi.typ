@@ -318,12 +318,10 @@
   //   avoid artifacts on edges between adjacent highlights.
   //
   // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
-  // 
-  // *Not* using show raw(...): set... rules here, so these rules can be
-  // overriden by user show-set rules.
-  set par(leading: 0pt)
-  set text(top-edge: 1.1em, bottom-edge: -0.05em)
-  set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
+  let target = raw.where(block: true, lang: "ansi")
+  show target: set par(leading: 0pt)
+  show target: set text(top-edge: 1.1em, bottom-edge: -0.05em)
+  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
   it
 }
 

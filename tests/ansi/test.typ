@@ -72,7 +72,6 @@
 
 == Custom foreground, ambient background and Gruvbox palette
 
-
 #let gruvbox = (
   rgb("#282828"), rgb("#cc241d"), rgb("#98971a"), rgb("#d79921"),
   rgb("#458588"), rgb("#b16286"), rgb("#689d6a"), rgb("#a89984"),
@@ -97,36 +96,9 @@
   )
 )
 #[
-  #set block(fill: eastern.darken(30%))
-  #Out(0)
-]
-
-== Custom styling functions
-
-#[
-  #show raw.where(lang: "ansi"): set text(
-    bottom-edge: -0.4em,
-    top-edge: 0.75em,
-  )
-
-  #let (Out,) = callisto.config(
-    nb: json("ansi-table.ipynb"),
-    theme: "plain",
-    handlers: (
-      "text-ansi-generic": (data, ..args) => ansi.render(
-        data,
-        line-by-line: true,
-        fg: green,
-        bg: luma(50),
-        apply-bg: (it, bg: none, ..args) => box(
-          baseline: 0.4em,
-          outset: 0.1pt,
-          fill: bg,
-          it,
-        ),
-      ),
-    )
-  )
+  // The block fill set here should be picked up as background color and
+  // used as text color in the reversed "Summary"
+  #set block(fill: eastern.darken(50%))
   #Out(0)
 ]
 
