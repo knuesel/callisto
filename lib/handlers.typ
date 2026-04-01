@@ -154,61 +154,28 @@
   ..args,
 )
 
-// Return a guess for the "active" foreground color, or none.
-#let _guess-fg-color() = {
-  if type(text.fill) == color { return text.fill }
-  return none
-}
-
-// Return a guess for the "active" background color, or none.
-#let _guess-bg-color() = {
-  if type(block.fill) == color { return block.fill }
-  if block.fill ==  none and type(page.fill) == color { return page.fill }
-  return none
-}
-
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
-#let handler-text-ansi-block(data, ctx: none, ..args) = {
-  let elem = raw(block: true, lang: "txt", data)
-  let target = raw.where(block: true, lang: "txt")
+#let handler-text-console-block(data, ctx: none, ..args) = {
+  // We basically duplicate the code of ansi.console-block here for clarity
+  // (making the code generic with a rendered callback obscures the flow,
+  // especially when trying to override fg/bg).
 
-  // Settings that work well:
-  // - Zero leading to avoid gaps (in bg color) between rows.
-  // - Text edges large enough to have some spacing between rows and some bg
-  //   color above the text of the first row, but small enough to have
-  //   box-drawing characters connect correctly between rows. The slightly
-  //   negative bottom edge seems necessary in DejaVu Sans Mono to have the
-  //   underscores rendered properly.
-  // - Highlight not too high to avoid overlap with previous row, low enough to
-  //   avoid gaps in bg color, with small extensions in absolute length to
-  //   avoid artifacts on edges between adjacent highlights.
-  // 
-  // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
-  show target: set par(leading: 0pt)
-  show target: set text(top-edge: 1.1em, bottom-edge: -0.05em)
-  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
+  // Tuning of some defaults to render background color through highlight
+  show: ansi.highlight-template
 
-  // We go through a raw block (replaced by a simple block in the show rule)
-  // to apply raw font and to allow the user to set show-set rules on raw.
-  // This is done in all cases for consistency.
-  show target: r => block(
+  // Replace raw block with rendered text block
+  show raw.where(block: true, lang: "ansi"): r => block({
     // Avoid any text styling if no escape sequence found
-    if data.match(ansi.escape-regex) == none {
+    if r.text.match(ansi.escape-regex) == none {
       r.text
     } else {
-      handle(
-          r.text,
-          mime: "text-ansi-generic",
-          ctx: ctx,
-          fg: _guess-fg-color(),
-          bg: _guess-bg-color(),
-          ..args,
-        )
+      // Call ANSI handler with default colors
+      let colors = ansi.pick-colors()
+      handle(r.text, mime: "text-ansi-generic", ctx: ctx, ..colors, ..args)
     }
-  )
-
-  raw(block: true, lang: "txt", data)
+  })
+  raw(block: true, lang: "ansi", data)
 }
 
 // Handler for simple text
@@ -386,7 +353,7 @@
   "cell": handler-cell, // called before the cell-type-specific handler
   // Other handlers
   "text-ansi-generic": handler-text-ansi-generic,
-  "text-ansi-block": handler-text-ansi-block,
+  "text-console-block": handler-text-console-block,
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
   "path": handler-path,

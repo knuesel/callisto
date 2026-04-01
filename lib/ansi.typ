@@ -1,5 +1,3 @@
-// Issue with nested backgrounds: see  https://github.com/typst/typst/issues/5766
-
 // A regex that should match any escape sequence (CSI and OSC)
 #let esc = "\u{1b}"
 #let _csi-regex-text = `\[[0-9:;<=>?]*[ -/]*[@-~]`.text
@@ -276,4 +274,78 @@
   
   // Join parts
   return line-joiner(results-by-part)
+}
+
+
+// Return a guess for the "active" foreground and background colors, in the
+// form of a dict with fields fg and bg.
+// Where no guess can be made, none is used (meaning that no color will be
+// set). Using black text and white background as defaults would often be
+// wrong: for example when the text is inside a #block(fill: red, ...), we
+// would still see block.fill==none on the style chain yet a white background
+// would be wrong.
+#let pick-colors(fg: auto, bg: auto) = {
+  if fg == auto {
+    fg = if type(text.fill) == color {
+      text.fill
+    } else {
+      none
+    }
+  }
+  if bg == auto {
+    bg = if type(block.fill) == color {
+      block.fill
+    } else if block.fill == none and type(page.fill) == color {
+      page.fill
+    } else {
+      none
+    }
+  }
+  return (fg: fg, bg: bg)
+}
+
+// Template for show-set rules tuned to render background color using highlight.
+#let highlight-template(it) = {
+  // Settings that work well:
+  // - Zero leading to avoid gaps (in bg color) between rows.
+  // - Text edges large enough to have some spacing between rows and some bg
+  //   color above the text of the first row, but small enough to have
+  //   box-drawing characters connect correctly between rows. The slightly
+  //   negative bottom edge seems necessary in DejaVu Sans Mono to have the
+  //   underscores rendered properly.
+  // - Highlight not too high to avoid overlap with previous row, low enough to
+  //   avoid gaps in bg color, with small extensions in absolute length to
+  //   avoid artifacts on edges between adjacent highlights.
+  //
+  // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
+  // 
+  // *Not* using show raw(...): set... rules here, so these rules can be
+  // overriden by user show-set rules.
+  set par(leading: 0pt)
+  set text(top-edge: 1.1em, bottom-edge: -0.05em)
+  set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
+  it
+}
+
+// Render the string as a console block, processing ANSI escape sequences.
+// The fg and bg parameters can be auto: in this case values will be guessed
+// from context if possible (using text.fill and block.fill/page.fill).
+// The other arguments are passed to the render function. 
+#let console-block(string, fg: auto, bg: auto, ..args) = {
+  show: highlight-template
+
+  // We go through a raw block (replaced by a simple block in the show rule)
+  // to apply raw font and to allow the user to set show-set rules on raw.
+  // This is done in all cases for consistency.
+  show raw.where(block: true, lang: "ansi"): r => block({
+    // Avoid any text styling if no escape sequence found
+    if r.text.match(escape-regex) == none {
+      r.text
+    } else {
+      let colors = pick-colors(fg: fg, bg: bg)
+      render(r.text, ..colors, ..args)
+    }
+  })
+
+  raw(block: true, lang: "ansi", string)
 }

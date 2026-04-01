@@ -2,7 +2,7 @@
 
 #let theme = (
   // Render text outputs as raw blocks
-  "text/plain": handle.with(mime: "text-ansi-block"),
-  stream-generic: handle.with(mime: "text-ansi-block"),
-  error: (data, ..args) => handle(data.evalue, ..args, mime: "text-ansi-block"),
+  "text/plain": handle.with(mime: "text-console-block"),
+  stream-generic: handle.with(mime: "text-console-block"),
+  error: (data, ..args) => handle(data.evalue, ..args, mime: "text-console-block"),
 )

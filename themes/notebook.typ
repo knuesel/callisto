@@ -41,7 +41,7 @@
 // Customized default handler for errors, rendering the traceback
 #let notebook-error(data, ctx: none, ..args) = {
   let txt = data.traceback.join("\n")
-  let rendered = handle(txt, mime: "text-ansi-block", ctx: ctx, ..args)
+  let rendered = handle(txt, mime: "text-console-block", ctx: ctx, ..args)
   error-block(rendered)
 }
 
