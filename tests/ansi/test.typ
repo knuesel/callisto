@@ -120,3 +120,14 @@ callisto.ansi.console-block(
 #callisto.render(
   nb: json("errors.ipynb"),
 )
+
+#pagebreak()
+
+= Test cell from issue \#6
+
+#{
+  let cfg = callisto.configuration.settings
+  let c = json("test-cell.json")
+  let processed-c = callisto.reading.notebook.preprocess-cell(c, index: 0, cfg: cfg)
+  callisto.render(processed-c, lang: "python")
+}
