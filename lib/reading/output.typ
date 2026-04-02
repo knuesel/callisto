@@ -1,5 +1,5 @@
 #import "/lib/util.typ": ensure-array, handle
-#import "/lib/config.typ": parse-main-args, read-enabled
+#import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "common.typ": final-result
 #import "cell.typ": cells

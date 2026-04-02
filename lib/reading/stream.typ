@@ -1,4 +1,4 @@
-#import "/lib/config.typ": parse-main-args, read-enabled
+#import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/util.typ": handle, ensure-array
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "common.typ": final-result

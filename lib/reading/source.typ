@@ -1,4 +1,4 @@
-#import "/lib/config.typ"
+#import "/lib/configuration.typ"
 #import "/lib/ctx/ctx.typ"
 #import "common.typ": final-result
 #import "cell.typ": cells
@@ -16,8 +16,8 @@
 ///   return for each matching cell a dict with fields 'cell' and 'value'.
 /// -> array of any | array of dict
 #let sources(..args) = {
-  let (cell-spec, cfg) = config.parse-main-args(..args)
-  if config.read-enabled(cfg: cfg) == false { return none }
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
+  if configuration.read-enabled(cfg: cfg) == false { return none }
   let srcs = ()
   for cell in cells(..args) {
     let ctx = ctx.get-ctx(cell, cfg: cfg)

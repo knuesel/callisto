@@ -1,5 +1,5 @@
 #import "/lib/util.typ"
-#import "/lib/config.typ"
+#import "/lib/configuration.typ"
 #import "/lib/ctx/cells.typ": resolve-name-path
 #import "/lib/header-pattern.typ"
 #import "notebook.typ"
@@ -204,8 +204,8 @@
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
-  let (cell-spec, cfg) = config.parse-main-args(..args)
-  if config.read-enabled(cfg: cfg) == false { return none }
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
+  if configuration.read-enabled(cfg: cfg) == false { return none }
   let cs = _cells-from-spec(cell-spec, cfg: cfg)
   return _apply-keep(cs, cfg.keep)
 }

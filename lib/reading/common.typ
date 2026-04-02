@@ -1,4 +1,4 @@
-#import "/lib/config.typ": parse-main-args, read-enabled
+#import "/lib/configuration.typ": parse-main-args, read-enabled
 
 // Calls the specified function with the given arguments and returns a single
 // item as specified in by the `item` setting, raising an error if the list is

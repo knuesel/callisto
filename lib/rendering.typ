@@ -1,6 +1,6 @@
 #import "reading/cell.typ": cells
 #import "util.typ": handle
-#import "config.typ": parse-main-args, read-enabled
+#import "configuration.typ": parse-main-args, read-enabled
 #import "ctx/ctx.typ": get-ctx
 
 // Render the specified cells according to the settings (see common.typ).

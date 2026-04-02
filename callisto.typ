@@ -5,7 +5,7 @@
 // of all exposed functions (doing this here avoids circular import issues).
 
 #import "themes/themes.typ": themes
-#import "lib/config.typ": parse-main-args
+#import "lib/configuration.typ"
 #import "lib/util.typ"
 #import "lib/reading/reading.typ"
 #import "lib/theming.typ"
@@ -88,7 +88,7 @@
     panic("unexpected positional argument(s): " + repr(args.pos()))
   }
   // Validate named arguments
-  let (cfg,) = parse-main-args(..args)
+  let (cfg,) = configuration.parse-main-args(..args)
   // Preconfigure functions with user args, not with cfg as cfg includes all
   // settings (using defaults for values not specified by the user) while we
   // want functions to be able to have defaults different from the global

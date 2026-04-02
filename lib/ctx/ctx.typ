@@ -1,6 +1,6 @@
 #import "/lib/reading/notebook.typ"
 #import "/lib/theming.typ"
-#import "/lib/config.typ"
+#import "/lib/configuration.typ"
 #import "/lib/header-pattern.typ"
 #import "preamble.typ"
 #import "handling.typ"
@@ -87,8 +87,8 @@
 
   ctx.ansi = (process: auto) + ctx.ansi
 
-  ctx.read = config.read-enabled(cfg: cfg)
-  ctx.export = config.export-enabled(cfg: cfg)
+  ctx.read = configuration.read-enabled(cfg: cfg)
+  ctx.export = configuration.export-enabled(cfg: cfg)
 
   let latex-preamble = none
   if ctx.gather-latex-defs {

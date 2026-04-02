@@ -1,7 +1,7 @@
 #import "/lib/header-pattern.typ": make-header-text
 #import "/lib/rendering.typ": render
 #import "/lib/reading/reading.typ"
-#import "config.typ"
+#import "configuration.typ"
 
 // Make label for exported raw elements
 #let _export-label(name) = label("__callisto-export:" + name)
@@ -10,7 +10,7 @@
 // Note that the 'export' setting makes no difference for this function.
 #let export(..args) = {
   // The cell-spec is actually a raw element in this case
-  let (cell-spec: elem, cfg) = config.parse-main-args(..args)
+  let (cell-spec: elem, cfg) = configuration.parse-main-args(..args)
   if type(elem) != content or elem.func() != raw {
     panic("expecting a raw element, got " +
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
@@ -130,7 +130,7 @@
 // 
 // - nbformat: the Jupyter Notebook format version, as a string (default: "4.5")
 #let make-notebook(..args) = {
-  let (cell-spec, cfg) = config.parse-main-args(..args)
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
 
   // Check that no cell specification was given
   if cell-spec != none {
@@ -159,8 +159,8 @@
 // Return the labelled metadata that should be inserted in the document so that
 // `typst query` can find the exported notebook.
 #let stage-notebook(..args) = {
-  let (cfg,) = config.parse-main-args(..args)
-  if not config.export-enabled(cfg: cfg) {
+  let (cfg,) = configuration.parse-main-args(..args)
+  if not configuration.export-enabled(cfg: cfg) {
     return none
   }
   return context {
@@ -177,8 +177,8 @@
 // the export is always done unless explicitly disabled with export=false.
 #let execute(..args, export: true) = {
   let all-args = arguments(..args, export: export)
-  let (cfg,) = config.parse-main-args(..all-args)
-  if config.export-enabled(cfg: cfg) {
+  let (cfg,) = configuration.parse-main-args(..all-args)
+  if configuration.export-enabled(cfg: cfg) {
     _export(..all-args)
   }
   render(..all-args, keep: "unique")
@@ -188,11 +188,11 @@
 // callisto-export sys.input is "true") or return the single execution output
 // otherwise.
 #let evaluate(..args) = {
-  let (cfg,) = config.parse-main-args(..args)
-  if config.export-enabled(cfg: cfg) {
+  let (cfg,) = configuration.parse-main-args(..args)
+  if configuration.export-enabled(cfg: cfg) {
     return _export(..args)
   }
-  if config.read-enabled(cfg: cfg) == false {
+  if configuration.read-enabled(cfg: cfg) == false {
     return none
   }
   let item = reading.single-item(reading.output.outputs, args)
