@@ -25,8 +25,8 @@
 // #display("plot3") // Doesn't work!
 #display("plot3", item: 0) // first display
 #display("plot3", item: 1) // second display
-#output("some-code") // returns the cell result
-#output("plot1")     // returns the cell display
+#output("calc")  // returns the cell result
+#output("plot1") // returns the cell display
 #outputs("plot2")
 #let my-output = output.with(
   output-type: ("display", "result"),

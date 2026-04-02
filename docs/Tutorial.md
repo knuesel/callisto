@@ -2,12 +2,14 @@
 
 Let's see how we can use Callisto to render a Jupyter notebook, or to extract the source and result of some computations. We will use the notebook [`example.ipynb`](example.ipynb). To compile the Typst examples yourself, you can download it and put it next to your Typst file.
 
+(If you're more interested in writing code directly in your Typst document, and using Callisto to execute the code blocks through Jupyter, head to the [Export and execution tutorial](Export-and-execution-tutorial.md).)
+
 ## Configuration
 
 We start by importing the latest version of the package:
 
 ```typst
-#import "@preview/callisto:0.2.4"
+#import "@preview/callisto:0.3.0"
 ```
 
 We can now call functions such as `callisto.render(nb: json("example.ipynb"))`, but it is more convenient to configure them to work with a particular notebook:
@@ -27,7 +29,7 @@ However to support Markdown cells that reference external images (using Markdown
 
 (With this path handler, Callisto can also access the notebook file so we don't need to call the `json` function ourselves.)
 
-The `config` call returns Callisto functions preconfigured with our settings. For a list of all functions (and all their parameters) that can be configured with `config`, see the [function reference](Reference.md).
+The `config` call returns Callisto functions preconfigured with our settings. For a list of all functions (and their parameters) that can be configured with `config`, see the [function reference](Reference.md).
 
 Here we only set the notebook, and from all the returned functions we only assign `render`, `Cell`, `In` and `Out`. Now let's use them!
 
@@ -47,31 +49,6 @@ This *renders* the notebook; the cells are inserted in the Typst document:
 
 -  the output of each code cell is inserted as a Typst image or text.
 
-### Using templates
-
-By default the cells are rendered with the `"notebook"` template, which adds some styling to get a notebook look. We can choose the `"plain"` template to get elements without styling:
-
-```typst
-#render(template: "plain")
-```
-
-We could also have applied this setting globally in the `config` call with `callisto.config(nb: json("example.ipynb"), template: "plain")`. This would affect all `render` calls.
-
-Different templates can be specified for the different cell types: `"markdown"`, `"code"` and `"raw"`. And instead of a name, a template can also be specified as a function that accepts a cell as argument (as well as keyword arguments for various settings, see the [reference](Reference.md#Templates)).
-
-For example, we might want to write Typst math in our Jupyter notebook, since the syntax is nicer than LaTeX. One way to do that is to write Typst formulas in raw cells, and use a template that renders raw cells by evaluating their source as Typst markup:
-
-```typst
-#render(
-  template: (
-    code: "notebook",
-    markdown: "notebook",
-    raw: (cell, ..args) => eval(cell.source, mode: "markup"),
-  ),
-)
-```
-
-Note: Markdown and LaTeX are rendered using [cmarker](https://typst.app/universe/package/cmarker/) and [mitex](https://typst.app/universe/package/mitex/) (awesome packages, though they don't support everything yet). It is possible to configure these packages or replace them with something else by setting custom handlers for `"text/markdown"` and `"text/latex"` (see the `handlers` keyword argument in the [reference](Reference.md)).
 
 ### Rendering specific cells
 
@@ -146,7 +123,6 @@ Note: the functions `Cell`, `In` and `Out` are implemented as aliases of the `re
 
 Let's say we want to extract some part of the notebook, like the source of one cell, or its output, to insert them at a specific place in our Typst document. We will need other Callisto functions for that. Let's configure them:
 
-
 ```typst
 #let (source, display, result, output, outputs) = callisto.config(
    nb: json("example.ipynb"),
@@ -167,22 +143,28 @@ That's a Markdown cell so we get the Markdown source as raw block (with `lang` s
 
 This gives a raw block with `lang` set to `"python"` since it's a notebook with a Python kernel. We could override this by calling `#source("plot1", lang: ...)` or setting `lang` directly in the `config` call.
 
-Now let's get the result of this code cell:
+Now let's get the output of this code cell:
+
+```typst
+#output("plot1")
+```
+
+Looking at the `callisto.config` call above, you might have noticed the `result` function. Let's try it:
 
 ```typst
 // Doesn't work!
 #result("plot1")
 ```
 
-This doesn't work, because this cell has no result! In Jupyter, a code cell has a result only if the last line returns a value. Here the last line is `plt.show()`, which returns nothing. The cell still shows a plot, but it's a **display object** rather than a result. Here the display object is created and updated by the various `plt` commands (and the `plt.show()` is useless in this case). The same cell can display many objects, but normally has only one result or none at all.
+This doesn't work, because this cell has no result! In Jupyter, a code cell has a result only if the last line returns a value. Here the last line is `plt.show()`, which returns nothing. The cell still shows a plot, but it's another kind of output: a **display object**. Here the display object is created and updated by the various `plt` commands. The same cell can display many objects, but normally has only one result or none at all.
 
-We can get this display object with the `display` function:
+We can specifically request a "display" output using the `display` function:
 
 ```typst
 #display("plot1")
 ```
 
-The `plot2` cell has has both a display object and a result. We can get each of them:
+The `plot2` cell produces both a display object and a result as outputs. We can get each of them:
 
 ```typst
 #display("plot2")
@@ -220,11 +202,11 @@ By default the `display` function expects only one item and complains if more (o
 #display("plot3", item: 1) // second display
 ```
 
-What if we don't really care if a cell shows a plot as a display or as a result? The `output` function can return all kind of cell outputs:
+The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:
 
 ```typst
-#output("some-code") // returns the cell result
-#output("plot1")     // returns the cell display
+#output("calc")  // returns the cell result
+#output("plot1") // returns the cell display
 ```
 
 The `plot2` cell has both a display and a result. To use `output` with that cell we would need to specify `item: 0` or `item: 1`. We can also call the `outputs` function instead:
@@ -233,14 +215,16 @@ The `plot2` cell has both a display and a result. To use `output` with that cell
 #outputs("plot2")
 ```
 
-This returns an array of outputs. To insert each output in the document we would have to write `#outputs("plot2").join()`.
+This returns an array of outputs. To insert each output in the document we could write `#outputs("plot2").join()`.
 
 Note: most "singular" functions like `source` and `display` have a plural counterpart (`sources`, `displays`) that return an array of values and don't complain if they find zero or many items.
+
+## More item extraction
 
 Now let's try something more complicated: we want to get the last display or result produced by a cell. We can configure our own function to do just that:
 
 ```typst
-#let my-output = output.with(
+#let last-output = output.with(
   output-type: ("display_data", "execute_result"),
   item: -1
 )
@@ -251,7 +235,7 @@ Here we filter on the output type: we don't want to get errors or stream items (
 Let's try it on the `plot2` cell:
 
 ```typst
-#my-output("plot2")
+#last-output("plot2")
 ```
 
 Excellent. Maybe we also want to customize the looks of a plot. Show it centered, and resized to 75% of the text width. When Callisto returns a plot, it's in the form of a Typst `image` element, so we can change the width with a set rule:
@@ -259,7 +243,8 @@ Excellent. Maybe we also want to customize the looks of a plot. Show it centered
 ```typst
 #[
   #set image(width: 75%)
-  #align(center, output("plot1"))
+  #set align(center)
+  #output("plot1")
 ]
 ```
 
@@ -273,7 +258,7 @@ Another way to change the width would be to extract the image data from the `ima
 #align(center, img)
 ```
 
-Finally we might want to include a plot in a particular format. In a Jupyter notebook, the same cell output is often stored in multiple formats, to let the viewer choose their preferred one. For example a table can be stored as HTML which looks great for viewers that support it, but another copy is stored as plain text for other viewers.
+Finally we might want to include a plot in a particular format. In a Jupyter notebook, the same cell output is often stored in multiple formats, to let the viewer choose their preferred one. For example a table can be stored as HTML which looks great for viewers that support it, while another copy is stored as plain text for other viewers.
 
 In Callisto we can request a particular format using the `format` argument:
 
@@ -300,7 +285,7 @@ Note: we can specify any format we want with the `format` keyword, but there mus
 
 ## Using a cell's execution count
 
-Instead of selecting code cells by label, we can use the *execution count*: as we know, when a cell is executed, Jupyter gives it a count like `[1]` or `[2]`. For example the `"plot1"` cell has execution count 2, and we can use it to identify the cell:
+Instead of selecting code cells by label, we can use the *execution count*: as we know, when a cell is executed, Jupyter gives it a count shown as `[1]` or `[2]`. For example the `"plot1"` cell has execution count 2, and we can use it to identify the cell:
 
 ```typst
 // Get "plot1" by execution count
@@ -319,3 +304,46 @@ If we want to do this a lot, we should make this behavior the default:
 ```
 
 Note that the same cell will get a different count if it's executed again, and cells can be executed manually in any order so the order of execution counts might not reflect the position of cells in the document. And the execution count is defined only for code cells. For all these reasons, by default Callisto uses the cell index rather than its execution count.
+
+### Using themes
+
+By default the cells are rendered with the `"notebook"` theme, which adds some styling to get a notebook look. We can choose the `"neat"` theme to get a cleaner look:
+
+```typst
+#render(theme: "neat")
+```
+
+There is also the `"plain"` theme which renders elements without any styling.
+
+We could also have applied the theme globally in the `config` call with `callisto.config(nb: json("example.ipynb"), theme: "neat")`. This would affect all `render` calls.
+
+We can also define our own theme. A theme is really a dictionary of functions (called handlers) that change how various elements are processed during rendering. We can access the standard theme dictionaries in `callisto.themes`.
+
+For example, we might want to write Typst math in our Jupyter notebook, since the syntax is nicer than LaTeX. One way to do that is to write Typst formulas in raw cells, and use a theme that renders raw cells by evaluating their source as Typst markup:
+
+```typst
+#render(
+  theme: callisto.themes.notebook + (
+    raw-cell: (cell, ..args) => eval(cell.source, mode: "markup"),
+  ),
+)
+```
+
+Here we started with the "notebook" theme dictionary and added our own handler for raw cells. For more information on theming, see the [reference](Reference.md#Themes).
+
+### Handlers
+
+We saw that a theme is a dictionary of handler functions. Actually all the advanced configuration in Callisto is done through handlers.
+
+For example, the `errors` function returns the errors produced by a cell. By default only the short text of the error is returned, but you change the `error` handler to return the full backtrace:
+
+```typst
+#let (errors,) = callisto.config(
+  nb: json("example.ipynb"),
+  handlers: (
+    error: (item, ..args) => item.traceback.join("\n"),
+  ),
+)
+```
+
+Markdown and LaTeX from the notebook are rendered using [cmarker](https://typst.app/universe/package/cmarker/) and [mitex](https://typst.app/universe/package/mitex/). It is possible to configure these packages or replace them with something else by setting custom `markdown-generic` and `math-generic` handlers (see [reference](Reference.md#Handlers)).

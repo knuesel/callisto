@@ -16,50 +16,27 @@
    nb: json("../../docs/example.ipynb"),
 )
 
-// Render the first 3 cells using the plain theme
-#render(range(3), theme: "plain")
-
-// Render only cell among the first two that is of type "code"
-#Cell(range(2), cell-type: "code")
+// Render the first 4 cells using the "neat" theme
+#render(range(4), theme: "neat")
 
 // Render cell with execution number 4.
 // Compared to `render`, `Cell` checks there's only one match.
-// (It could make sense to set `count` globally with `config()`.)
+// (It could make sense to set count: "execution" globally with config().)
 #Cell(4, count: "execution")
 
 // Render separately the input and output of cell "plot2"
 // The cell defines its label "plot2" in a header at the top of the cell:
-// #| label: plot2
+// the first source line is `#| label: plot2`
 #In("plot2")
 #Out("plot2")
-
-// Use notebook theme for code inputs, custom theme for markdown cells
-#let repr-theme(cell, ..args) = repr(cell.source)
-#render(theme: (code-cell-input: "notebook", markdown-cell: repr-theme))
 
 // Get more functions preconfigured for this notebook
 #let (display, result, source, output, outputs) = callisto.config(
    nb: json("../../docs/example.ipynb"),
 )
 
-// Get the result of cell with label "some-code"
-#result("some-code")
-
-// Get the source of cell "plot1" as raw block
-#source("plot1")
-
-// This doesn't work: cell "plot1" produces a display but no result!
-// #result("plot1")
-
-// Get the display output of that cell
-#display("plot1")
-
-// Force using the PNG version of this output
-#display("plot1", format: "image/png")
-
-// Get the output (display or result, we don't care) of some cells
-#output("some-code")
-#output("plot1")
+// Get the single output of cell with label "calc"
+#output("calc")
 
 // This doesn't work: "plot2" has two outputs!
 // #output("plot2")
@@ -71,11 +48,23 @@
 // Get all outputs as an array
 #outputs("plot2")
 
+// Get the "plot2" output that is the cell result
+#result("plot2")
+
+// And the "plot2" output that is a "display" item
+#display("plot2")
+
+// Force using the PNG version of this output
+#display("plot2", format: "image/png")
+
+// This doesn't work: cell "plot1" produces a display but no result!
+// #result("plot1")
+
+// Get the source of cell "plot1" as raw block
+#source("plot1")
+
 // Change the width of an image read from the notebook
 #{
    set image(width: 100%)
    output("plot1")
 }
-
-// Another way to do the same thing
-#image(output("plot1").source, width: 100%)
