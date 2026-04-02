@@ -7,6 +7,7 @@
 #import "reading/stream.typ"
 #import "reading/error.typ"
 #import "reading/output.typ": outputs
+#import "ansi.typ"
 #import "latex.typ"
 
 // A handler is a function called to render a value such as a cell's source,
@@ -139,6 +140,38 @@
 
 // Handler for LaTeX markup
 #let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+
+// Handler for rendering text that includes ANSI escape sequences.
+#let handler-text-ansi-generic(data, ctx: none, ..args) = {
+  let (process, ..render-args) = ctx.ansi
+  ansi.render(data, ..render-args)
+}
+
+// Handler for text to render as console output, in particular text that can
+// include ANSI escape sequences for colors, etc.
+#let handler-text-console-block(data, ctx: none, ..args) = {
+  let process = ctx.ansi.process
+
+  if process == auto {
+    process = data.contains(ansi.escape-regex)
+  }
+
+  if process in (false, "strip") {
+    if process == "strip" {
+      data = data.replace(ansi.escape-regex, "")
+    }
+    return raw(block: true, lang: "txt", data)
+  }
+
+  if process != true {
+    panic("invalid ansi.process value: " + repr(process))
+  }
+
+  let renderer = handle.with(mime: "text-ansi-generic", ctx: ctx)
+
+  // Pass args here (could be used e.g. to change the template)
+  ansi.console-block(data, renderer: renderer, ..args)
+}
 
 // Handler for simple text
 #let handler-text-plain(data, ctx: none, ..args) = data
@@ -301,8 +334,8 @@
   "stream": handler-stream, // called before stream-type-specific handler
   "output": handler-output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
-  "markdown-generic": handler-markdown-generic,
-  "markdown-par": handler-markdown-par,
+  "markdown-generic": handler-markdown-generic, // returns inline content
+  "markdown-par": handler-markdown-par, // returns paragraph(s) (without block)
   // Handlers for LaTeX math
   "math-generic": handler-math-generic, // base handler for math
   "math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
@@ -314,6 +347,8 @@
   "code-cell": handler-code-cell,
   "cell": handler-cell, // called before the cell-type-specific handler
   // Other handlers
+  "text-ansi-generic": handler-text-ansi-generic,
+  "text-console-block": handler-text-console-block,
   "source-code-generic": handler-source-code-generic,
   "attachment": handler-attachment,
   "path": handler-path,

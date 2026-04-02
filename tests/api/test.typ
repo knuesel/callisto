@@ -1,4 +1,5 @@
 #import "/callisto.typ"
+#import "/lib/handlers.typ"
 #import "/lib/header-pattern.typ"
 
 // With julia.ipynb
@@ -74,7 +75,7 @@
   ),
   apply-theme: true,
 )
-#assert("Stacktrace" in out.body.text)
+#assert("Stacktrace" in out.body.child.text)
 
 // Allow multiple items in singular functions, pick the first
 #[

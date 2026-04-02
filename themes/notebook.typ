@@ -40,7 +40,9 @@
 
 // Customized default handler for errors, rendering the traceback
 #let notebook-error(data, ctx: none, ..args) = {
-  error-block(raw(data.traceback.join("\n"), block: true, lang: "txt"))
+  let txt = data.traceback.join("\n")
+  let rendered = handle(txt, mime: "text-console-block", ctx: ctx, ..args)
+  error-block(rendered)
 }
 
 #let notebook-stream-stderr(data, ctx: none, ..args) = {

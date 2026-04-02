@@ -85,6 +85,8 @@
     ctx.output = cells.resolve-output(cell, cfg: cfg)
   }
 
+  ctx.ansi = (process: auto) + ctx.ansi
+
   ctx.read = config.read-enabled(cfg: cfg)
   ctx.export = config.export-enabled(cfg: cfg)
 
