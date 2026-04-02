@@ -312,14 +312,13 @@
 // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
 #let highlight-template(
   it,
-  target: raw.where(block: true, lang: "ansi"),
+  target: raw.where(lang: "ansi"),
   // Slightly negative bottom edge seems necessary in DejaVu Sans Mono to
   // have the underscores rendered properly.
   text-edges: (top-edge: 1.1em, bottom-edge: -0.05em),
   // Block inset that matches the text and highlight settings
   inset: (top: -0.2em, bottom: 0.25em+0.2pt, x: 0.1pt),
 ) = {
-  show target: set par(leading: 0pt)
   show target: set text(..text-edges)
   show target: set highlight(
     top-edge: text-edges.top-edge + inset.top,
@@ -341,13 +340,18 @@
   template: highlight-template,
   ..args,
 ) = {
+  // The console block must have no leading, to allow box-drawing characters
+  // to connect
+  set par(leading: 0pt)
+
+  // Apply template after leading, in case it wants to change it
   show: template
 
   // We go through a raw block (replaced by a simple block in the show rule)
   // to apply raw font and to allow the user to set show-set rules on raw.
-  show raw.where(block: true, lang: "ansi"): r => block(
+  show raw.where(block: true, lang: "ansi"): r => block({
     renderer(r.text, ..args)
-  )
+  })
 
   raw(block: true, lang: "ansi", string)
 }

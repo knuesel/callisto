@@ -1,6 +1,6 @@
 #import "/callisto.typ"
 
-#set page(margin: 2cm)
+#set page(margin: (x: 2cm, y: 1cm))
 #set heading(numbering: "1.")
 #let esc = "\u{1b}"
 
@@ -15,19 +15,23 @@
     bg: white,
   )
 
+  #show: callisto.ansi.highlight-template
+
   // Big mix
+  #lorem(12)
   #raw(lang: "ansi",
     esc + "[32;1m Green bold " +
     esc + "[38;2;255;128;0;44m TrueColor on blue " + 
     esc + "[2J" + // ignored cursor wipe
     esc + "[39m Default fg " + 
-    esc + "[m Reset (empty m)\n" + 
+    esc + "[m Reset (empty m)" + 
     esc + "[38;5;199m 8-bit cube pink" +
-    esc + "[38;5;6m 8-bit cyan" +
-    esc + "[38;5;14m 8-bit bright cyan" +
+    esc + "[38;5;6m cyan" +
+    esc + "[38;5;14m bright cyan" +
     esc + "[38;5;240m 8-bit gray" +
     esc + "[0m Reset "
   )
+  #lorem(10)
 
   // 6-level nesting
   #raw(lang: "ansi",
