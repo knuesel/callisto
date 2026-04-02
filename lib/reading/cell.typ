@@ -7,54 +7,6 @@
 // All possible Jupyter cell types
 #let all-cell-types = ("code", "markdown", "raw")
 
-// Convert metadata in code header to cell metadata
-#let _process-cell-header(cell, cfg: none) = {
-  let header = header-pattern.parse-header-text(
-    cell.source,
-    pattern: cfg.cell-header-pattern,
-  )
-  cell.metadata.callisto.header = header.dict
-  cell.metadata.callisto.header-text = header.text
-
-  // Remove header from source if necessary
-  if not cfg.keep-cell-header and header.dict.len() > 0 {
-    cell.source = cell.source.slice(header.text.len())
-  }
-  return cell
-}
-
-// Normalize cell dict (ensuring the source is a single string rather than an
-// array with one string per line) and convert source header metadata to cell
-// metadata, using cell-header-pattern to recognize and parse cell header lines.
-// Also ensures that the cell has a metadata.callisto dictionary.
-#let _process-cell(i, cell, cfg: none) = {
-  if "id" not in cell {
-    cell.id = str(i)
-  }
-  cell.index = i
-
-  // Normalize source field to a single string
-  cell = notebook.normalize-cell-source(cell)
-
-  if "callisto" not in cell.metadata {
-    cell.metadata.callisto = (:)
-  }
-  if cell.cell_type == "code" {
-    cell = _process-cell-header(cell, cfg: cfg)
-  }
-  return cell
-}
-
-// Preprocess notebook dict
-#let _preprocess-nb(cfg: none) = {
-  if cfg.nb == none { return none }
-  let nb-json = notebook.nb-json(cfg: cfg)
-  nb-json.cells = nb-json.cells.enumerate().map(
-    ((i, c)) => _process-cell(i, c, cfg: cfg)
-  )
-  return nb-json
-}
-
 // Get value at given path in recursive dict.
 // The path can be a string of the form `key1.key2....`, or an array
 // `(key1, key2, ...)`.
@@ -188,7 +140,7 @@
     // to convert header lines to metadata)
     return _filter-type(util.ensure-array(spec), cfg.cell-type)
   }
-  let all-cells = _preprocess-nb(cfg: cfg).cells
+  let all-cells = notebook.preprocess(cfg: cfg).cells
   let cells-of-type = _filter-type(all-cells, cfg.cell-type)
   if spec == none {
     // No spec means select all cells

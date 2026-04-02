@@ -58,7 +58,7 @@
   item-desc: none,
 ) = {
 
-  let nb-json = notebook.nb-json(cfg: cfg)
+  let nb-json = notebook.get-json(cfg: cfg)
   let ctx = cfg
 
   ctx.cell-header-pattern = header-pattern.resolve(

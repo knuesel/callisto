@@ -1,7 +1,8 @@
 #import "/lib/ctx/handling.typ": all-handlers
+#import "/lib/header-pattern.typ"
 
 // Return the notebook as JSON, without any processing
-#let nb-json(cfg: none) = {
+#let get-json(cfg: none) = {
   if cfg.nb == none {
     return none
   }
@@ -27,4 +28,57 @@
     cell.source = ""
   }
   return cell
+}
+
+// Convert metadata in code header to cell metadata
+#let _process-cell-header(cell, cfg: none) = {
+  let header = header-pattern.parse-header-text(
+    cell.source,
+    pattern: cfg.cell-header-pattern,
+  )
+  cell.metadata.callisto.header = header.dict
+  cell.metadata.callisto.header-text = header.text
+
+  // Remove header from source if necessary
+  if not cfg.keep-cell-header and header.dict.len() > 0 {
+    cell.source = cell.source.slice(header.text.len())
+  }
+  return cell
+}
+
+// Normalize cell dict (ensuring the source is a single string rather than an
+// array with one string per line) and convert source header metadata to cell
+// metadata, using cell-header-pattern to recognize and parse cell header lines.
+// Also ensures that the cell has a metadata.callisto dictionary.
+// The positional parameters are the cell index and original cell dict.
+#let preprocess-cell(cell, index: none, cfg: none) = {
+  if type(index) != int {
+    panic("cell index must be an integer")
+  }
+
+  if "id" not in cell {
+    cell.id = str(index)
+  }
+  cell.index = index
+
+  // Normalize source field to a single string
+  cell = normalize-cell-source(cell)
+
+  if "callisto" not in cell.metadata {
+    cell.metadata.callisto = (:)
+  }
+  if cell.cell_type == "code" {
+    cell = _process-cell-header(cell, cfg: cfg)
+  }
+  return cell
+}
+
+// Preprocess notebook dict
+#let preprocess(cfg: none) = {
+  if cfg.nb == none { return none }
+  let nb-json = get-json(cfg: cfg)
+  nb-json.cells = nb-json.cells.enumerate().map(
+    ((i, c)) => preprocess-cell(c, index: i, cfg: cfg)
+  )
+  return nb-json
 }
