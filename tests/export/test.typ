@@ -1,6 +1,8 @@
 #import "/callisto.typ"
 
 #show heading: set block(below: 1em)
+#show heading.where(level: 1): set text(14pt)
+#show heading.where(level: 2): set text(12pt)
 #set heading(numbering: "1.")
 
 // Work around https://github.com/typst/typst/issues/1331
@@ -36,20 +38,16 @@
   description: "Notebook of all code blocks in the document",
 )
 
-#outline()
-
 = Select exports using a label
 
 == Show rule to show + export + render
 
-#show <g>: it => rect(it, width: 100%) + execute(it)
+#show <g>: execute
 
 ```python
 #| label: x
-a = 1
-b = 2
-c = a + b
-c
+x = 1 + 2
+x
 ```<g>
 
 ```python
@@ -60,18 +58,14 @@ c
 
 #show <with-header>: execute
 
-Cell with `output: false` in header:
-
 ```python
 #| output: false
 2 + 3
 ```<with-header>
 
-Cell with `echo: false` in header:
-
 ```python
 #| echo: false
-10 + 1
+3 + 4
 ```<with-header>
 
 == Get cell by name
@@ -79,7 +73,7 @@ Cell with `echo: false` in header:
 Cell `x`:
 #Cell("x")
 
-== Render all exported cells with a given Typst label
+== Select by Typst label
 #render(<g>)
 
 == Render input/output/both based on label
@@ -88,31 +82,23 @@ Cell `x`:
 #show <in>:   execute.with(output: false)
 #show <out>:  execute.with(input: false)
 
-Cells that should be rendered in whole:
-
 ```python
 10 + 1
 ```<cell>
 
 ```python
 10 + 2
-```<cell>
-
-Cell that should show only input:
+```<in>
 
 ```python
 10 + 3
-```<in>
-
-Cell that should show only output:
-
-```python
-10 + 4
 ```<out>
+
+#pagebreak()
 
 = Select exports using raw lang
 
-(The raw lang fill be "fixed" automatically by the kernel upon execution.)
+(The raw lang will be "fixed" automatically by the kernel upon execution.)
 
 #show raw.where(lang: "python-x"): export
 
@@ -129,19 +115,23 @@ a = 23; a
 b = 42; b
 ```<b>
 
-== Cell exported by lang and selected for render using Typst label
+== Select with Typst label
 
 #Cell(<a>)
 
-== Render exported cells using raw lang query
+== Select with raw lang query
 
 #context render(query(raw.where(lang: "python-x")))
 
-== Render exported cells using raw lang in cell metadata
+== Select with raw lang in cell metadata
 
 #render(c => c.metadata.callisto.export.lang == "python-x")
 
-== Inline raw elements with `evaluate`
+#pagebreak()
+
+= Inline raw elements
+
+== With `evaluate`
 
 // Using keep to disambiguate between several evaluations of `3*3`
 The square of 3 is #evaluate(`3*3`, keep: 0).
@@ -153,6 +143,7 @@ A table with $3^2$ cells:
 #{
   let n = evaluate(`3*3`, keep: 1)
   if type(n) == str {
+    set align(center)
     table(
       columns: int(n),
       ..range(int(n)).map(str),
@@ -170,7 +161,7 @@ A table with $3^2$ cells:
   transform: x => int(x) * 10,
 )
 
-== Inline raw exported by label
+== Exported by label
 
 // Outputs in the the context of a raw element so will use monospace font
 #show <x>: evaluate
@@ -225,9 +216,9 @@ Code can be generated dynamically for execution:
 }
 
 // Build table from results
-#table(
+#align(center, table(
   columns: 2,
-  inset: 1em,
+  inset: 0.5em,
   stroke: none,
   table.header($f$, $f'$),
   table.hline(),
@@ -237,7 +228,9 @@ Code can be generated dynamically for execution:
       result-sympy(str(i) + "-diff"),
     )
   }
-)
+))
+
+#pagebreak()
 
 = Third export with another kernel and with "neat" theme
 
@@ -256,6 +249,7 @@ Code can be generated dynamically for execution:
   export-name: "julia",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
   theme: "neat",
+  ansi: (bg: luma(30%)),
 )
 
 #stage-julia()
@@ -327,6 +321,12 @@ cos(1.2)
 #| fig-cap: Tangent of 1.2
 tan(1.2)
 ```
+
+== Output with ANSI escape sequences
+
+```
+println(read("../ansi/model_summary_output.txt", String))
+```<exec2>
 
 == Inline computations
 
