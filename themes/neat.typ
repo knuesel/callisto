@@ -15,7 +15,7 @@
 )
 
 // Document template
-#let neat-template(doc, set-fonts: true) = {
+#let _template(doc, set-fonts: true) = {
   set text(font: "Noto Sans") if set-fonts
   show raw: set text(font: "Noto Sans Mono") if set-fonts
   show heading: set text(weight: "semibold") if set-fonts
@@ -38,7 +38,7 @@
   doc
 }
 
-#let neat-code-cell-input(cell, ctx: none) = {
+#let _code-cell-input(cell, ctx: none) = {
   let has-output = ctx.output and cell.outputs.len() > 0
   set text(rgb("#005979"))
   show raw: set block(.._raw-block-cfg, above: 1em)
@@ -46,7 +46,7 @@
   handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
 }
 
-#let neat-code-cell-output(cell, ctx: none) = {
+#let _code-cell-output(cell, ctx: none) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   // Undo global show rule for raw block
@@ -62,7 +62,7 @@
 }
 
 #let theme = plain.theme + (
-  template: neat-template,
-  code-cell-input: neat-code-cell-input,
-  code-cell-output: neat-code-cell-output,
+  template: _template,
+  code-cell-input: _code-cell-input,
+  code-cell-output: _code-cell-output,
 )

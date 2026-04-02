@@ -11,7 +11,7 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
-#let notebook-raw-cell(cell, ctx: none) = block(
+#let _raw-cell(cell, ctx: none) = block(
   spacing: 1.5em,
   width: 100%,
   inset: 0.5em,
@@ -19,7 +19,7 @@
   handle(cell.source, mime: "source-code-generic", ctx: ctx),
 )
 
-#let notebook-code-cell-input(cell, ctx: none) = block(
+#let _code-cell-input(cell, ctx: none) = block(
   above: 2em,
   below: if ctx.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
@@ -32,30 +32,30 @@
 )
 
 // Styled block for error items (error outputs or stderr streams)
-#let error-block = block.with(
+#let _error-block = block.with(
   width: 100%,
   fill: red.lighten(90%),
   outset: 0.5em,
 )
 
 // Customized default handler for errors, rendering the traceback
-#let notebook-error(data, ctx: none, ..args) = {
+#let _error(data, ctx: none, ..args) = {
   let txt = data.traceback.join("\n")
   let rendered = handle(txt, mime: "text-console-block", ctx: ctx, ..args)
-  error-block(rendered)
+  _error-block(rendered)
 }
 
-#let notebook-stream-stderr(data, ctx: none, ..args) = {
+#let _stream-stderr(data, ctx: none, ..args) = {
   let value = handle(data, mime: "stream-generic", ctx: ctx, ..args)
-  error-block(value)
+  _error-block(value)
 }
 
-#let notebook-result(data, ctx: none, ..args) = block({
+#let _result(data, ctx: none, ..args) = block({
   _in-out-num("Out", ctx.cell.execution_count)
   handle(data, mime: "rich-output-generic", ctx: ctx, ..args)
 })
 
-#let notebook-code-cell-output(cell, ctx: none) = {
+#let _code-cell-output(cell, ctx: none) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   block(
@@ -68,10 +68,10 @@
 }
 
 #let theme = plain.theme + (
-  stream-stderr: notebook-stream-stderr,
-  error: notebook-error,
-  result: notebook-result,
-  raw-cell: notebook-raw-cell,
-  code-cell-input: notebook-code-cell-input,
-  code-cell-output: notebook-code-cell-output,
+  stream-stderr: _stream-stderr,
+  error: _error,
+  result: _result,
+  raw-cell: _raw-cell,
+  code-cell-input: _code-cell-input,
+  code-cell-output: _code-cell-output,
 )
