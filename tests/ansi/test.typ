@@ -64,13 +64,12 @@
 
 == Using `ansi.console-block`
 
-#[
-  #callisto.ansi.console-block(
-    fg: white,
-    bg: luma(30%),
-    "Hello " + esc + "[33;7mWorld!\n" + "Still reversed" + esc + "[0m Reset",
-  )
-]
+#rect(stroke: red, inset: 0pt,
+callisto.ansi.console-block(
+  fg: white,
+  bg: luma(30%),
+  "Hello " + esc + "[33;7mWorld!\n" + "Still reversed" + esc + "[0m Reset",
+))
 
 = `ansi-table.ipynb`
 

@@ -315,17 +315,17 @@
   // Slightly negative bottom edge seems necessary in DejaVu Sans Mono to
   // have the underscores rendered properly.
   text-edges: (top-edge: 1.1em, bottom-edge: -0.05em),
-  // Block outset that matches the text and highlight settings
-  outset: (top: -0.2em, bottom: 0.25em+0.2pt, x: 0.1pt),
+  // Block inset that matches the text and highlight settings
+  inset: (top: -0.2em, bottom: 0.25em+0.2pt, x: 0.1pt),
 ) = {
   show target: set par(leading: 0pt)
   show target: set text(..text-edges)
   show target: set highlight(
-    top-edge: text-edges.top-edge + outset.top,
-    bottom-edge: text-edges.bottom-edge - outset.bottom,
-    extent: outset.x,
+    top-edge: text-edges.top-edge + inset.top,
+    bottom-edge: text-edges.bottom-edge - inset.bottom,
+    extent: inset.x,
   )
-  show target: set block(outset: outset)
+  show target: set block(inset: inset)
   it
 }
 
