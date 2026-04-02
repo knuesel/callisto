@@ -32,9 +32,6 @@
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 //
-// - The "text-ansi-generic" handler gets 'fg' and 'bg' arguments (either
-//   colors or none).
-//
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
 // see an error when an unknown argument is passed.
@@ -145,37 +142,35 @@
 #let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
 
 // Handler for rendering text that includes ANSI escape sequences.
-// This handler is designed to be easily swappable by the user, e.g. to change
-// the ANSI color palette.
-#let handler-text-ansi-generic(data, ctx: none, fg: none, bg: none, ..args) = ansi.render(
-  data,
-  fg: fg,
-  bg: bg,
-  ..args,
-)
+#let handler-text-ansi-generic(data, ctx: none, ..args) = {
+  let (process, ..render-args) = ctx.ansi
+  ansi.render(data, ..render-args)
+}
 
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
 #let handler-text-console-block(data, ctx: none, ..args) = {
-  // We basically duplicate the code of ansi.console-block here for clarity
-  // (making the code generic with a rendered callback obscures the flow,
-  // especially when trying to override fg/bg).
+  let (process, ..render-args) = ctx.ansi
 
-  // Tuning of some defaults to render background color through highlight
-  show: ansi.highlight-template
+  if process == auto {
+    process = data.contains(ansi.escape-regex)
+  }
 
-  // Replace raw block with rendered text block
-  show raw.where(block: true, lang: "ansi"): r => block({
-    // Avoid any text styling if no escape sequence found
-    if r.text.match(ansi.escape-regex) == none {
-      r.text
-    } else {
-      // Call ANSI handler with default colors
-      let colors = ansi.pick-colors()
-      handle(r.text, mime: "text-ansi-generic", ctx: ctx, ..colors, ..args)
+  if process in (false, "strip") {
+    if process == "strip" {
+      data = data.replace(ansi.escape-regex, "")
     }
-  })
-  raw(block: true, lang: "ansi", data)
+    return raw(block: true, lang: "txt", data)
+  }
+
+  if process != true {
+    panic("invalid ansi.process value: " + repr(process))
+  }
+
+  let renderer = handle.with(mime: "text-ansi-generic", ctx: ctx)
+
+  // Pass args here (could be used e.g. to change the template)
+  ansi.console-block(data, renderer: renderer, ..args)
 }
 
 // Handler for simple text

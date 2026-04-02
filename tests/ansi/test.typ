@@ -63,6 +63,16 @@
   )
 ]
 
+== Using `ansi.console-block`
+
+#[
+  #ansi.console-block(
+    fg: white,
+    bg: luma(30%),
+    "Hello " + esc + "[33;7mWorld!\n" + "Still reversed" + esc + "[0m Reset",
+  )
+]
+
 = `ansi-table.ipynb`
 
 // The text color when colors are reversed will be wrong here as the background
@@ -70,6 +80,7 @@
 
 #let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
+  ansi: (bg: white),
 )
 #render()
 
@@ -89,26 +100,16 @@
 #let (Out,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   theme: "plain",
-  handlers: (
-    "text-ansi-generic": (data, ctx: none, fg: none, bg: none, ..args) => ansi.render(
-      data,
-      palette: gruvbox,
-      fg: orange,
-      bg: gruvbox.first(),
-      ..args,
-    ),
-  )
+  ansi: (palette: gruvbox, bg: gruvbox.first(), fg: orange),
 )
-#[
-  // The block fill set here should be picked up as background color and
-  // used as text color in the reversed "Summary"
-  // #set block(fill: eastern.darken(50%))
-  #Out(0)
-]
+#Out(0)
 
-== Using `ansi.console-block`
-
-#ansi.console-block(esc + "[33;46;7mHello")
+#let (Out,) = callisto.config(
+  nb: json("ansi-table.ipynb"),
+  theme: "plain",
+  ansi: (process: "strip"),
+)
+#Out(0)
 
 #pagebreak()
 

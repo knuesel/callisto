@@ -263,77 +263,56 @@
   return chunk-results.join()
 }
 
-
-// Return a guess for the "active" foreground and background colors, in the
-// form of a dict with fields fg and bg.
-// Where no guess can be made, none is used (meaning that no color will be
-// set). Using black text and white background as defaults would often be
-// wrong, for the background at least: for example when the text is inside a
-// #block(fill: red, ...), we would still see block.fill==none on the style
-// chain yet a white background would be wrong, and this wrong background would
-// be applied on most text. Better default to none in this case: this way we
-// we don't apply styles uselessly, and the result is wrong only in the rare
-// cases where colors are reversed.
-#let pick-colors(fg: auto, bg: auto) = {
-  if fg == auto {
-    fg = if type(text.fill) == color {
-      text.fill
-    } else {
-      none
-    }
-  }
-  if bg == auto {
-    bg = if type(block.fill) == color {
-      block.fill
-    } else if block.fill == none and type(page.fill) == color {
-      page.fill
-    } else {
-      none
-    }
-  }
-  return (fg: fg, bg: bg)
-}
-
 // Template for show-set rules tuned to render background color using highlight.
-#let highlight-template(it) = {
-  // Settings that work well:
-  // - Zero leading to avoid gaps (in bg color) between rows.
-  // - Text edges large enough to have some spacing between rows and some bg
-  //   color above the text of the first row, but small enough to have
-  //   box-drawing characters connect correctly between rows. The slightly
-  //   negative bottom edge seems necessary in DejaVu Sans Mono to have the
-  //   underscores rendered properly.
-  // - Highlight not too high to avoid overlap with previous row, low enough to
-  //   avoid gaps in bg color, with small extensions in absolute length to
-  //   avoid artifacts on edges between adjacent highlights.
-  //
-  // Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
-  let target = raw.where(block: true, lang: "ansi")
+// 
+// Settings that work well:
+// - Zero leading to avoid gaps (in bg color) between rows.
+// - Text edges large enough to have some spacing between rows and some bg
+//   color above the text of the first row, but small enough to have
+//   box-drawing characters connect correctly between rows.
+// - Highlight not too high to avoid overlap with previous row, low enough to
+//   avoid gaps in bg color, with small extensions in absolute length to
+//   avoid artifacts on edges between adjacent highlights.
+//
+// Tested with DejaVu Sans Mono, JuliaMono, Noto Sans Mono
+#let highlight-template(
+  it,
+  target: raw.where(block: true, lang: "ansi"),
+  // Slightly negative bottom edge seems necessary in DejaVu Sans Mono to
+  // have the underscores rendered properly.
+  text-edges: (top-edge: 1.1em, bottom-edge: -0.05em),
+  // Block outset that matches the text and highlight settings
+  outset: (top: -0.2em, bottom: 0.25em+0.2pt, x: 0.1pt),
+) = {
   show target: set par(leading: 0pt)
-  show target: set text(top-edge: 1.1em, bottom-edge: -0.05em)
-  show target: set highlight(top-edge: 0.9em, bottom-edge: -0.25em-0.2pt, extent: 0.1pt)
+  show target: set text(..text-edges)
+  show target: set highlight(
+    top-edge: text-edges.top-edge + outset.top,
+    bottom-edge: text-edges.bottom-edge - outset.bottom,
+    extent: outset.x,
+  )
+  show target: set block(outset: outset)
   it
 }
 
 // Render the string as a console block, processing ANSI escape sequences.
-// The fg and bg parameters can be auto: in this case values will be guessed
-// from context if possible (using text.fill and block.fill/page.fill).
-// The other arguments are passed to the render function. 
-#let console-block(string, fg: auto, bg: auto, ..args) = {
-  show: highlight-template
+// The extra arguments are passed to the renderer.
+// Note that bg (if given in extra args) is not applied to the block itself:
+// that could be redundant, and it's easier for the user to do that themselves
+// than to undo it when undesired.
+#let console-block(
+  string,
+  renderer: render,
+  template: highlight-template,
+  ..args,
+) = {
+  show: template
 
   // We go through a raw block (replaced by a simple block in the show rule)
   // to apply raw font and to allow the user to set show-set rules on raw.
-  // This is done in all cases for consistency.
-  show raw.where(block: true, lang: "ansi"): r => block({
-    // Avoid any text styling if no escape sequence found
-    if r.text.match(escape-regex) == none {
-      r.text
-    } else {
-      let colors = pick-colors(fg: fg, bg: bg)
-      render(r.text, ..colors, ..args)
-    }
-  })
+  show raw.where(block: true, lang: "ansi"): r => block(
+    renderer(r.text, ..args)
+  )
 
   raw(block: true, lang: "ansi", string)
 }
