@@ -11,6 +11,7 @@
 #import "lib/theming.typ"
 #import "lib/rendering.typ"
 #import "lib/handlers.typ"
+#import "lib/ansi.typ"
 #import "lib/exporting.typ"
 #import "lib/header-pattern.typ": make-header-text, parse-header-text
 

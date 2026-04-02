@@ -1,5 +1,4 @@
 #import "/callisto.typ"
-#import "/lib/ansi.typ"
 
 #set page(margin: 2cm)
 #set heading(numbering: "1.")
@@ -9,7 +8,7 @@
 = Test strings
 
 #[
-  #show raw.where(lang: "ansi"): it => ansi.render(
+  #show raw.where(lang: "ansi"): it => callisto.ansi.render(
     it.text,
     conceal: (it, ..args) => text(rgb(0, 0, 0, 50), it),
     bold-is-bright: true,
@@ -66,7 +65,7 @@
 == Using `ansi.console-block`
 
 #[
-  #ansi.console-block(
+  #callisto.ansi.console-block(
     fg: white,
     bg: luma(30%),
     "Hello " + esc + "[33;7mWorld!\n" + "Still reversed" + esc + "[0m Reset",

@@ -150,7 +150,7 @@
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
 #let handler-text-console-block(data, ctx: none, ..args) = {
-  let (process, ..render-args) = ctx.ansi
+  let process = ctx.ansi.process
 
   if process == auto {
     process = data.contains(ansi.escape-regex)
