@@ -40,7 +40,7 @@
 
 // Generic image handler that supports image path and image bytes, used by
 // several others to actually render the image.
-#let handler-image-generic(data, ctx: none, ..args) = {
+#let image-generic(data, ctx: none, ..args) = {
   if type(data) == str {
     data = handle(data, mime: "path", ctx: ctx, ..args)
   }
@@ -51,7 +51,7 @@
 // path of the form "attachment:name" where 'name' refers to a cell attachment.
 // As all image handlers, this handler can receive extra arguments such as
 // 'alt' that must be forwarded to the subhandler.
-#let handler-image-markdown-cell(path, ctx: none, ..args) = {
+#let image-markdown-cell(path, ctx: none, ..args) = {
   let (handlers, cell) = ctx
   if path.starts-with("attachment:") {
     let name = path.trim("attachment:", at: start)
@@ -75,13 +75,13 @@
 }
 
 // Handler for base64-encoded images
-#let handler-image-base64(data, ctx: none, ..args) = {
+#let image-base64(data, ctx: none, ..args) = {
   let data-bytes = base64.decode(data.replace("\n", ""))
   handle(data-bytes, mime: "image-generic", ctx: ctx, ..args)
 }
 
 // Handler for text-encoded images, for example svg+xml
-#let handler-image-text(data, ctx: none, ..args) = {
+#let image-text(data, ctx: none, ..args) = {
   handle(bytes(data), mime: "image-generic", ctx: ctx, ..args)
 }
 
@@ -98,7 +98,7 @@
 }
 
 // Smart svg+xml handler that handles both text and base64 data
-#let handler-image-svg-xml(data, ctx: none, ..args) = {
+#let image-svg-xml(data, ctx: none, ..args) = {
   let mime = _encoded-svg-mime(data)
   handle(data, mime: mime, ctx: ctx, ..args)
 }
@@ -108,7 +108,7 @@
 // of the document, so that e.g. spacing around headings can be configured
 // without interference from a container block, see
 // https://github.com/knuesel/callisto/issues/13 )
-#let handler-markdown-generic(data, ctx: none, ..args) = cmarker.render(
+#let markdown-generic(data, ctx: none, ..args) = cmarker.render(
   data,
   math: handle.with(mime: "math-markdown-cell", ctx: ctx),
   scope: (
@@ -127,29 +127,29 @@
 
 // Handler for Markdown markup to be rendered as one or several paragraphs but
 // without a block wrapper (see handler-markdown-generic).
-#let handler-markdown-par(data, ctx: none, ..args) = {
+#let markdown-par(data, ctx: none, ..args) = {
   parbreak()
   handle(data, mime: "markdown-generic", ctx: ctx, ..args)
   parbreak()
 }
 
 // Handler for Markdown outputs
-#let handler-text-markdown(data, ctx: none, ..args) = {
+#let text-markdown(data, ctx: none, ..args) = {
   block(handle(data, mime: "markdown-generic", ctx: ctx, ..args))
 }
 
 // Handler for LaTeX markup
-#let handler-text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+#let text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
 
 // Handler for rendering text that includes ANSI escape sequences.
-#let handler-text-ansi-generic(data, ctx: none, ..args) = {
+#let text-ansi-generic(data, ctx: none, ..args) = {
   let (process, ..render-args) = ctx.ansi
   ansi.render(data, ..render-args)
 }
 
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc.
-#let handler-text-console-block(data, ctx: none, ..args) = {
+#let text-console-block(data, ctx: none, ..args) = {
   let process = ctx.ansi.process
 
   if process == auto {
@@ -174,13 +174,13 @@
 }
 
 // Handler for simple text
-#let handler-text-plain(data, ctx: none, ..args) = data
+#let text-plain(data, ctx: none, ..args) = data
 
 // Handler for LaTeX equations
-#let handler-math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
+#let math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
 // Handler for LaTeX equations in Markdown cells.
-#let handler-math-markdown-cell(data, ctx: none, ..args) = {
+#let math-markdown-cell(data, ctx: none, ..args) = {
   let txt = data
   // If the preamble is set, we must use it and remove definitions from the
   // math item itself to avoid duplicates.
@@ -196,7 +196,7 @@
 // metadata can be a simple metadata dict or a dict with metadata dicts keyed
 // by MIME types. If given, the subhandler args will be forwarded to
 // the subhandler called by this handler to handle a particular format.
-#let handler-attachment(
+#let attachment(
   data,
   ctx: none,
   metadata: none,
@@ -218,15 +218,15 @@
 }
 
 // Default handler for path: raise an error
-#let handler-path(cell, ctx: none, ..args) = {
+#let path-handler(cell, ctx: none, ..args) = {
   panic("\"path\" handler undefined. You can define it with callisto.config(..., handlers: (path: (x, ..args) => read(x, encoding: none)))")
 }
 
 // Generic stream handler
-#let handler-stream-generic(data, ctx: none, ..args) = data
+#let stream-generic(data, ctx: none, ..args) = data
 
 // Handler for stream output items
-#let handler-stream(item, ctx: none, ..args) = {
+#let stream(item, ctx: none, ..args) = {
   let mime = (
     "stdout": "stream-stdout",
     "stderr": "stream-stderr",
@@ -236,20 +236,20 @@
 }
 
 // Handler for error output items
-#let handler-error(item, ctx: none, ..args) = item.evalue
+#let error(item, ctx: none, ..args) = item.evalue
 
 // Handler for rich output items (display and result)
-#let handler-rich-output-generic(data, ctx: none, ..args) = {
+#let rich-output-generic(data, ctx: none, ..args) = {
   rich-object.process(data, ctx: ctx, ..args)
 }
 
 // Handler for any type of code cell output
-#let handler-output(data, ctx: none, ..args) = {
+#let output(data, ctx: none, ..args) = {
   handle(data, mime: ctx.item-desc.type, ctx: ctx, ..args)
 }
 
 // Handler for source code
-#let handler-source-code-generic(txt, ctx: none, lang: none, ..args) = {
+#let source-code-generic(txt, ctx: none, lang: none, ..args) = {
   // Ensure the source has at least one (possibly empty) line
   // (without this the raw block looks weird for empty cells)
   if txt == "" {
@@ -259,7 +259,7 @@
 }
 
 // Handler for raw cell
-#let handler-raw-cell(cell, ctx: none, ..args) = {
+#let raw-cell(cell, ctx: none, ..args) = {
   handle(
     cell.source,
     mime: "source-code-generic",
@@ -270,12 +270,12 @@
 }
 
 // Handler for Markdown cell
-#let handler-markdown-cell(cell, ctx: none, ..args) = {
+#let markdown-cell(cell, ctx: none, ..args) = {
   handle(cell.source, mime: "markdown-par", ctx: ctx, ..args)
 }
 
 // Handler for code cell input
-#let handler-code-cell-input(cell, ctx: none, ..args) = {
+#let code-cell-input(cell, ctx: none, ..args) = {
   handle(
     cell.source,
     mime: "source-code-generic",
@@ -286,13 +286,13 @@
 }
 
 // Handler for code cell output
-#let handler-code-cell-output(cell, ctx: none, ..args) = {
+#let code-cell-output(cell, ctx: none, ..args) = {
   // Get outputs with user config, but override 'result' to get just the values
   outputs(cell, ..ctx.cfg, result: "value").join()
 }
 
 // Handler for code cell
-#let handler-code-cell(cell, ctx: none, ..args) = {
+#let code-cell(cell, ctx: none, ..args) = {
   if ctx.input {
     handle(cell, mime: "code-cell-input", ctx: ctx, ..args)
   }
@@ -302,7 +302,7 @@
 }
 
 // Handler for cells
-#let handler-cell(cell, ctx: none, ..args) = {
+#let cell(cell, ctx: none, ..args) = {
   // Delegate to cell-type-specific handler
   handle(cell, mime: cell.cell_type + "-cell", ctx: ctx, ..args)
 }
@@ -310,46 +310,46 @@
 // Default handlers
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
-  "image/svg+xml": handler-image-svg-xml,
+  "image/svg+xml": image-svg-xml,
   "image/png"    : handle.with(mime: "image-base64"),
   "image/jpeg"   : handle.with(mime: "image-base64"),
   "image/gif"    : handle.with(mime: "image-base64"),
-  "text/markdown": handler-text-markdown,
-  "text/latex"   : handler-text-latex,
-  "text/plain"   : handler-text-plain,
+  "text/markdown": text-markdown,
+  "text/latex"   : text-latex,
+  "text/plain"   : text-plain,
   // Generic image handlers
-  "image-generic": handler-image-generic, // base handler used by others
-  "image-base64" : handler-image-base64,  // base64 encoded image
-  "image-text"   : handler-image-text,    // text encoded image
-  "image-markdown-cell": handler-image-markdown-cell, // Markdown cell image
+  "image-generic": image-generic, // base handler used by others
+  "image-base64" : image-base64,  // base64 encoded image
+  "image-text"   : image-text,    // text encoded image
+  "image-markdown-cell": image-markdown-cell, // Markdown cell image
   // Handlers for output items
-  "rich-output-generic": handler-rich-output-generic,
+  "rich-output-generic": rich-output-generic,
   "display": handle.with(mime: "rich-output-generic"),
   "result": handle.with(mime: "rich-output-generic"),
-  "error": handler-error,
-  "stream-generic": handler-stream-generic,
+  "error": error,
+  "stream-generic": stream-generic,
   "stream-stdout": handle.with(mime: "stream-generic"),
   "stream-stderr": handle.with(mime: "stream-generic"),
   "stream-merged": handle.with(mime: "stream-generic"), // used when both streams are merged
-  "stream": handler-stream, // called before stream-type-specific handler
-  "output": handler-output, // called before output-type-specific handler
+  "stream": stream, // called before stream-type-specific handler
+  "output": output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
-  "markdown-generic": handler-markdown-generic, // returns inline content
-  "markdown-par": handler-markdown-par, // returns paragraph(s) (without block)
+  "markdown-generic": markdown-generic, // returns inline content
+  "markdown-par": markdown-par, // returns paragraph(s) (without block)
   // Handlers for LaTeX math
-  "math-generic": handler-math-generic, // base handler for math
-  "math-markdown-cell": handler-math-markdown-cell, // Markdown cell math
+  "math-generic": math-generic, // base handler for math
+  "math-markdown-cell": math-markdown-cell, // Markdown cell math
   // Handlers for cell rendering
-  "raw-cell": handler-raw-cell,
-  "markdown-cell": handler-markdown-cell,
-  "code-cell-input": handler-code-cell-input,
-  "code-cell-output": handler-code-cell-output,
-  "code-cell": handler-code-cell,
-  "cell": handler-cell, // called before the cell-type-specific handler
+  "raw-cell": raw-cell,
+  "markdown-cell": markdown-cell,
+  "code-cell-input": code-cell-input,
+  "code-cell-output": code-cell-output,
+  "code-cell": code-cell,
+  "cell": cell, // called before the cell-type-specific handler
   // Other handlers
-  "text-ansi-generic": handler-text-ansi-generic,
-  "text-console-block": handler-text-console-block,
-  "source-code-generic": handler-source-code-generic,
-  "attachment": handler-attachment,
-  "path": handler-path,
+  "text-ansi-generic": text-ansi-generic,
+  "text-console-block": text-console-block,
+  "source-code-generic": source-code-generic,
+  "attachment": attachment,
+  "path": path-handler,
 )
