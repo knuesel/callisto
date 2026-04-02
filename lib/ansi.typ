@@ -105,33 +105,63 @@
   return state
 }
 
-// Return fg and bg colors taking the reverse state into account
+// Return a color (either black or white) with good contrast to the given one
+#let _contrasting-color(c) = {
+  if luma(c).components().first() > 50% {
+    black
+  } else {
+    white
+  }
+}
+
+// Return dict of fg and bg colors after applying reverse and bold-is-bright.
+// This function converts palette indices to actual colors, so the returned
+// values are always colors or none.
+// When reversing and one color is none, we pick white or black depending on
+// the luminance of the other, to guarantee good contrast.
 #let _final-colors(state, bold: none, bold-is-bright: none, palette: none) = {
   let (fg, bg, reverse) = state
+
+  // Handle reverse
   if reverse {
     (fg, bg) = (bg, fg)
   }
-  // Handle colors given as palette index
+
+  // Handle colors given as palette index.
+  // We keep track of non-brightened color if using bold-is-bright
   if type(fg) == int {
     if bold and bold-is-bright and fg < 8 {
-      fg = fg + 8
+      fg = palette.at(fg + 8)
+    } else {
+      fg = palette.at(fg)
     }
-    fg = palette.at(fg)
   }
   if type(bg) == int {
     bg = palette.at(bg)
   }
+
+  // Use negated value of other color for reverse when one is missing
+  // (this must be done after palette index -> color conversion) 
+  if reverse {
+    if fg == none and bg != none {
+      fg = _contrasting-color(bg)
+    }
+    if bg == none and fg != none {
+      // Using the non-brightened version
+      bg = _contrasting-color(fg)
+    }
+  }
+
   return (fg: fg, bg: bg)
 }
 
 // Convert a string with ANSI escape sequences into styled text.
 // - palette: an array of 16 colors to use for the standard ANSI colors.
-//   Default is auto for the Campbell palette.
+//   Default is auto for a palette based on Tango colors.
 // - fg: initial color for text (default: none). If none, by default the text
-//   color (or background color when reverse) is left as-is and dimming has no
-//   effect.
+//   color is left as-is and dimming has no effect.
 // - bg: initial background color (default: none). If none, by default the
-//   background color (or text color when reversed) is left as-is.
+//   background color is left as-is.
 // - bold-is-bright: if true, bold text in standard normal color (one of the
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
@@ -142,6 +172,10 @@
 //   conceal: functions to apply the corresponding style, each taking content
 //   as first positional argument, as well as `fg` and `bg` keyword
 //   arguments for the current colors, which are always of type color or none.
+//
+//   When colors are reversed and one of fg or bg is none, we pick white or
+//   black to guarantee good contrast. (When both are none, we don't do
+//   anything, so contrast won't be worse than without reversing.)
 //
 //   The default function for "dim" makes the text 50% transparent.
 // 
