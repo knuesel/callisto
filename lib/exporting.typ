@@ -1,5 +1,5 @@
-#import "/lib/header-pattern.typ": make-header-text
-#import "/lib/rendering.typ": render
+#import "/lib/header-pattern.typ"
+#import "/lib/rendering.typ"
 #import "/lib/reading/reading.typ"
 #import "configuration.typ"
 
@@ -16,7 +16,7 @@
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
   }
 
-  let header = make-header-text(
+  let header = header-pattern.make-text(
     cfg.cell-header,
     pattern: cfg.cell-header-pattern,
   )
@@ -157,7 +157,7 @@
   if configuration.export-enabled(cfg: cfg) {
     _export(..all-args)
   }
-  render(..all-args, keep: "unique")
+  rendering.render(..all-args, keep: "unique")
 }
 
 // Return the export metadata if export is true (or auto and the

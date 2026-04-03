@@ -32,7 +32,7 @@
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
-  let header = header-pattern.parse-header-text(
+  let header = header-pattern.parse-text(
     cell.source,
     pattern: cfg.cell-header-pattern,
   )

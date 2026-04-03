@@ -16,7 +16,7 @@
 #import "lib/handlers.typ"
 #import "lib/ansi.typ"
 #import "lib/exporting.typ"
-#import "lib/header-pattern.typ": make-header-text, parse-header-text
+#import "lib/header-pattern.typ"
 
 #import util: handle
 

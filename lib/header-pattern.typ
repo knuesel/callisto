@@ -69,7 +69,7 @@
 }
 
 // Build a cell header string for the given dict, based on the given pattern
-#let make-header-text(header-dict, pattern: none) = {
+#let make-text(header-dict, pattern: none) = {
   if header-dict == none {
     return none
   }
@@ -92,7 +92,7 @@
 // Parse the given cell source text to find the header and convert it to a
 // dictionary. The returned value is a dict with `text` field holding the full
 // header as a string, and `dict` holding the dictionary.
-#let parse-header-text(cell-source, pattern: none) = {
+#let parse-text(cell-source, pattern: none) = {
   let header = (text: none, dict: (:))
   let header-regex = resolve(pattern).regex
   if header-regex == none {

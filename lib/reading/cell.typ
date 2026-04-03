@@ -78,7 +78,7 @@
     // for the notebook cells).
     // We still work on cells-of-type so if the user filtered for non-code
     // cells there will be no match.
-    let spec-header = header-pattern.make-header-text(
+    let spec-header = header-pattern.make-text(
       cfg.cell-header,
       pattern: cfg.cell-header-pattern,
     )
