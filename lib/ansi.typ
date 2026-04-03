@@ -355,3 +355,6 @@
 
   raw(block: true, lang: "ansi", string)
 }
+
+// Return the string with all escape sequences stripped
+#let strip(string) = string.replace(escape-regex, "")

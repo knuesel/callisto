@@ -158,7 +158,7 @@
 
   if process in (false, "strip") {
     if process == "strip" {
-      data = data.replace(ansi.escape-regex, "")
+      data = ansi.strip(data)
     }
     return raw(block: true, lang: "txt", data)
   }
