@@ -325,9 +325,9 @@ Here we started with the "notebook" theme dictionary and added our own handler f
 
 ### Handlers
 
-There's a lot we can configure with function parameters or directly in `callisto.config`, but advanced customization is done through *handlers*. Handlers are functions called by Callisto to process elements at various stages in the conversion/rendering pipeline.
+There's a lot we can configure with function parameters or in `callisto.config`, but advanced customization is done through *handlers*. Handlers are functions called by Callisto to process elements at various stages in the conversion/rendering pipeline.
 
-For example, the `errors` function returns the errors produced by a cell. The notebook might store a fulll backtrace, but by default the Callisto `errors` returns only the short text of each error. We can change this by defining a custom `error` handler:
+For example, the `errors` function returns the errors produced by a cell. The notebook might store a full backtrace, but by default the Callisto `errors` returns only the short text of each error. We can change this by defining a custom `error` handler:
 
 ```typst
 #let (errors,) = callisto.config(
@@ -339,7 +339,6 @@ For example, the `errors` function returns the errors produced by a cell. The no
 ```
 
 This works but the backtrace is full of weird characters like `¤[0;31m`. These characters are [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) used to colorize text in the terminal. If we want the actual text of the error, we can use `callisto.ansi.strip` to remove the escape codes: `callisto.ansi.strip(item.traceback.join("\n"))`.
-
 
 ## Themes
 
