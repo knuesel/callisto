@@ -49,3 +49,11 @@
    count: "execution",
 )
 #render(2)
+
+#let (error,) = callisto.config(
+   nb: json("../../docs/example.ipynb"),
+  handlers: (
+    error: (item, ..args) => item.traceback.join("\n"),
+  ),
+)
+#error()

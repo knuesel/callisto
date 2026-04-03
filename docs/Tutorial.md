@@ -1,8 +1,8 @@
-# Tutorial
+# Tutorial: Importing code and outputs from Jupyter notebooks
 
-Let's see how we can use Callisto to render a Jupyter notebook, or to extract the source and result of some computations. We will use the notebook [`example.ipynb`](example.ipynb). To compile the Typst examples yourself, you can download it and put it next to your Typst file.
+Let's see how we can use Callisto to render a Jupyter notebook, or to extract the source and result of some computations for use in a Typst document. We will use the notebook [`example.ipynb`](example.ipynb). To compile the Typst examples yourself, you can download it and put it next to your Typst file.
 
-(If you're more interested in writing code directly in your Typst document, and using Callisto to execute the code blocks through Jupyter, head to the [Export and execution tutorial](Export-and-execution-tutorial.md).)
+(In the [next tutorial](Export-and-execution-tutorial.md) we will see how to write Python or other language code directly in the Typst document, and use Callisto to execute the code blocks through Jupyter.)
 
 ## Configuration
 
@@ -121,7 +121,13 @@ Note: the functions `Cell`, `In` and `Out` are implemented as aliases of the `re
 
 ## Item extraction
 
-Let's say we want to extract some part of the notebook, like the source of one cell, or its output, to insert them at a specific place in our Typst document. We will need other Callisto functions for that. Let's configure them:
+Let's say we want to extract some part of the notebook, like the source of one cell, or its output. For example we might want to:
+
+* insert a piece of code or output at a specific place in the Typst document, or
+
+* get an output (e.g. a string) from the notebook for further processing in Typst.
+
+We will need other Callisto functions for that. Let's configure them:
 
 ```typst
 #let (source, display, result, output, outputs) = callisto.config(
@@ -202,7 +208,7 @@ By default the `display` function expects only one item and complains if more (o
 #display("plot3", item: 1) // second display
 ```
 
-The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:
+The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. **But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:**
 
 ```typst
 #output("calc")  // returns the cell result
@@ -226,11 +232,11 @@ Now let's try something more complicated: we want to get the last display or res
 ```typst
 #let last-output = output.with(
   output-type: ("display_data", "execute_result"),
-  item: -1
+  item: -1,
 )
 ```
 
-Here we filter on the output type: we don't want to get errors or stream items (messages written to `stdout` or `stderr`).
+Here we filter on the output type: we don't want stream items (messages written to `stdout` or `stderr`) or errors.
 
 Let's try it on the `plot2` cell:
 
@@ -238,7 +244,7 @@ Let's try it on the `plot2` cell:
 #last-output("plot2")
 ```
 
-Excellent. Maybe we also want to customize the looks of a plot. Show it centered, and resized to 75% of the text width. When Callisto returns a plot, it's in the form of a Typst `image` element, so we can change the width with a set rule:
+Excellent. Maybe we also want to customize the looks of a plot: show it centered, and resized to 75% of the text width. When Callisto returns a plot, it's in the form of a Typst `image` element, so we can change the width with a set rule:
 
 ```typst
 #[
@@ -283,7 +289,7 @@ When `format` is `auto`, a default order of preference is used: `("image/svg+xml
 
 Note: we can specify any format we want with the `format` keyword, but there must be a matching handler function to process values of that format. We can register our own handlers with the `handlers` keyword, see the [reference](Reference.md).
 
-## Using a cell's execution count
+### Using a cell's execution count
 
 Instead of selecting code cells by label, we can use the *execution count*: as we know, when a cell is executed, Jupyter gives it a count shown as `[1]` or `[2]`. For example the `"plot1"` cell has execution count 2, and we can use it to identify the cell:
 
@@ -305,20 +311,6 @@ If we want to do this a lot, we should make this behavior the default:
 
 Note that the same cell will get a different count if it's executed again, and cells can be executed manually in any order so the order of execution counts might not reflect the position of cells in the document. And the execution count is defined only for code cells. For all these reasons, by default Callisto uses the cell index rather than its execution count.
 
-### Using themes
-
-By default the cells are rendered with the `"notebook"` theme, which adds some styling to get a notebook look. We can choose the `"neat"` theme to get a cleaner look:
-
-```typst
-#render(theme: "neat")
-```
-
-There is also the `"plain"` theme which renders elements without any styling.
-
-We could also have applied the theme globally in the `config` call with `callisto.config(nb: json("example.ipynb"), theme: "neat")`. This would affect all `render` calls.
-
-We can also define our own theme. A theme is really a dictionary of functions (called handlers) that change how various elements are processed during rendering. We can access the standard theme dictionaries in `callisto.themes`.
-
 For example, we might want to write Typst math in our Jupyter notebook, since the syntax is nicer than LaTeX. One way to do that is to write Typst formulas in raw cells, and use a theme that renders raw cells by evaluating their source as Typst markup:
 
 ```typst
@@ -333,9 +325,9 @@ Here we started with the "notebook" theme dictionary and added our own handler f
 
 ### Handlers
 
-We saw that a theme is a dictionary of handler functions. Actually all the advanced configuration in Callisto is done through handlers.
+There's a lot we can configure with function parameters or directly in `callisto.config`, but advanced customization is done through *handlers*. Handlers are functions called by Callisto to process elements at various stages in the conversion/rendering pipeline.
 
-For example, the `errors` function returns the errors produced by a cell. By default only the short text of the error is returned, but you change the `error` handler to return the full backtrace:
+For example, the `errors` function returns the errors produced by a cell. The notebook might store a fulll backtrace, but by default the Callisto `errors` returns only the short text of each error. We can change this by defining a custom `error` handler:
 
 ```typst
 #let (errors,) = callisto.config(
@@ -346,4 +338,34 @@ For example, the `errors` function returns the errors produced by a cell. By def
 )
 ```
 
-Markdown and LaTeX from the notebook are rendered using [cmarker](https://typst.app/universe/package/cmarker/) and [mitex](https://typst.app/universe/package/mitex/). It is possible to configure these packages or replace them with something else by setting custom `markdown-generic` and `math-generic` handlers (see [reference](Reference.md#Handlers)).
+This works but the backtrace is full of weird characters like `¤[0;31m`. These characters are [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) used to colorize text in the terminal. If we want the actual text of the error, we can use `callisto.ansi.strip` to remove the escape codes: `callisto.ansi.strip(item.traceback.join("\n"))`.
+
+
+## Themes
+
+By default the cells are rendered with the "notebook" theme, which adds some styling to get a notebook look. We can choose the "neat" theme to get a cleaner look:
+
+```typst
+#render(theme: "neat")
+```
+
+There is also the `"plain"` theme which renders elements without any styling.
+
+We can appy the theme globally in the `config` call with `callisto.config(nb: json("example.ipynb"), theme: "neat")`. This would affect all `render` calls.
+
+We can also define our own theme. A theme is really a dictionary of handlers that are used in place of the default handlers when doing rendering. For example the "notebook" theme redefines the `error` handler a bit like in the previous section, but using the function `callisto.ansi.console-block` to render ANSI escape codes correctly (converting the codes to styles such as color and underline) and showing the whole thing in a red block.
+
+Note that theme handlers are only used during rendering. So with the "notebook" theme for example, errors are shown with a backtrace in a red block when we call `render` or `Cell` or `Out`, which are all rendering functions, but the `output` or `error` functions will still return the short error string (unless the `apply-theme` parameter is explicitly set to `true`).
+
+The standard theme dictionaries are available in `callisto.themes`. We can make a theme by extending one of these dictionaries. For example, let's say we want each cell rendered in a frame. In the [handler reference](Reference.md#Handlers) we see there is a `cell` handler called for each cell. The "neat" theme dict, available as `callisto.themes.neat`, has no `cell` field so Callisto will use the default function `callisto.handlers.cell`. Let's extend the "neat" theme with a `cell` handler that adds a frame: 
+
+```typst
+#render(
+  theme: callisto.themes.neat + (
+    cell: (c, ..args) => rect(
+      width: 100%,
+      callisto.handlers.cell(c, ..args), // render cell inside the frame
+    ),
+  ),
+)
+```
