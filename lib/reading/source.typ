@@ -11,10 +11,6 @@
 ).at(cell.cell_type)
 
 /// Extract the 'source' field from cells as raw blocks.
-/// Return type depends on the 'result' parameter.
-/// - result (str): Use "value" to return just the raw items, or "dict" to
-///   return for each matching cell a dict with fields 'cell' and 'value'.
-/// -> array of any | array of dict
 #let sources(..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
   if configuration.read-enabled(cfg: cfg) == false { return none }

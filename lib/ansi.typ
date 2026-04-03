@@ -1,3 +1,5 @@
+// Code to render styled text from ANSI escape sequences
+
 // Regexes to match escape sequences (CSI and/or OSC)
 #let esc = "\u{1b}"
 #let _csi-regex-text = `\[[0-9:;<=>?]*[ -/]*[@-~]`.text
@@ -14,10 +16,11 @@
   rgb("#729fcf"), rgb("#ad7fa8"), rgb("#34e2e2"), rgb("#eeeeec"),
 )
 
-// Takes an R/G/B code from 8-bit color spec and returns the corresponding
+// Take an R/G/B code from 8-bit color spec and returns the corresponding
 // value in 0-255.
 #let _rgb-channel(v) = if v == 0 { 0 } else { 55 + v * 40 }
 
+// Return the color corresponding to an 8-bit color code
 #let _color-8bit(palette, idx-str) = {
   let idx = int(idx-str)
   if idx < 16 {
@@ -37,6 +40,7 @@
   }
 }
 
+// Compute the chunk style state given current state and chunk style codes
 #let _chunk-style(codes-str, state: none, default: none, palette: none) = {
   let codes = codes-str.split(";")
   // Keep track of how many numerical values have been processed
@@ -158,7 +162,7 @@
 
 // Convert a string with ANSI escape sequences into styled text.
 // - palette: an array of 16 colors to use for the standard ANSI colors.
-//   Default is auto for a palette based on Tango colors.
+//   Default is auto and corresponds to a palette based on Tango colors.
 // - fg: initial color for text (default: none). If none, by default the text
 //   color is left as-is and dimming has no effect.
 // - bg: initial background color (default: none). If none, by default the
@@ -166,13 +170,10 @@
 // - bold-is-bright: if true, bold text in standard normal color (one of the
 //   first 8 colors in the palette) will also be rendered "bright" by using
 //   the corresponding bright color from the palette. Default false.
-// - line-by-line: if true (default false), chunks will be split at newlines
-//   so that styling functions (see below) are never called with content that
-//   spans multiple lines.
 // - apply-fg, apply-bg, bold, italic, overline, underline, strike, dim,
 //   conceal: functions to apply the corresponding style, each taking content
-//   as first positional argument, as well as `fg` and `bg` keyword
-//   arguments for the current colors, which are always of type color or none.
+//   as positional argument, and `fg` and `bg` keyword arguments for the
+//   current colors, which are always of type color or none.
 //
 //   When colors are reversed and one of fg or bg is none, we pick white or
 //   black to guarantee good contrast. (When both are none, we don't do
@@ -182,7 +183,7 @@
 // 
 //   The default "conceal" is to use "hide" to prevent secrets from leaking
 //   into compiled documents. To instead make the text "invisible" but still
-//   present and selectable, use
+//   present and selectable, use for example:
 //     conceal: (it, ..args) => text(it, fill: rgb(0, 0, 0, 0))
 #let render(
   string,

@@ -9,6 +9,7 @@
   return named-themes.at(name)
 }
 
+// Resolve field value to a function
 #let _resolve-field(key, value, named-themes) = {
   if value == none {
     return none

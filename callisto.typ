@@ -1,8 +1,11 @@
-// This file defines all the aliases of the main functions `cells`, `sources`,
-// `outputs`, `render` and `streams`.
-
+// This file exports the main functions and defines all the aliases of `cells`,
+// `sources`, `outputs`, `render` and `streams`.
+//
 // It also pre-configures the `default-handlers` and `named-themes` parameters
 // of all exposed functions (doing this here avoids circular import issues).
+//
+// It also exports modules and utility functions that should be available
+// to users or theme developers.
 
 #import "themes/themes.typ": themes
 #import "lib/configuration.typ"

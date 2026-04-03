@@ -7,20 +7,19 @@
 #import "outputs.typ"
 #import "cells.typ"
 
-// TODO: rewrite, now ctx is simply a resolved cfg + extra contextual fields:
-// - cell
-// - item-desc
-// The 'ctx' dict is passed to all handler calls and holds
-// contextual data including at least the following fields:
-//
-// - cell: the dict of the cell being processed
+// The 'ctx' dict is passed to all handler calls and holds resolved settings
+// (replacing most 'auto' values with resolved values) as well as contextual
+// data including at least the following fields:
 //
 // - cfg: a dict with all the settings supported by callisto.config, using
-//   default values for settings not set by the user.
+//   default values for settings not set by the user (this holds the
+//   non-resolved settings values).
 // 
-// - item-desc: a dict with information on the cell item (output item or attachment)
-//   being processed, or 'none' otherwise. When not 'none', the dict contains
-//   at least the following fields:
+// - cell: the dict of the cell being processed.
+//
+// - item-desc: a dict with information on the cell item (output item or
+//   attachment) being processed, or 'none' otherwise. When not 'none', the
+//   dict contains at least the following fields:
 //
 //    - index: the item index in the cell output list (none for attachments),
 //    - type: the output type, or "attachment" for attachments.
@@ -30,15 +29,9 @@
 //    - metadata: the format-specific metadata if present, or full metadata
 //      dict associated with this item otherwise.
 // 
-// - nb: a processed version of the notebook, with metadata in cell source
-//   headers converted to metadata in the cell dict.
-// 
-// - handlers: the final list of handlers (including both default handlers
-//   and user handlers).
-// 
-// - lang: the language set by the user (equal to 'cfg.lang') or, if that value
-//   is 'auto', the language inferred from the notebook if available and 'none'
-//   'none' otherwise.
+// - latex-preamble: a string with all the LaTeX command definitions (of the
+//   `\newcommmand` form) found in the notebook, or none if gather-latex-defs
+//   is false.
 
 // Return the language name of the given notebook json
 #let _nb-lang(nb-json) = {
@@ -97,9 +90,9 @@
   }
 
   return ctx + (
+    cfg: cfg,
     cell: cell,
     item-desc: item-desc,
-    cfg: cfg,
     latex-preamble: latex-preamble,
   )
 }

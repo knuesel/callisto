@@ -1,3 +1,5 @@
+// Gather reading modules and functions in a single module
+
 #import "common.typ": single-item, final-result
 #import "notebook.typ"
 #import "rich-object.typ"
