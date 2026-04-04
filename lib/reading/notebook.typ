@@ -32,17 +32,18 @@
 
 // Convert metadata in code header to cell metadata
 #let _process-cell-header(cell, cfg: none) = {
-  let header = header-pattern.parse-text(
+  let parsed = header-pattern.parse-text(
     cell.source,
     pattern: cfg.cell-header-pattern,
   )
-  cell.metadata.callisto.header = header.dict
-  cell.metadata.callisto.header-text = header.text
+  cell.metadata.callisto.header = parsed.header
+  cell.metadata.callisto.code = parsed.code
 
   // Remove header from source if necessary
-  if not cfg.keep-cell-header and header.dict.len() > 0 {
-    cell.source = cell.source.slice(header.text.len())
+  if not cfg.keep-cell-header {
+    cell.source = parsed.code
   }
+
   return cell
 }
 

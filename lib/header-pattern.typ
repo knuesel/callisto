@@ -90,23 +90,23 @@
 }
 
 // Parse the given cell source text to find the header and convert it to a
-// dictionary. The returned value is a dict with `text` field holding the full
-// header as a string, and `dict` holding the dictionary.
+// dictionary. The returned value is a dict with `header` field holding header
+// dict and `code` field holding the rest of the cell source as a string.
 #let parse-text(cell-source, pattern: none) = {
-  let header = (text: none, dict: (:))
   let header-regex = resolve(pattern).regex
   if header-regex == none {
-    return header
+    return (header: (:), code: cell-source)
   }
-  for line in cell-source.split("\n") {
+  let header = (:)
+  let lines = cell-source.split("\n")
+  for line in lines {
     let m = line.match(header-regex)
     if m == none {
       break
     }
-    header.text += line + "\n"
-
     let (key, value) = m.captures
-    header.dict.insert(key, value)
+    header.insert(key, value)
   }
-  return header
+  let code-lines = lines.slice(header.len())
+  return (header: header, code: code-lines.join("\n"))
 }

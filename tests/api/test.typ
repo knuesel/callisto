@@ -31,11 +31,18 @@
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
+// Test header parsing in absence of regex
+#let src = "#| label: x\na = 2"
+#assert.eq(header-pattern.parse-text(src, pattern: (regex: none, writer: none)), (header: (:), code: src))
+
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
 #assert.eq(source("plot3", keep-cell-header: true).text.split("\n").first(), "#| label: plot3")
-// Test header-text field in cell metadata
-#assert.eq(cell("plot3").metadata.callisto.header-text.split("\n").first(), "#| label: plot3")
+// Test code field in cell metadata
+#assert.eq(cell("plot3").metadata.callisto.code.split("\n").first(), "a = 2")
+// Test header field in cell metadata
+#assert.eq(cell("plot3").metadata.callisto.header.type, "scatter")
+
 
 #assert("`aa` not defined" in error())
 

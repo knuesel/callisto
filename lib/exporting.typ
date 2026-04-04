@@ -9,24 +9,30 @@
 // Return the export metadata for the given raw element.
 // Note that the 'export' setting makes no difference for this function.
 #let export(..args) = {
-  // The cell-spec is actually a raw element in this case
+  // The cell-spec is a raw element in this case
   let (cell-spec: elem, cfg) = configuration.parse-main-args(..args)
   if type(elem) != content or elem.func() != raw {
     panic("expecting a raw element, got " +
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
   }
 
-  let header = header-pattern.make-text(
-    cfg.cell-header,
+  // First get header dict and rest of source from raw source
+  let parsed = header-pattern.parse-text(
+    elem.text,
+    pattern: cfg.cell-header-pattern,
+  )
+  // Now make header text from combined config header and source header
+  let header-text = header-pattern.make-text(
+    cfg.cell-header + parsed.header,
     pattern: cfg.cell-header-pattern,
   )
 
   // We store the raw fields rather than the raw element itself, to avoid
-  // having it show up in query(raw)
+  // having it show up in `query(raw)`
   let dict = (
     export-name: cfg.export-name,
     kernel: cfg.kernel,
-    text: header + elem.text,
+    text: header-text + parsed.code,
     lang: elem.at("lang", default: none),
     block: elem.at("block", default: true),
     label: elem.at("label", default: none),

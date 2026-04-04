@@ -78,13 +78,21 @@
     // for the notebook cells).
     // We still work on cells-of-type so if the user filtered for non-code
     // cells there will be no match.
-    let spec-header = header-pattern.make-text(
-      cfg.cell-header,
+
+    // Parse spec source into header dict and rest string
+    let spec-parsed = header-pattern.parse-text(
+      spec.text,
       pattern: cfg.cell-header-pattern,
     )
-    let spec-text = spec-header + spec.text
+
+    // Complete header: cfg header + override from cell text header
+    let spec-header = cfg.cell-header + spec-parsed.header
+
     return _filter-type(cells-of-type, "code")
-      .filter(x => x.metadata.callisto.header-text + x.source == spec-text)
+      .filter(x => {
+        // Compare separately the header and the code without header
+        x.metadata.callisto.code == spec-parsed.code and x.metadata.callisto.header == spec-header
+      })
       .map(c => c.index)
   }
   if type(spec) == int {
