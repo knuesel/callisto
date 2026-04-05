@@ -38,7 +38,7 @@
   doc
 }
 
-#let _code-cell-input(cell, ctx: none) = {
+#let _code-cell-input(cell, ctx: none, ..args) = {
   let has-output = ctx.output and cell.outputs.len() > 0
   set text(rgb("#005979"))
   show raw: set block(.._raw-block-cfg, above: 1em)
@@ -46,7 +46,7 @@
   handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
 }
 
-#let _code-cell-output(cell, ctx: none) = {
+#let _code-cell-output(cell, ctx: none, ..args) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   // Undo global show rule for raw block

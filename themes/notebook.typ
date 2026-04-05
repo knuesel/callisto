@@ -11,15 +11,15 @@
   place(top+left, dx: -1.2em - measure(txt).width, txt)
 }
 
-#let _raw-cell(cell, ctx: none) = block(
+#let _handler-raw-cell(cell, ctx: none, ..args) = block(
   spacing: 1.5em,
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
-  handle(cell.source, mime: "source-code-generic", ctx: ctx),
+  handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.raw-lang),
 )
 
-#let _code-cell-input(cell, ctx: none) = block(
+#let _handler-code-cell-input(cell, ctx: none, ..args) = block(
   above: 2em,
   below: if ctx.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
@@ -39,23 +39,23 @@
 )
 
 // Customized default handler for errors, rendering the traceback
-#let _error(data, ctx: none, ..args) = {
+#let _handler-error(data, ctx: none, ..args) = {
   let txt = data.traceback.join("\n")
   let rendered = handle(txt, mime: "text-console-block", ctx: ctx, ..args)
   _error-block(rendered)
 }
 
-#let _stream-stderr(data, ctx: none, ..args) = {
+#let _handler-stream-stderr(data, ctx: none, ..args) = {
   let value = handle(data, mime: "stream-generic", ctx: ctx, ..args)
   _error-block(value)
 }
 
-#let _result(data, ctx: none, ..args) = block({
+#let _handler-result(data, ctx: none, ..args) = block({
   _in-out-num("Out", ctx.cell.execution_count)
   handle(data, mime: "rich-output-generic", ctx: ctx, ..args)
 })
 
-#let _code-cell-output(cell, ctx: none) = {
+#let _handler-code-cell-output(cell, ctx: none, ..args) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
   block(
@@ -68,10 +68,10 @@
 }
 
 #let theme = plain.theme + (
-  stream-stderr: _stream-stderr,
-  error: _error,
-  result: _result,
-  raw-cell: _raw-cell,
-  code-cell-input: _code-cell-input,
-  code-cell-output: _code-cell-output,
+  stream-stderr: _handler-stream-stderr,
+  error: _handler-error,
+  result: _handler-result,
+  raw-cell: _handler-raw-cell,
+  code-cell-input: _handler-code-cell-input,
+  code-cell-output: _handler-code-cell-output,
 )
