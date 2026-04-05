@@ -31,7 +31,7 @@
       " from cell " + str(ctx.cell.index) +
       " has no appropriate format: item has " +
         repr(item.data.keys()) + ", we want " +
-        repr(normalize-formats(ctx.format)))
+        repr(ctx.format))
     }
     return none
   }
