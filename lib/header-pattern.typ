@@ -34,8 +34,8 @@
 }
 
 // Get a header writer function from cell-header-pattern setting
-// (a function that takes a key and a value and returns a header line without
-// trailing newline).
+// (a function that takes key and value strings and returns a header line
+// without trailing newline).
 #let _writer(pat) = {
   if type(pat) == dictionary {
     return pat.writer

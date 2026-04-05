@@ -208,7 +208,7 @@ By default the `display` function expects only one item and complains if more (o
 #display("plot3", item: 1) // second display
 ```
 
-The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. **But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:**
+The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:
 
 ```typst
 #output("calc")  // returns the cell result
@@ -348,7 +348,7 @@ By default the cells are rendered with the "notebook" theme, which adds some sty
 #render(theme: "neat")
 ```
 
-There is also the `"plain"` theme which renders elements without any styling.
+There is also the "plain" theme which renders elements without any styling.
 
 We can appy the theme globally in the `config` call with `callisto.config(nb: json("example.ipynb"), theme: "neat")`. This would affect all `render` calls.
 

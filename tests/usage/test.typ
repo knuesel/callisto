@@ -31,7 +31,7 @@
 #Out("plot2")
 
 // Get more functions preconfigured for this notebook
-#let (display, result, source, output, outputs) = callisto.config(
+#let (output, outputs, result, source) = callisto.config(
    nb: json("../../docs/example.ipynb"),
 )
 
@@ -51,13 +51,7 @@
 // Get the "plot2" output that is the cell result
 #result("plot2")
 
-// And the "plot2" output that is a "display" item
-#display("plot2")
-
-// Force using the PNG version of this output
-#display("plot2", format: "image/png")
-
-// This doesn't work: cell "plot1" produces a display but no result!
+// This doesn't work: cell "plot1" produces a display item but no result!
 // #result("plot1")
 
 // Get the source of cell "plot1" as raw block

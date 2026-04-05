@@ -26,8 +26,8 @@
 //
 //   For rich items, this dict contains also
 //    - rich-format: the format selected for this rich item
-//    - metadata: the format-specific metadata if present, or full metadata
-//      dict associated with this item otherwise.
+//    - metadata: the format-specific metadata if present, or the whole
+//      metadata dict associated with this item otherwise.
 // 
 // - latex-preamble: a string with all the LaTeX command definitions (of the
 //   `\newcommmand` form) found in the notebook, or none if gather-latex-defs

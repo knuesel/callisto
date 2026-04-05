@@ -10,13 +10,14 @@
 #import "ansi.typ"
 #import "latex.typ"
 
-// A handler is a function called to render a value such as a cell's source,
-// a cell output or even a whole cell.
-// Each handler is associated with a MIME type. Rich items, which can be
-// available in multiple formats, are rendered by calling the handler on the
-// selected format. In this case the type is a real MIME type, for example
-// "image/png". Other handlers use dummy MIME types such as "code-cell"
-// (without slash character).
+// A handler is a function called to process a value such as a cell's source,
+// a cell output such as a PNG image, or even a whole cell.
+// Each handler is associated with a "MIME type", which is really an arbitrary
+// string used to identify the kind of value being processed: Rich items,
+// which can be available in multiple formats, are rendered by calling the
+// handler on the selected format. In this case the type is a real MIME type,
+// for example "image/png". Other handlers use dummy MIME types such as
+// "code-cell" (without slash character).
 //
 // Handlers are always called with a positional argument for the data to
 // render, and a 'ctx' keyword argument for contextual data. Some handlers also

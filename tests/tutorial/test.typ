@@ -1,6 +1,8 @@
 #import "/callisto.typ"
 
 #let (render, Cell, In, Out) = callisto.config(nb: json("../../docs/example.ipynb"))
+
+
 #render()
 #render(theme: "plain")
 #block(stroke: red)[
