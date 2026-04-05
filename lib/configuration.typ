@@ -4,32 +4,30 @@
   nb: none,
   cell-header-pattern: auto,
   keep-cell-header: false,
-  lang: auto,
-  raw-lang: none,
-  gather-latex-defs: true,
   // Cell selection
   count: "index",
   name-path: auto,
   cell-type: "all",
   keep: "all",
-  // Other
-  h1-level: 1,
+  // Source
+  lang: auto,
+  raw-lang: none,
   // Outputs
-  result: "value",
-  stream: "all",
-  format: auto,
-  handlers: auto,
-  ignore-wrong-format: false,
-  item: "unique",
   output-type: "all",
+  format: auto,
+  ignore-wrong-format: false,
+  stream: "all",
+  result: "value",
+  handlers: auto,
+  item: "unique",
   // Rendering
   input: auto,
   output: auto,
+  h1-level: 1,
+  gather-latex-defs: true,
   ansi: (:),
-  default-handlers: (:), // to be filled in callisto.typ
-  named-themes: (:), // to be filled in callisto.typ
-  theme: "notebook",
   apply-theme: false, // default for all but render functions
+  theme: "notebook",
   // Export
   export-name: "notebook",
   cell-header: none,
@@ -38,6 +36,8 @@
   // Undocumented for now
   read: auto,
   export: auto,
+  default-handlers: (:), // to be filled in callisto.typ
+  named-themes: (:), // to be filled in callisto.typ
 )
 
 // Parse the arguments of the main functions
