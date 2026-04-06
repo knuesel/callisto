@@ -25,7 +25,7 @@
 //    - type: the output type, or "attachment" for attachments.
 //
 //   For rich items, this dict contains also
-//    - rich-format: the format selected for this rich item
+//    - format: the format selected for this rich item
 //    - metadata: the format-specific metadata if present, or the whole
 //      metadata dict associated with this item otherwise.
 // 

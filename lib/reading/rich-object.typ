@@ -51,11 +51,11 @@
   return (
     data: data,
     metadata: metadata,
-    rich-format: fmt,
+    format: fmt,
   )
 }
 
-// Process an item given as a dict with keys data, metadata and rich-format.
+// Process an item given as a dict with keys data, metadata and format.
 // - handler-args: extra arguments to pass to the handler that will handle the
 //   item data (there is no such arguments when processing an output item, but
 //   for an image attachment in a Markdown cell for example the Markdown can
@@ -68,6 +68,6 @@
   if item.data.len() == 0 { return none }
   // Add some context fields
   ctx.item-desc.metadata = item.metadata
-  ctx.item-desc.rich-format = item.rich-format
-  return handle(item.data, mime: item.rich-format, ctx: ctx, ..handler-args)
+  ctx.item-desc.format = item.format
+  return handle(item.data, mime: item.format, ctx: ctx, ..handler-args)
 }

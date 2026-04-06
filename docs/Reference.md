@@ -499,7 +499,7 @@ Cell dicts can be used as a form of cell specification when calling functions su
 
 ## Handlers
 
-A handler is a function called to process a value such as: a cell's source, a cell output such as a PNG image, or even a whole cell. Each handler is associated with a "MIME type", which is really an arbitrary string used to identify the kind of value being processed. In the case of rich items, which can be available in multiple formats, the item is rendered by calling the handler on the selected format. In this case the type is a real MIME type, for example `image/png`. Other handlers use dummy MIME types such as `code-cell` (without slash character in the "MIME" string).
+A handler is a function called to process a value such as: a cell's source, a cell output such as a PNG image, or even a whole cell. Each handler is associated with a "MIME type", which is really an arbitrary string used to identify the kind of value being processed. In the case of rich outputs (of type `display` or `result`), which can be available in multiple formats, the item is rendered by calling the handler for the selected format. In this case the "MIME type" is a real MIME type, for example `image/png`. Other handlers use dummy MIME types such as `code-cell` (without slash character in the "MIME" string).
 
 Handlers offer a powerful mechanism for customization. A particular value is typically processed in several steps by chaining calls to different handlers from more abstract to more concrete. This allows the theme or the user to plug in their code at the right step in the chain. 
 
@@ -628,7 +628,7 @@ A `ctx` dict is passed to all handler calls and holds resolved settings (replaci
 
   For rich items, this dict contains also
 
-   - `rich-format`: the format selected for this rich item.
+   - `format`: the format selected for this rich item.
 
    - `metadata`: the format-specific metadata if present, or the whole metadata dict associated with this item otherwise.
 

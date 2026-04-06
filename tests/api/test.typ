@@ -124,7 +124,7 @@
 #assert.eq(out.metadata.a, "x")
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
-#assert.eq(out.rich-format, "image/png")
+#assert.eq(out.format, "image/png")
 
 // ctx.item-desc fields
 #let out = output(
@@ -135,7 +135,7 @@
 )
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
-#assert.eq(out.rich-format, "image/png")
+#assert.eq(out.format, "image/png")
 
 // check that none handlers work
 #assert.eq(outputs(6, handlers: ("image/png": none)).len(), 2)
