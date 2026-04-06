@@ -48,11 +48,11 @@
   std.image(data, ..args)
 }
 
-// Handler for images in Markdown cells. Such images can be specified by a
+// Handler for images in Markdown. Such images can be specified by a
 // path of the form "attachment:name" where 'name' refers to a cell attachment.
 // As all image handlers, this handler can receive extra arguments such as
 // 'alt' that must be forwarded to the subhandler.
-#let image-markdown-cell(path, ctx: none, ..args) = {
+#let image-markdown(path, ctx: none, ..args) = {
   let (handlers, cell) = ctx
   if path.starts-with("attachment:") {
     let name = path.trim("attachment:", at: start)
@@ -111,7 +111,7 @@
 // https://github.com/knuesel/callisto/issues/13 )
 #let markdown-generic(data, ctx: none, ..args) = cmarker.render(
   data,
-  math: handle.with(mime: "math-markdown-cell", ctx: ctx),
+  math: handle.with(mime: "math-markdown", ctx: ctx),
   scope: (
     // Note that for images specified by disk path, the default image-generic
     // handler uses the path handler to resolve the path. Users must define
@@ -119,7 +119,7 @@
     // probably won't change when Typst gets a 'path' type as that won't give
     // access to other files in the notebook directory, but the path type will
     // make it easier to define the path handler).
-    image: handle.with(mime: "image-markdown-cell", ctx: ctx),
+    image: handle.with(mime: "image-markdown", ctx: ctx),
   ),
   heading-labels: "jupyter",
   h1-level: ctx.h1-level,
@@ -173,7 +173,7 @@
 #let math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
 // Handler for LaTeX equations in Markdown cells.
-#let math-markdown-cell(data, ctx: none, ..args) = {
+#let math-markdown(data, ctx: none, ..args) = {
   let txt = data
   // If the preamble is set, we must use it and remove definitions from the
   // math item itself to avoid duplicates.
@@ -316,7 +316,7 @@
   "image-generic": image-generic, // base handler used by others
   "image-base64" : image-base64,  // base64 encoded image
   "image-text"   : image-text,    // text encoded image
-  "image-markdown-cell": image-markdown-cell, // Markdown cell image
+  "image-markdown": image-markdown, // image in Markdown
   // Handlers for output items
   "rich-output-generic": rich-output-generic,
   "display": handle.with(mime: "rich-output-generic"),
@@ -332,7 +332,7 @@
   "markdown-generic": markdown-generic, // returns inline content
   // Handlers for LaTeX math
   "math-generic": math-generic, // base handler for math
-  "math-markdown-cell": math-markdown-cell, // Markdown cell math
+  "math-markdown": math-markdown, // Markdown math
   // Handlers for cell rendering
   "raw-cell": raw-cell,
   "markdown-cell": markdown-cell,

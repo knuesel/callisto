@@ -1,17 +1,5 @@
 #import "/callisto.typ"
 
-// #import "@preview/cmarker:0.1.8"
-
-// #let handler-markdown-generic(data, ctx: none, ..args) = cmarker.render(
-//   data,
-//   math: callisto.handle.with(mime: "math-markdown-cell", ctx: ctx),
-//   scope: (
-//     image: callisto.handle.with(mime: "image-markdown-cell", ctx: ctx),
-//   ),
-//   heading-labels: "jupyter",
-//   ..args,
-// )
-
 #set heading(numbering: "1.")
 
 // In Jupyter when linking to a Markdown heading that includes quotes one must
@@ -33,5 +21,4 @@ See @Some-heading and #ref(label("Here’s-a-heading-with-a-quote"))
 #callisto.render(
   nb: json("notebook.ipynb"),
   h1-level: 0,
-  // handlers: ("markdown-generic": handler-markdown-generic),
 )

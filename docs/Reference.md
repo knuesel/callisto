@@ -523,11 +523,11 @@ The following handlers ("MIME types") are defined by default:
    - `image-generic`: base handler used by others.
    - `image-base64`: for base64 encoded image.
    - `image-text`: for text-encoded images such as some SVGs.
-   - `image-markdown-cell`: for images in Markdown cells, which can refer to an external file or to an attachment (an image stored in the notebook itself).
+   - `image-markdown`: for images in Markdown, which can refer to an external file or to an attachment (an image stored in the notebook itself).
 
 -  Handlers for LaTeX math
    - `math-generic`: base handler for math.
-   - `math-markdown-cell`: for processing math in Markdown cells. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions).
+   - `math-markdown`: for processing math in Markdown. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions).
 
 -  Handlers for cell rendering
    - `raw-cell` for raw cells.
