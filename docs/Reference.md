@@ -315,7 +315,7 @@ Most functions accept a cell specification as positional argument. Below we use 
       #outputs(output-type: "error", result: "dict").map(x => x.traceback)
       ```
 
-   -  `handlers`: a dictionary mapping "MIME types" to handler functions. A handler is a function called to process a value of particular type. A particular value is often processed in multiple steps through a chain of handlers. For example, by default a display output holding a PNG image will be processed by calling the `output` handler which will call the `display` handler, etc. resulting in the following sequence of handlers: `output` → `display` → `rich-output-generic` → `image/png`.
+   -  `handlers`: a dictionary mapping "MIME types" to handler functions. A handler is a function called to process a value of particular type. A particular value is often processed in multiple steps through a chain of handlers. For example, by default a display output holding a PNG image will be processed by calling the `output` handler which will call the `display` handler, etc. resulting in the following sequence of handlers: `output` → `display` → `rich-output-generic` → `image/png` → `image-base64` → `image-generic`.
 
       Each handler should accept a positional argument for the data to process and any keyword argument, and return the processed data. The dict passed to `handlers` is merged with the dict of default handlers, overriding default values with the specified ones. Example:
 
@@ -505,45 +505,49 @@ Handlers offer a powerful mechanism for customization. A particular value is typ
 
 The following handlers ("MIME types") are defined by default:
 
--  Handlers for output item data: `image/svg+xml`, `image/png`, `image/jpeg`, `image/gif`, `text/markdown`, `text/latex`, `text/plain`.
+-  Handlers for cell rendering
+   - `cell`: for any type of cell (this handler will generally call the type-specific handler).
+   - `markdown-cell`: for Markdown cells.
+   - `code-cell`: for a whole code cell (this handler will generally call the handlers for `code-cell-input` and/or `code-cell-output`).
+   - `code-cell-input`: for the source of code cells.
+   - `code-cell-output`: for the output of code cells.
+   - `raw-cell` for raw cells.
 
 -  Handlers for output items
-   - `rich-output-generic`: picks the best format and delegates to the corresponding data handler.
+   - `output`: for any output (called before `display`, `result`, `error` or `stream`). For rich outputs (`display` and `result`) which can be available in multiple formats, the handler receives the data and metadata selected according to the `format` setting.
    - `display`: for display output.
    - `result`: for result output.
    - `error`: for error output.
-   - `stream-generic`: for processing the actual stream content.
+   - `rich-output-generic`: for processing the actual content of rich outputs ("display" and "result"). Rich outputs  This handler receives the data and metadata for the 
+   - `stream`: for any stream (called before the stream-specific handler).
    - `stream-stdout`: for an "stdout" stream.
    - `stream-stderr`: for an "stderr" stream.
    - `stream-merged`: for a stream that merges "stdout" and "stderr".
-   - `stream`: for any stream (called before the stream-specific handler).
-   - `output`: for any output (called before `display`, `result`, `error` or `stream`).
+   - `stream-generic`: for processing the actual stream content.
+
+-  Handlers for output item data: `image/svg+xml`, `image/png`, `image/jpeg`, `image/gif`, `text/markdown`, `text/latex`, `text/plain`.
 
 -  Generic image handlers
-   - `image-generic`: base handler used by others.
+   - `image-markdown`: for images in Markdown, which can refer to an external file or to an attachment (an image stored in the notebook itself).
    - `image-base64`: for base64 encoded image.
    - `image-text`: for text-encoded images such as some SVGs.
-   - `image-markdown`: for images in Markdown, which can refer to an external file or to an attachment (an image stored in the notebook itself).
+   - `image-generic`: base handler used by others.
 
 -  Handlers for LaTeX math
-   - `math-generic`: base handler for math.
    - `math-markdown`: for processing math in Markdown. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions).
-
--  Handlers for cell rendering
-   - `raw-cell` for raw cells.
-   - `markdown-cell`: for Markdown cells.
-   - `code-cell-input`: for the source of code cells.
-   - `code-cell-output`: for the output of code cells.
-   - `code-cell`: for a whole code cell (this handler will generally call the handlers for `code-cell-input` and/or `code-cell-output`).
-   - `cell`: for any type of cell (this handler will generally call the type-specific handler).
+   - `math-generic`: base handler for math.
 
 -  Other handlers
-   - `markdown-generic`: for rendering Markdown (should return inline content).
-   - `text-ansi-generic`: for rendering text with ANSI escape sequences.
-   - `text-console-block`: for rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
-   - `source-code-generic`: for rendering source code (called by default handlers for code cell inputs an raw cells).
    - `attachment`: for items stored as attachment in the notebook.
+   - `source-code-generic`: for rendering source code (called by default handlers for code cell inputs an raw cells).
+   - `markdown-generic`: for rendering Markdown (should return inline content).
+   - `text-console-block`: for rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
+   - `text-ansi-generic`: for rendering text with ANSI escape sequences.
    - `path`: for reading the content of files specified by path. Having the user set this handle gives Callisto permission to read any file under the project root.
+
+The following diagram shows which handlers can call which other handlers in the default configuration:
+
+![](handler-tree.png)
 
 Handlers with names ending in `-generic` are close to the bottom of the chain: they correspond to fairly concrete value types that need to be processed by several higher-level handlers.
 

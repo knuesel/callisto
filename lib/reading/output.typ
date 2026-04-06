@@ -55,7 +55,7 @@
       let ctx = get-ctx(cell, cfg: cfg, item-desc: item-desc)
 
       // The processing is split in two output-type-specific steps:
-      // preprocessing and rendering. The preprocessed data is used
+      // preprocessing and "rendering". The preprocessed data is used
       // as argument to the handler and to populate the final result when
       // 'result' is "dict". The handler takes the preprocessed data and
       // returns the rendered value.

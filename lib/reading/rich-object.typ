@@ -13,7 +13,8 @@
 // This is how display_data/execute_result values and Markdown cell
 // attachments are stored in the notebook.
 
-// Preprocess a "rich" object, which can be available in multiple formats.
+// Preprocess a "rich" object, which can be available in multiple formats,
+// to select the best format among those available.
 // The item is a dict with at least 'data' and 'metadata' fields, with 'data'
 // a dict keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
