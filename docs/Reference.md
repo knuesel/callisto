@@ -347,7 +347,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
    - `theme`: the theme used for rendering content. This can be the name of a standard theme as string, or a theme dictionary (see [Themes](#Themes) for more information). Note that by default the theme has no effect for `outputs` (see `apply-theme` above).
 
-- `render(..cell-args, input: true, output: true, h1-level: 1, gather-latex-defs: true, ansi: (:), apply-theme: true, theme: "notebook")`
+- `render(..cell-args, input: true, output: true, h1-level: 1, gather-latex-defs: true, ansi: (:), theme: "notebook")`
 
    Renders selected cells in the Typst document. The `cell-args` are the same as for the `cells` function.
 
@@ -391,6 +391,8 @@ Most functions accept a cell specification as positional argument. Below we use 
       Jupyter allows defining a LaTeX command in an equation and using it in another equation (contrary to actual LaTeX, where a definition in some equation is local to that equation). This can cause difficulties during rendering in Callisto: the default LaTeX renderer (mitex) doesn't allow a command local to one equation to be used in another, and it can even happen that the user renders a single cell that uses a command that was defined in another. To address these issues, by default Callisto will gather all command definitions in a single preamble string, and when a math equation from a Markdown cell is rendered, any command definition found in the equation is removed (to avoid duplicate definitions) and the full preamble is inserted at the beginning. This whole processing can be disabled by setting `gather-latex-defs: false`.
 
    - `ansi`: how to process text that might contain ANSI escape sequences. More precisely, this setting affects every value that is processed through the `text-console-block` handler, which by default means the values of every stream, error and `text/plain` outputs. The default behavior is to look for escape sequences in the string. If none is found, the string is left untouched. If any is found, the string is processed into styled text. This processing also applies the `ansi.highlight-template` which tunes the text and highlight edges to have background colors and box-drawing characters connect nicely from one line to the next.
+
+   - `theme`: the theme used for rendering content. This can be the name of a standard theme as string, or a theme dictionary (see [Themes](#Themes) for more information).
 
 ## Alias functions
 
@@ -523,10 +525,6 @@ The following handlers ("MIME types") are defined by default:
    - `image-text`: for text-encoded images such as some SVGs.
    - `image-markdown-cell`: for images in Markdown cells, which can refer to an external file or to an attachment (an image stored in the notebook itself).
 
--  Handlers for Markdown as part of the document flow:
-   - `markdown-generic`: normally returns inline content.
-   - `markdown-par`: normally returns paragraph(s) (without block).
-
 -  Handlers for LaTeX math
    - `math-generic`: base handler for math.
    - `math-markdown-cell`: for processing math in Markdown cells. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions).
@@ -540,11 +538,12 @@ The following handlers ("MIME types") are defined by default:
    - `cell`: for any type of cell (this handler will generally call the type-specific handler).
 
 -  Other handlers
-  - `text-ansi-generic`: for rendering text with ANSI escape sequences.
-  - `text-console-block`: for rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
-  - `source-code-generic`: for rendering source code (called by default handlers for code cell inputs an raw cells).
-  - `attachment`: for items stored as attachment in the notebook.
-  - `path`: for reading the content of files specified by path. Having the user set this handle gives Callisto permission to read any file under the project root.
+   - `markdown-generic`: for rendering Markdown (should return inline content).
+   - `text-ansi-generic`: for rendering text with ANSI escape sequences.
+   - `text-console-block`: for rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
+   - `source-code-generic`: for rendering source code (called by default handlers for code cell inputs an raw cells).
+   - `attachment`: for items stored as attachment in the notebook.
+   - `path`: for reading the content of files specified by path. Having the user set this handle gives Callisto permission to read any file under the project root.
 
 Handlers with names ending in `-generic` are close to the bottom of the chain: they correspond to fairly concrete value types that need to be processed by several higher-level handlers.
 
@@ -606,7 +605,7 @@ When Callisto processes a particular value, which handler gets called is determi
 
 - During other function calls (like `source` or `outputs`), the theme handlers are *not* used unless the user set `apply-theme: true`.
 
-- The handlers defined by the user through the `handlers` always take precedence.
+- The handlers defined by the user through `handlers` always take precedence.
 
 ### Handler context
 

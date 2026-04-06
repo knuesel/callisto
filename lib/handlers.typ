@@ -126,14 +126,6 @@
   ..args,
 )
 
-// Handler for Markdown markup to be rendered as one or several paragraphs but
-// without a block wrapper (see handler-markdown-generic).
-#let markdown-par(data, ctx: none, ..args) = {
-  parbreak()
-  handle(data, mime: "markdown-generic", ctx: ctx, ..args)
-  parbreak()
-}
-
 // Handler for Markdown outputs
 #let text-markdown(data, ctx: none, ..args) = {
   block(handle(data, mime: "markdown-generic", ctx: ctx, ..args))
@@ -272,7 +264,9 @@
 
 // Handler for Markdown cell
 #let markdown-cell(cell, ctx: none, ..args) = {
-  handle(cell.source, mime: "markdown-par", ctx: ctx, ..args)
+  parbreak()
+  handle(cell.source, mime: "markdown-generic", ctx: ctx, ..args)
+  parbreak()
 }
 
 // Handler for code cell input
@@ -336,7 +330,6 @@
   "output": output, // called before output-type-specific handler
   // Handlers for Markdown as part of the document flow
   "markdown-generic": markdown-generic, // returns inline content
-  "markdown-par": markdown-par, // returns paragraph(s) (without block)
   // Handlers for LaTeX math
   "math-generic": math-generic, // base handler for math
   "math-markdown-cell": math-markdown-cell, // Markdown cell math

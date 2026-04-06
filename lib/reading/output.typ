@@ -18,7 +18,7 @@
   "error": "error",
 )
 
-// The module that implements 'preprocess' and 'process' for each output type
+// The module that implements 'preprocess' for each output type
 #let processor-modules = (
   display: rich-object,
   result: rich-object,
