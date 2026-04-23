@@ -166,8 +166,9 @@
   rendering.render(..all-args, keep: "unique")
 }
 
+// Export the given raw element and return the unique output.
 // Return the export metadata if export is true (or auto and the
-// callisto-export sys.input is "true") or return the single execution output
+// callisto-export sys.input is "true") or return the unique execution output
 // otherwise.
 #let evaluate(..args) = {
   let (cfg,) = configuration.parse-main-args(..args)
