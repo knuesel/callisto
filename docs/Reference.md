@@ -22,11 +22,10 @@ The main functions can be configured by calling `config`, which accepts all the 
 #let (output, render) = callisto.config(
    nb: json("notebook.ipynb"),
    output-type: ("display_data", "execution_result"),
-   item: 0,
 )
 ```
 
-configures `output` and `render` to use `notebook.ipynb` as notebook, keep only display and result outputs (ignoring errors and streams), and in case of multiple outputs to keep only the first one (index 0).
+configures `output` and `render` to use `notebook.ipynb` as notebook and keep only display and result outputs (ignoring errors and streams).
 
 The dictionary returned by `config` also includes a `template` function, which is either the document template defined by the selected theme, or a do-nothing template if the theme defines no such function. Usage is as follows:
 
@@ -418,7 +417,7 @@ The main functions have many aliases defined for convenience. Each alias corresp
 
 ### Aliases for single values
 
-The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form: the functions `cell`, `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Example:
+The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form: the functions `cell`, `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they always return a single value. Example:
 
    ```typst
    // The first cell
@@ -435,13 +434,9 @@ The singular form is useful in two ways:
 
 2. A call such as `result("plot1")` will check for us that there is only one item of "result" type that matches the "plot1" cell specification. If more than one is found, by default an error is raised.
 
-The check for uniqueness can be disabled by setting the `item` argument to a value different from `"unique"`. Use for example `cell(..., item: 0)` to get the first matching cell, and `display(..., item: -1)` to get the last display of the matching cell(s).
-
-Note that `keep` is always a filter on the results of the cell specification and can be used for plural as well as singular functions, while `item` is used to select which result is returned by a singular function. Both can be used together. Example:
-
 ```typst
-// Second display of the first cell matching "plot1"
-#display("plot1", keep: 0, item: 1)
+// Unique display of the first cell matching "plot1"
+#display("plot1", keep: 0)
 ```
 
 However these functionalities overlap in the case of `cell`. Using both parameters rarely makes sense for this function.

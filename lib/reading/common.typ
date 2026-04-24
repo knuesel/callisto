@@ -8,17 +8,10 @@
   if read-enabled(cfg: cfg) == false { return none }
 
   let items = func(..args)
-  let item = cfg.item
-  if items.len() == 0 {
-    panic("no matching item found")
+  if items.len() != 1 {
+    panic("expected 1 item, found " + str(items.len()))
   }
-  if item == "unique" {
-    if items.len() != 1 {
-      panic("expected 1 item, found " + str(items.len()))
-    }
-    item = 0
-  }
-  return items.at(item)
+  return items.first()
 }
 
 // A dictionary of cell-related data, to be used as one field in the result

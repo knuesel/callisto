@@ -130,7 +130,7 @@ Let's say we want to extract some part of the notebook, like the source of one c
 We will need other Callisto functions for that. Let's configure them:
 
 ```typst
-#let (source, display, result, output, outputs) = callisto.config(
+#let (source, display, displays, result, output, outputs) = callisto.config(
    nb: json("example.ipynb"),
 )
 ```
@@ -201,39 +201,38 @@ We get an error:
 error: panicked with: "expected 1 item, found 2"
 ```
 
-By default the `display` function expects only one item and complains if more (or zero) are found. Here the cell produces two displays. We can choose one:
+The `display` function expects only one item and complains if more (or zero) are found. Here the cell produces two displays. We can use the `displays` function to get all displays and pick one:
 
 ```typst
-#display("plot3", item: 0) // first display
-#display("plot3", item: 1) // second display
+#displays("plot3").first() // first display
+#displays("plot3").at(1)   // second display
 ```
 
-The possible output types are `display`, `result`, `stream` and `error`. Each of these types has a corresponding Callisto function. But in the common case where the cell produces one output and we don't care about the type, we can just use `output`:
+A particular cell output can be of type `display`, `result`, `stream` or `error`. Each of these types has a corresponding Callisto function, and a plural counterpart: `displays`, `results`, `streams` and `errors`. In the common case where the cell produces one output and we don't care about the type, we can just use `output`:
 
 ```typst
 #output("calc")  // returns the cell result
 #output("plot1") // returns the cell display
 ```
 
-The `plot2` cell has both a display and a result. To use `output` with that cell we would need to specify `item: 0` or `item: 1`. We can also call the `outputs` function instead:
+The `plot2` cell has both a display and a result. We can get both as an array using the `outputs` function:
 
 ```typst
 #outputs("plot2")
 ```
 
-This returns an array of outputs. To insert each output in the document we could write `#outputs("plot2").join()`.
+To insert each output in the document we could write `#outputs("plot2").join()`.
 
-Note: most "singular" functions like `source` and `display` have a plural counterpart (`sources`, `displays`) that return an array of values and don't complain if they find zero or many items.
 
 ## More item extraction
 
-Now let's try something more complicated: we want to get the last display or result produced by a cell. We can configure our own function to do just that:
+Now let's try something more complicated: we want to get the last display or result produced by a cell. We can define our own function:
 
 ```typst
-#let last-output = output.with(
-  output-type: ("display_data", "execute_result"),
-  item: -1,
-)
+#let last-output(..args) = outputs(
+  ..args,
+  output-type: ("display_data", "execute_result",
+).last()
 ```
 
 Here we filter on the output type: we don't want stream items (messages written to `stdout` or `stderr`) or errors.
