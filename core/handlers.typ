@@ -133,7 +133,7 @@
 // (This is useful for Markdown that must be included seamlessly in the flow
 // of the document, so that e.g. spacing around headings can be configured
 // without interference from a container block, see
-// https://github.com/knuesel/callisto/issues/13 )
+// https://github.com/sijow/callisto/issues/13 )
 #let markdown-generic(data, ctx: none, ..args) = cmarker.render(
   data,
   math: handle.with(mime: "math-markdown", ctx: ctx),
