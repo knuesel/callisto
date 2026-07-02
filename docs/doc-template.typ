@@ -91,6 +91,7 @@
   let _radius = 5pt
   let inline-code = selector.or(
     raw.where(block: false, lang: "txt"),
+    raw.where(block: false, lang: "typ"),
     raw.where(block: false, lang: "typc"),
   )
   show inline-code: it => {

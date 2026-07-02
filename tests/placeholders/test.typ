@@ -5,9 +5,6 @@
 #show heading.where(level: 2): set text(12pt)
 #set heading(numbering: "1.")
 
-// Work around https://github.com/typst/typst/issues/1331
-#show raw: set text(8.8pt)
-
 #let (
   Cell,
   In,
@@ -23,7 +20,10 @@
 
 #stage-notebook()
 
-#show raw.where(lang: "py-x"): execute
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8)
+  execute(it)
+}
 
 ```py-x
 a = 1

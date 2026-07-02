@@ -5,9 +5,6 @@
 #show heading.where(level: 2): set text(12pt)
 #set heading(numbering: "1.")
 
-// Work around https://github.com/typst/typst/issues/1331
-#show raw: set text(8.8pt)
-
 #let (
   cell,
   source,
@@ -54,7 +51,9 @@
 
 = Using `#show: <label>: execute`
 
-#show <g>: execute
+#let revoke-and-execute(..args) = { set text(1em/0.8); execute(..args) }
+
+#show <g>: revoke-and-execute
 
 ```python
 x = 1 + 2; x
@@ -72,7 +71,7 @@ x += 1; x
 
 == Control what part to show from the cell header
 
-#show <with-header>: execute
+#show <with-header>: revoke-and-execute
 
 ```python
 #| label: x
@@ -90,13 +89,13 @@ x += 1; x
 Cell `x` result: #result("x")
 
 == Select by Typst label
-#render(<g>)
+#render(<with-header>)
 
 == Render input/output/both based on label
 
-#show <cell>: execute
-#show <in>:   execute.with(output: false)
-#show <out>:  execute.with(input: false)
+#show <cell>: revoke-and-execute
+#show <in>:   revoke-and-execute.with(output: false)
+#show <out>:  revoke-and-execute.with(input: false)
 
 ```python
 10 + 1
@@ -145,7 +144,7 @@ b = 42; b
 
 == Select with raw lang and execute
 
-#show raw.where(lang: "python-xx"): execute
+#show raw.where(lang: "python-xx"): revoke-and-execute
 
 ```python-xx
 c = 91; c
@@ -184,12 +183,13 @@ A table with $3^2$ cells:
 
 The square of 4 is `4*4`<x>, and that of 5 is `5*5`<x>.
 
-== With workaround for issue of raw context in show rule
+== Work around issue of raw context in show rule
 
-// Add something in cell header to avoid exporting twice exactly the same thing
-#show <x2>: evaluate.with(cell-header: (dedup: "2"))
-
-#show <x2>: set text(font: "Libertinus Serif", size: 1em/0.8)
+#show <x2>: it => {
+  set text(font: "Libertinus Serif", size: 1em/0.8)
+  // Add something in cell header to avoid exporting twice exactly the same thing
+  evaluate(it, cell-header: (dedup: "2"))
+}
 
 The square of 4 is `4*4`<x2>, and that of 5 is `5*5`<x2>.
 
@@ -262,16 +262,10 @@ Code can be generated dynamically for execution:
   console-text: (bg: luma(30%)),
 )
 
-// #let raw-elements = raw.where(lang: "julia").or(raw.where(lang: none))
-// #let raw-elements = raw
 #show: template.with(set-fonts: false)
 // Simulate a template that also applies show-set rules on inline raws
 // (to check that we can avoid styling evaluation outputs that aren't raw)
-#show: it => {
-  // show selector(raw-elements).and(raw.where(block: false)): set text(red)
-  show raw.where(block: false): set text(red)
-  it
-}
+#show raw.where(block: false): set text(red)
 
 #show <exec>: export-julia
 
@@ -297,7 +291,10 @@ And here is the result:
 
 == Rendering through `execute`
 
-#show <exec2>: execute-julia
+#show <exec2>: it => {
+  set text(1em/0.8)
+  execute-julia(it)
+}
 
 ```
 #| label: cos
@@ -315,13 +312,11 @@ cos(1.2)
   }
 }
 
-#show raw.where(lang: "julia-x"): execute-julia.with(
-  handlers: (
-    code-cell-output: (auto, fig-wrapper),
-  ),
-)
-#show raw.where(lang: "julia-x"): set text(font: "Libertinus Serif", size: 1em/0.8)
-#show raw.where(lang: "julia-x"): set block(fill: none, inset: 0pt)
+#show raw.where(lang: "julia-x"): it => {
+  set text(1em/0.8, font: "Libertinus Serif")
+  set block(fill: none, inset: 0pt) // undo some styling from neat theme
+  execute-julia(it, handlers: (code-cell-output: (auto, fig-wrapper)))
+}
 
 ```julia-x
 #| label: tan
@@ -337,7 +332,9 @@ println(read("../ansi/model_summary_output.txt", String))
 
 == Inline computations
 
-#show raw.where(lang: "jx").or(<jx>): evaluate-julia
-#show raw.where(lang: "jx").or(<jx>): set text(font: "Libertinus Serif", size: 1em/0.8, fill: black)
+#show raw.where(lang: "jx").or(<jx>): it => {
+  set text(1em/0.8, font: "Libertinus Serif", fill: black)
+  evaluate-julia(it)
+}
 
 Here's an inline computation: ```jx 2+3``` and another one: `2+4`<jx>

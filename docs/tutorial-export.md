@@ -36,13 +36,15 @@ The last line prepares the data for the exported notebook.
 We now need to specify which code blocks should be executed. This can be done with a show rule that selects all raw elements with a specific language tag:
 
 ```typst
-#show raw.where(lang: "py-x"): execute
-#show raw: set text(11pt * 0.8)
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8)
+  execute(it)
+}
 ```
 
 Make sure to use a non-standard language tag like `py-x` here, to avoid selecting Python code blocks by mistake (for example code blocks generated in the rendering of the notebook cells!).
 
-The `#show raw: set text` line is a workaround for an [issue](https://github.com/typst/typst/issues/1331) with show rules on raw elements, to avoid the default `0.8em` scaling of raw text being applied twice.
+The `set text` line is a workaround for an [issue](https://github.com/typst/typst/issues/1331) with show rules on raw elements, to avoid the default `0.8em` scaling of raw text being applied twice.
 
 Now let's add code blocks in our document:
 
@@ -185,8 +187,10 @@ Placeholders are only used by functions that render a single cell or extract a s
 An interesting case is when we process a code block with `execute`:
 
 ``````typst
-#show raw.where(lang: "py-x"): execute
-#show raw: set text(11pt * 0.8)
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8)
+  execute(it)
+}
 
 ```py-x
 import random
@@ -250,12 +254,12 @@ The square of 3 is `3*3`<x>.
 However using `evaluate` or an alias is preferred:
 
 ```typst
-#let python = evaluate
+#let py = evaluate
 
-The square of 3 is #python(`3*3`).
+The square of 3 is #py(`3*3`).
 ```
 
-This avoids the problem with recursive show rules so we don't need hacks like `#show raw: set text(11pt * 0.8)`.
+This avoids the problem with show rules style inheritance so we don't need hacks like `set text(1em/0.8)`.
 
 Typst labels can also used as cell specification, to find all cells that where exported from code blocks with the given label:
 

@@ -605,13 +605,22 @@ How code blocks are selected for export, and read back from the exported noteboo
 
 === Issues with Show Rules
 
-The "show rule" method described above allows for the nicest syntax but comes with a significant downside: the `execute` function runs in the context of the raw element that is being replaced by the show rule, while the "raw style" is active. This means the execution result is subject to the default rules on `raw` as well as any ```txt show raw: set ...``` rule added by the user. If you want a result in normal font for example, you will have to manually undo the raw style.
+The "show rule" method described above allows for the nicest syntax but comes with a significant downside: the `execute` function runs in the context of the raw element that is being replaced by the show rule, while the "raw style" is active. This means the execution result is subject to the default rules on `raw` as well as any ```typc show raw: set ...``` rule added by the user.
 
-Problems appear also when the `execute` function produces a raw element: the raw style is applied again to the new element, so a font size in "em" units ends up scaling the text twice (see #link("https://github.com/typst/typst/issues/1331")[this issue]). This can be remediated by setting raw text size to an absolute value (e.g. in `pt` instead of `em`).
+Problems appear also when the `execute` function produces a raw element: the raw style is applied again to the new element, so a font size in "em" units ends up scaling the text twice (see #link("https://github.com/typst/typst/issues/1331")[this issue]).
 
-These issues might get resolved if/when Typst adds support for #link("https://github.com/typst/typst/issues/7165")[replacing show rules].
+These issues might get resolved if/when Typst adds support for #link("https://github.com/typst/typst/issues/7165")[replacing show rules]. In the meantime, it is best to "revoke" the raw style directly in the show rule. By default, raw elements have styling equivalent to ```typc set text(0.8em)``` so we write:
 
-Finally, when selecting blocks with ```txt #show raw.where(lang: ...): execute```, it is generally a bad idea to use the standard language name (e.g. "python") for the raw blocks: the show rule can inadvertently select blocks that should not be executed, in particular blocks that are produced by the `execute` call itself when it renders the code input, which can lead to infinite recursion. Prefer a non-standard `lang` value, for example `"py-x"` instead of `"py"`.
+```typ
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8) // Revoke raw style
+  execute(it)
+}
+```
+
+The raw style also applies a monospace font which is often not a problem. When it is undesired, we can write something like ```typc set text(1em/0.8, font: "Libertinus Serif")```.
+
+Finally, when selecting blocks with ```typ #show raw.where(lang: ...): execute```, it is generally a bad idea to use the standard language name (e.g. "python") for the raw blocks: the show rule can inadvertently select blocks that should not be executed, in particular blocks that are produced by the `execute` call itself when it renders the code input, which can lead to infinite recursion. Prefer a non-standard `lang` value, for example `"py-x"` instead of `"py"`.
 
 === Complete Workflow with the Command Line <complete-workflow>
 
@@ -633,11 +642,11 @@ Here is a complete workflow using show rules to select code blocks for execution
     kernel: "python3",
   )
 
-  // Workaround for https://github.com/typst/typst/issues/1331
-  #show raw: set text(11pt * 0.8)
-
   // Execute all code blocks that have "py-x" lang
-  #show raw.where(lang: "py-x"): execute
+  #show raw.where(lang: "py-x"): it => {
+    set text(1em/0.8) // Revoke raw style
+    execute(it)
+  }
 
   // Make notebook from exported (executed) code blocks
   #stage-notebook()
@@ -680,11 +689,11 @@ In this example, we just exported some code blocks using #func[execute]. Here is
   kernel: "python3",
 )
 
-// Workaround for https://github.com/typst/typst/issues/1331
-#show raw: set text(11pt * 0.8)
-
 // Execute all code blocks that have "py-x" lang
-#show raw.where(lang: "py-x"): execute
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8) // Revoke raw style
+  execute(it)
+}
 
 // Make notebook from exported (executed) code blocks
 #stage-notebook()
@@ -770,11 +779,8 @@ The #setting[nb] and #setting[export-name] settings must have distinct values fo
 #stage-python()
 #stage-julia()
 
-// Workaround for https://github.com/typst/typst/issues/1331
-#show raw: set text(11pt * 0.8)
-
-#show raw.where(lang: "py-x"): execute-python
-#show raw.where(lang: "julia-x"): execute-julia
+#show raw.where(lang: "py-x"):    it => { set text(1em/0.8); execute-python(it) }
+#show raw.where(lang: "julia-x"): it => { set text(1em/0.8); execute-julia(it) }
 
 A computation in Python:
 
@@ -1516,7 +1522,7 @@ typst eval --input callisto-export=true --in document.typ \
     'query(<python>).first().value' > notebooks/export-python.ipynb
 ```
 
-#setting-doc[`export-label`][#pills.str #pills.auto]
+#setting-doc[`export-label`][#pills.label #pills.auto]
 
 The label for the metadata returned by #func[stage-notebook]. The default is `auto`, to derive a label from the #setting[export-name] value. Example:
 
@@ -2327,7 +2333,7 @@ Note: The `code-cell-output` handler receives the cell as positional argument. I
 #let _code-cell-output(cell, ctx: none, ..args) = {
   let outs = callisto.outputs(cell, ..ctx.cfg)
   if outs.len() == 0 { return }
-  // Undo template show rule for raw block
+  // Override template show rule for raw blocks
   // (we don't want simple text outputs to be shown in rounded gray rects)
   show raw: set block(width: auto, inset: 0pt, radius: 0pt, fill: none)
   block(

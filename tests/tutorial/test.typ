@@ -45,8 +45,6 @@
 
 #output("typst-markup")
 
-#type(output("calc"))
-
 #output("json-result", format: "application/json")
 #let (output,) = callisto.config(
   nb: path("/docs/example.ipynb"),
@@ -79,8 +77,10 @@ The square of 3 is #evaluate(`3+3`, cell-header: (label: "square")).
 
 Recall that the square of 3 is #output("square").
 
-#show raw.where(lang: "py-x"): execute
-#show raw: set text(11pt * 0.8)
+#show raw.where(lang: "py-x"): it => {
+  set text(1em/0.8)
+  execute(it)
+}
 
 ```py-x
 import random
