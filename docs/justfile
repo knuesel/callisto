@@ -1,8 +1,19 @@
-all: handler-trees
+all: use-cases handler-trees
 
-screenshot filename:
-    typst c --root=.. {{filename}} {{file_stem(filename)}}.png
+use-cases:
+    typst c use-cases.typ 'use-cases-{p}.png'
 
 handler-trees:
     typst c --root=.. handler-tree.typ handler-tree.svg
     typst c --root=.. handler-tree-placeholders.typ handler-tree-placeholders.svg
+
+
+export:
+    typst eval --root=.. --input callisto-export=true --in use-cases.typ \
+      'query(<notebook>).first().value' > export.ipynb
+
+execute:
+    jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+
+watch:
+    watchexec -w . -f '**/*.typ' just export execute

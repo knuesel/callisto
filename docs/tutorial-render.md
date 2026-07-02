@@ -51,7 +51,7 @@ The content is converted to Typst so it can be styled with show/set rules!
 
 A common use case is to include a notebook as a chapter or section in a larger document, maybe for a computation-heavy chapter. In this case it might be useful to control the level of headings generated from Markdown. For example we might want the top-level headings in the notebook to be used as level 2 headings in Typst.
 
-Callisto uses #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] to parse Markdown and convert it to Typst content. The [`cmarker` setting](callisto-manual.pdf#nameddest=setting:cmarker) can be used to configure this conversion. In particular we can set the `h1-level` field to shift the levels of Markdown headings:
+Callisto uses [cmarker](https://github.com/SabrinaJewson/cmarker.typ) to parse Markdown and convert it to Typst content. The [`cmarker` setting](callisto-manual.pdf#nameddest=setting:cmarker) can be used to configure this conversion. In particular we can set the `h1-level` field to shift the levels of Markdown headings:
 
 ```typst
 = Results

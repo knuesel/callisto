@@ -979,7 +979,7 @@ One form of specification is notably missing from the list: `none`. Indeed the `
   #render(<sum-calc>)
   ``````
 
-  See the #link("Export-and-execution-tutorial.md")[Export and execution tutorial] for more information about this functionality.
+  See @export-and-execution for more information about this functionality.
 
   Note: Typst labels should not be confused with cell labels (which are strings defined in the cell header). They are two independent concepts with different features and limitations. For example cell labels are meant to be unique, while the same Typst label can be used on many cells, e.g. to select many inline raw elements for export. Ideally we would use different names for the two concepts, but we try to maintain some compatibility with #link("https://quarto.org/docs/computations/execution-options.html")[Quarto chunk options].
 

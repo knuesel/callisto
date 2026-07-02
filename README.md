@@ -1,175 +1,178 @@
 # Callisto
 
-A Typst package for reading from Jupyter notebooks. It currently addresses the following use cases:
+A Typst package for reading and exporting Jupyter notebooks. It covers various use cases:
 
-- Extracting specific cell sources and cell outputs, for example to include a plot in a Typst document.
+-  Rendering: Convert a notebook to PDF using Typst styles.
+-  Extraction: Use the outputs of notebook cells in your document.
+-  Execution: Execute code from Typst raw blocks and include the results in the document.
 
-- Rendering a notebook in Typst (embedding selected cells or the whole notebook).
+## Render Notebooks with Style
 
-<img src="docs/lorenz-extract.png" width="600px" alt="Rendering of the first cells of the Lorenz.ipynb notebook">
+Render a full notebook:
 
-## Quick start
+<table>
+  <tr>
+  <td width="50%">
 
-The examples below illustrate the basic functionality. For more information see
+  ```typst
+  #import "@preview/callisto:0.3.0"
 
--  the [tutorial](https://github.com/sijow/callisto/blob/v0.2.5/docs/Tutorial.md),
--  the [function reference](https://github.com/sijow/callisto/blob/v0.2.5/docs/Reference.md).
+  #set text(font: "Pennstander")
+  #show math.equation: set text(
+   font: "Pennstander Math",
+  )
+  #set heading(numbering: "I.")
 
-```typst
-#import "@preview/callisto:0.2.5"
+  #callisto.render(
+    nb: path("notebook.ipynb"),
+    (0, 1), // first two cells
+  )
+  ```
 
-// Render whole notebook
-#callisto.render(nb: json("docs/example.ipynb"))
+  </td>
+  <td width="50%">
+  <img src="docs/use-cases-1.png" alt="rendered notebook with Typst styling">
+  </td>
+  </tr>
+</table>
 
-// Render code cells named/tagged with "plots", showing only the cell output
-#callisto.render(
-   "plots",
-   nb: json("docs/example.ipynb"),
-   cell-type: "code",
-   input: false,
-)
+Or include the notebook as a section of a larger document:
 
-// Get functions preconfigured to use this notebook
-#let (render, Cell, In, Out) = callisto.config(
-   nb: json("docs/example.ipynb"),
-)
+<table>
+  <tr>
+  <td width="50%">
 
-// Render the first 3 cells using the plain template
-#render(range(3), template: "plain")
+  ```typst
+  #import "@preview/callisto:0.3.0"
 
-// Render only cell among the first two that is of type "code"
-#Cell(range(2), cell-type: "code")
+  #set heading(numbering: "1.")
 
-// Render cell with execution number 4.
-// Compared to `render`, `Cell` checks there's only one match.
-// (It could make sense to set `count` globally with `config()`.)
-#Cell(4, count: "execution")
+  = Introduction
+  Some text.
+  
+  #callisto.render(
+    nb: path("notebook.ipynb"),
+    theme: "neat",
+    cmarker: (h1-level: 2), // subsection
+    (0, 1), // first two cells
+  )
+  ```
 
-// Render separately the input and output of cell "plot2"
-// The cell defines its label "plot2" in a header at the top of the cell:
-// #| label: plot2
-#In("plot2")
-#Out("plot2")
+  </td>
+  <td width="50%">
+  <img src="docs/use-cases-2.png" alt="Typst document with section from notebook">
+  </td>
+  </tr>
+</table>
 
-// Use notebook template for code inputs, custom template for markdown cells
-#let repr-template(cell, ..args) = repr(cell.source)
-#render(template: (input: "notebook", markdown: repr-template))
+## Extract Cell Code and Outputs
 
-// Get more functions preconfigured for this notebook
-#let (display, result, source, output, outputs) = callisto.config(
-   nb: json("docs/example.ipynb"),
-)
+For each kind of item there's a function to extract it:
 
-// Get the result of cell with label "some-code"
-#result("some-code")
+<table>
+  <tr>
+  <td width="50%">
 
-// Get the source of cell "plot1" as raw block
-#source("plot1")
+  ```typst
+  #import "@preview/callisto:0.3.0"
 
-// This doesn't work: cell "plot1" produces a display but no result!
-// #result("plot1")
+  #let (source, output, errors) = callisto.config(
+    nb: path("example.ipynb"),
+  )
 
-// Get the display output of that cell
-#display("plot1")
+  The source of the "plot1" cell:
+  #source("plot1", keep-cell-header: true)
 
-// Force using the PNG version of this output
-#display("plot1", format: "image/png")
+  And its output:
+  #output("plot1")
 
-// Get the output (display or result, we don't care) of some cells
-#output("some-code")
-#output("plot1")
+  #if errors().len() > 0 [
+    There are errors in this notebook...
+  ]
+  ```
 
-// This doesn't work: "plot2" has two outputs!
-// #output("plot2")
+  </td>
+  <td width="50%">
+  <img src="docs/use-cases-3.png" alt="Independent rendering of cell source and output">
+  </td>
+  </tr>
+</table>
 
-// Get first and last output of "plot2"
-#output("plot2", item: 0)
-#output("plot2", item: -1)
+## Execute Raw Blocks from Typst
 
-// Get all outputs as an array
-#outputs("plot2")
+Export code blocks to a Jupyter notebook and render the results:
 
-// Change the width of an image read from the notebook
-#{
-   set image(width: 100%)
-   output("plot1")
-}
+<table>
+  <tr>
+  <td width="50%">
 
-// Another way to do the same thing
-#image(output("plot1").source, width: 100%)
-```
+  ``````typst
+  #import "@preview/callisto:0.3.0"
 
-The manual call to `json(...)` is currently required to avoid issues with relative file paths between the user root and the package root. This should be solved once Typst gets a `path` type.
+  #let (execute, stage-notebook) = callisto.config(
+    nb: path("export.ipynb"),
+    kernel: "python3",
+    theme: "neat",
+  )
+  #show raw.where(lang: "py-x"): it => {
+    set text(1em/0.8)
+    execute(it)
+  }
+  #stage-notebook()
 
-## Design
+  Here's a plot of $y = x^2$ :
 
-The API is centered on the following main functions:
+  ```py-x
+  import matplotlib.pyplot as plt
+  plt.rcParams['figure.figsize'] = (3, 2)
+  plt.plot([1, 2, 3, 4], [1, 4, 9, 16]);
+  ```
 
-- `render`: takes a cell specification and returns content for the selected cells, rendered using the selected template.
+  Let's expand $(a+b)^2$ :
 
-- `sources`: takes a cell specification and returns raw blocks with the cell sources. The raw block can be used as content. Alternatively, the source text and source language can be accessed as fields.
+  ```py-x
+  import sympy as sp
+  a, b = sp.symbols('a b')
+  sp.expand((a+b)**2)
+  ```
+  ``````
 
-- `outputs`: takes a cell specification and returns cell outputs of the desired type (result, displays, errors, streams).
+  </td>
+  <td width="50%">
+  <img src="docs/use-cases-4.png" alt="SymPy code in Typst raw block with result rendered underneath">
+  </td>
+  </tr>
+</table>
 
-The function parameters are described in detail in the [function reference](https://github.com/sijow/callisto/blob/release-0.2/docs/Reference.md).
+The export is done with `typst eval`, the execution with `jupyter-nbconvert`.
 
-The cell specification can be a cell index, execution count, tag, ID, metadata label, or filter function. The cell label and other metadata can be defined in the cell code using a header line of the form `#| key: value` (this pattern can be configured). When a notebook is processed, header lines are removed from the cell source and converted to cell metadata.
-
-For convenience, many additional functions are derived from the main functions by setting some of their parameters to fixed values. For example, `render` has `Cell`, `In` and `Out` as aliases to render a single cell, either in entirety (`Cell`) or just the input or output (`In` and `Out`). And `outputs` has aliases such as `results` and `displays` to get an array of results or displays for the selected cells.
-
-Most aliases have a singular and a plural form, e.g. `result` and `results`: the singular form will return a single value (which can often be used directly as content), while a plural form always returns an array. By default the singular form also checks that there is a single value to return: for example `result("figure1")` will raise an error if the call matches more than one cell.
-
-All the functions can be further preconfigured by calling `config`, which returns a dict of functions with some arguments pre-applied. This is most commonly used to set the notebook for all functions, but can also be used for any parameter such as the rendering template or the preferred image formats.
+You can share the exported notebook together with your Typst file, it's all one needs to recompile the document.
 
 
-## Markdown and LaTeX rendering configuration
+## Tutorials
 
-By default Markdown and LaTeX are rendered using [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [mitex](https://github.com/mitex-rs/mitex). These cannot (yet) render everything.
+The following tutorials are meant to be read in order:
 
-The Markdown and LaTeX processing can be configured by changing the handlers for `text/markdown` and `text/latex`. For example to get working rendering of image files references in Markdown, the following can be used:
+1. [Rendering Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-render.md)
+1. [Extraction Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-extract.md)
+1. [Execution Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-export.md)
 
-   ```typ
-   #import "@preview/cmarker:0.1.6"
-   #import "@preview/mitex:0.2.6": mitex
+## Reference Manual
 
-   #callisto.render(
-     nb: json("notebook.ipynb"),
-     handlers: (
-       "text/markdown": cmarker.render.with(
-           math: mitex,
-           scope: (image: (path, alt: none) => image(path, alt: alt)),
-       ),
-     ),
-   )
-   ```
+See the [reference manual](docs/callisto-manual.pdf) for all functions, available settings and additional examples.
 
-(This should become unnecessary once Typst adds a `path` type for file paths.)
-   
+## See Also
 
-## Current features and roadmap
+Here are some alternatives for the "execution" use case:
 
-- [x] Easy reading of cell source and outputs from notebooks
+- [Quarto](https://quarto.org/): An amazing system for producing PDF, HTML and more from Markdown sources that include executable code blocks. Can use Typst as PDF backend.
 
-- [x] Render notebooks in Typst
+- [Calepin](https://vincentarelbundock.github.io/calepin/index.html): A tool that works like a mini Quarto, where you write input files in Typst instead of Markdown.
 
-   - [x] Markdown
-   - [x] results (basic types)
-   - [x] displays (basic types)
-   - [x] stdout and stderr
-   - [x] errors
-   - [ ] ANSI escape sequences in text outputs
+- [Jlyfish](https://github.com/andreasKroepelin/TypstJlyfish.jl): Typst and Julia packages that work together to execute Julia code blocks from Typst documents.
 
-- Supported output types
+- [Prequery](https://typst-community.github.io/prequery/) A more generic approach to getting data out of a Typst document and back in after some processing. Can be used for executing code blocks.
 
-   - [x] text/plain
-   - [x] image/png
-   - [x] image/jpeg
-   - [x] image/svg+xml
-   - [x] image/gif
-   - [x] text/markdown
-   - [x] text/latex
-   - [ ] text/html
+## Special Thanks
 
-- [ ] Export, e.g. for round-tripping similar to prequery
-
-- [ ] Some way to convert the first heading to a title
+Two amazing packages made this possible: [cmarker](https://github.com/SabrinaJewson/cmarker.typ) and [MiTeX](https://github.com/mitex-rs/mitex).

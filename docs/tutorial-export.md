@@ -178,7 +178,7 @@ Here the same execution result is used twice in the document: the `#output("squa
 
 If you try to compile the above example, during the export/execution phase you will see the following before execution is complete:
 
-![Placeholder for output call](placeholder-output.png)
+<img src="placeholder-output.png" alt="Placeholder for output call" width=400>
 
 The dashed rectangles are placeholders. This feature is enabled by default for notebooks that use the export functionality (when the `kernel` setting is set), to make compilation possible when the notebook is not yet exported/executed.
 
@@ -200,7 +200,7 @@ random.randint(0, 5)
 
 After export and execution, the `execute` call will render the notebook cell that contains this code (using the cell position for disambiguation if necessary). If we then change the code block in the Typst document, for example replacing the second line with `random.randint(0, 6)`, the `execute` call won't find a corresponding cell anymore and will instead show the code block itself as placeholder, with dashed stroke:
 
-![Placeholder for execute call](placeholder-execute.png)
+<img src="placeholder-execute.png" alt="Placeholder for execute call" width=430>
 
 The value used as placeholder can be configured with the `placeholder` setting (see the [reference manual](callisto-manual.pdf#nameddest=setting:placeholder)).
 
@@ -268,7 +268,7 @@ Typst labels can also used as cell specification, to find all cells that where e
 #render(<exec>)
 ```
 
-Typst labels should not be confused with cell labels. Cell labels are strings and should be unique IDs, while the same Typst label can be used for many code blocks. Ideally we would use different terms for these two concepts, but we try to be compatible with #link("https://quarto.org/docs/computations/execution-options.html")[Quarto chunk options].
+Typst labels should not be confused with cell labels. Cell labels are strings and should be unique IDs, while the same Typst label can be used for many code blocks. Ideally we would use different terms for these two concepts, but we try to be compatible with [Quarto chunk options](https://quarto.org/docs/computations/execution-options.html).
 
 
 ## Transforming Output Values

@@ -75,13 +75,13 @@ The `plot2` cell produces a plot as display item and a string as result. We can 
 
 If the distinction between display and result is confusing, the Jupyter interface can help us. A cell without result looks like this:
 
-<img src="cell-no-result.png" alt="Jupyter cell without result" width=450>
+<img src="cell-no-result.png" alt="Jupyter cell without result" width=470>
 
 There is an execution count `[1]` next to the source, but nothing next to the output.
 
 A cell with result looks like this:
 
-<img src="cell-result.png" alt="Jupyter cell with result" width=400>
+<img src="cell-result.png" alt="Jupyter cell with result" width=420>
 
 The execution count `[2]` in red next to the value `1024` is a visual hint that `1024` is the cell result.
 
@@ -97,7 +97,7 @@ In the common case where the cell produces one output and we don't care about th
 ## Why not just `Out` ?
 
 Why use `output`, `display`, etc. when `Out` also gives a cell's output?
-`Out` renders the whole cell output, and depending on the selected [theme](#Themes) it can return complex content that includes much more than the output items. With `output` and friends we can get a single item in a predictable format: for example `display("plot2")` returns an `image` element and `result("plot2")` returns an `str` value.
+`Out` renders the whole cell output, and depending on the selected [theme](tutorial-render.md#Themes) it can return complex content that includes much more than the output items. With `output` and friends we can get a single item in a predictable format: for example `display("plot2")` returns an `image` element and `result("plot2")` returns an `str` value.
 
 The way this works is that theme handlers are only used during rendering. So with the "notebook" theme for example, errors are shown with a backtrace in a red block when we call `render` or `Cell` or `Out`, which are all rendering functions, but the `output` and `error` functions will still return the short error string (unless the [`apply-theme`](callisto-manual.pdf#nameddest=setting:apply-theme) setting is explicitly set to `true`).
 
@@ -276,7 +276,4 @@ We can also redefine the priority to always take the JSON value if available:
 ## Next
 
 In the [next tutorial](tutorial-export.md) we will see how code blocks in Python (or other languages) written directly in the Typst file can be executed through Jupyter, to have the execution result included in the document.
-
-
-
 
