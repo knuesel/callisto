@@ -54,7 +54,7 @@ Or include the notebook as a section of a larger document:
     nb: path("notebook.ipynb"),
     theme: "neat",
     cmarker: (h1-level: 2), // subsection
-    (0, 1), // first two cells
+    (0, 1),
   )
   ```
 
@@ -144,7 +144,7 @@ Export code blocks to a Jupyter notebook and render the results:
   </tr>
 </table>
 
-The export is done with `typst eval`, the execution with `jupyter-nbconvert`.
+The export is done with `typst eval`, the execution with `jupyter-nbconvert` (see Execution tutorial below).
 
 You can share the exported notebook together with your Typst file, it's all one needs to recompile the document.
 

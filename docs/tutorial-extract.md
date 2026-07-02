@@ -245,7 +245,7 @@ Cell outputs are generally stored either as images or text. For example the `cal
 #type(output("calc"))
 ```
 
-However `IPython.display.JSON` we be used to produce an output item in the JSON format. We can encode pretty much anything as JSON so that's a powerful way to transfer data from Python to Typst. See for exampe the `json-result` cell:
+However `IPython.display.JSON` we be used to produce an output item in the JSON format. We can encode pretty much anything as JSON so that's a powerful way to transfer data from Python to Typst. See for example the `json-result` cell:
 
 ```py
 #| label: json-result

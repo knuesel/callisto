@@ -273,7 +273,7 @@ Typst labels should not be confused with cell labels. Cell labels are strings an
 
 ## Transforming Output Values
 
-When reading from a notebook like `example.iynb`, we can manipulate output items like any Typst value. For example the `calc` cell computes the value `4`, though in the notebook it's actually stored as string. Let's use it to make a table with a dynamic number of columns:
+When reading from a notebook like `example.ipynb`, we can manipulate output items like any Typst value. For example the `calc` cell computes the value `4`, though in the notebook it's actually stored as string. Let's use it to make a table with a dynamic number of columns:
 
 ```typst
 // Make table with n columns holding numbers 0 to n-1

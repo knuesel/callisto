@@ -817,7 +817,7 @@ watch:
 
 
 === Exporting Multiple Notebooks Together <section:export-together>
-By default, #func[stage-notebook] derives the label for the exported notebook from the #setting[export-name] value, so each notebook can be extracted by its own `typst eval` call as shown above. For large documents it can be interesting to get all the notebooks with a single `tyst eval` command for performance reasons.
+By default, #func[stage-notebook] derives the label for the exported notebook from the #setting[export-name] value, so each notebook can be extracted by its own `typst eval` call as shown above. For large documents it can be interesting to get all the notebooks with a single `typst eval` command for performance reasons.
 
 Something like ```typc query(selector.or(<python>,<julia>))``` could be used in `typst eval` to retrieve several notebooks. Maybe a better way is to export all notebooks under the same label using the #setting[export-label] setting:
 
@@ -1177,7 +1177,7 @@ The language of the notebook's raw cells. This is used as language tag for the r
 
 #setting-doc[`item`][#pills.int #pills.str]
 
-This controls wich item should be returned by the "singular" output functions: #func[output], #func[display], #func[result], #func[stream], #func[full-stream], #func[error].
+This controls which item should be returned by the "singular" output functions: #func[output], #func[display], #func[result], #func[stream], #func[full-stream], #func[error].
 
 The default is `"unique"`. In this case an error is raised when zero or more than one items are found. An integer value can be specified to pick one item in case of multiple matches. A negative value can be used to count from the end.
 
