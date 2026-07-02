@@ -42,7 +42,7 @@ We now need to specify which code blocks should be executed. This can be done wi
 
 Make sure to use a non-standard language tag like `py-x` here, to avoid selecting Python code blocks by mistake (for example code blocks generated in the rendering of the notebook cells!).
 
-The `#show raw: set text` line is a workaround for an [issue](https://github.com/typst/typst/issues/1331) with show rules on raw elements, to avoid the default `0.8em` scaling of raw text to be applied twice.
+The `#show raw: set text` line is a workaround for an [issue](https://github.com/typst/typst/issues/1331) with show rules on raw elements, to avoid the default `0.8em` scaling of raw text being applied twice.
 
 Now let's add code blocks in our document:
 
@@ -176,7 +176,7 @@ Here the same execution result is used twice in the document: the `#output("squa
 
 If you try to compile the above example, during the export/execution phase you will see the following before execution is complete:
 
-#![Placeholder for output call](placeholder-output.png)
+![Placeholder for output call](placeholder-output.png)
 
 The dashed rectangles are placeholders. This feature is enabled by default for notebooks that use the export functionality (when the `kernel` setting is set), to make compilation possible when the notebook is not yet exported/executed.
 
@@ -196,7 +196,7 @@ random.randint(0, 5)
 
 After export and execution, the `execute` call will render the notebook cell that contains this code (using the cell position for disambiguation if necessary). If we then change the code block in the Typst document, for example replacing the second line with `random.randint(0, 6)`, the `execute` call won't find a corresponding cell anymore and will instead show the code block itself as placeholder, with dashed stroke:
 
-#![Placeholder for execute call](placeholder-execute.png)
+![Placeholder for execute call](placeholder-execute.png)
 
 The value used as placeholder can be configured with the `placeholder` setting (see the [reference manual](callisto-manual.pdf#nameddest=setting:placeholder)).
 

@@ -75,13 +75,13 @@ The `plot2` cell produces a plot as display item and a string as result. We can 
 
 If the distinction between display and result is confusing, the Jupyter interface can help us. A cell without result looks like this:
 
-![Jupyter cell without result](cell-no-result.png)
+<img src="cell-no-result.png" alt="Jupyter cell without result" width=450>
 
 There is an execution count `[1]` next to the source, but nothing next to the output.
 
 A cell with result looks like this:
 
-![Jupyter cell with result](cell-result.png)
+<img src="cell-result.png" alt="Jupyter cell with result" width=400>
 
 The execution count `[2]` in red next to the value `1024` is a visual hint that `1024` is the cell result.
 
@@ -186,6 +186,7 @@ This will only work if the cell stores a PNG version of this item. We can also a
 When `format` is `auto`, the following order of preference is used (with preferred formats listed first):
 
 ```
+"text/vnd.typst"
 "image/svg+xml"
 "image/png"
 "image/jpeg"
@@ -206,21 +207,57 @@ We can also use the special value `auto` as an element of the array; The default
 
 Every value given in `format` must have a matching handler function to process values of that format. To add support for a new format we can register our own handlers with the `new-handlers` setting, see the [reference manual](callisto-manual.pdf#nameddest=setting:new-handlers).
 
-## Producing Math or Arbitrary Values from Notebook Cells
+## Producing Typst code from Notebook Cells
 
-Jupyter kernels often provide functions that a cell can use to produce rich outputs with arbitrary MIME type. Let's look at two cells of our `example.ipynb` notebook (which uses the Python kernel).
+You might have noticed that the first format in the list above is `text/vnd.typst`. That's the MIME type for Typst source code. The default handler for this format evaluates the value as Typst markup.
 
-The `some-math` cell uses SymPy to produce math formulas. The notebook stores each formula in two versions: a LaTeX version and a plain text version. By default Callisto will use the LaTeX version and convert it to Typst math, but we can request the text version:
+The `typst-markup` cell shows how a Python notebook can generate an output of this type:
 
-```typst
-// Get formula as Typst math
-#output("some-math")
+```py
+#| label: typst-markup
+from IPython.display import display
 
-// Get formula as text
-#output("some-math", format: "text/plain")
+typst_code = """
+= Basel Problem
+
+$ sum_(i=1)^oo = pi^2/6 $
+"""
+
+display({
+    'text/vnd.typst': typst_code,
+    'text/plain': '<Typst Document>'
+}, raw=True)
 ```
 
-The `json-result` cell uses `IPython.display.JSON` to encode a Python variable as a JSON string. This technique can be used to store all kind of data types in the notebook and retrieve them from Typst! However the notebook stores two values for this output: the JSON string itself under the MIME type `application/json`, and an uninformative description `"<IPython.core.display.JSON object>"` under the MIME type `text/plain`. By default the `text/plain` value has priority. To get the JSON we can request it explicitly:
+This `display` call generates an output item with two formats: Typst markup and a `text/plain` placeholder. Including a `text/plain` placeholder is good practice so that notebook viewers can show something meaningful if they don't know how to render Typst source code.
+
+An `output` call will include the evaluated markup in our document:
+
+```typ
+#output("typst-markup")
+```
+
+## Getting Arbitrary Values from Notebook Cells
+
+Cell outputs are generally stored either as images or text. For example the `calc` cell which computes 2+2 stores the result `"4"` as string:
+
+```typst
+#type(output("calc"))
+```
+
+However `IPython.display.JSON` we be used to produce an output item in the JSON format. We can encode pretty much anything as JSON so that's a powerful way to transfer data from Python to Typst. See for exampe the `json-result` cell:
+
+```py
+#| label: json-result
+from IPython.display import display, JSON
+some_dict = {
+  'a': 0,
+  's': 'some string',
+}
+JSON(some_dict)
+```
+
+The notebook stores the JSON value under the MIME type `application/json`, and an uninformative description `"<IPython.core.display.JSON object>"` under the MIME type `text/plain`. By default the `text/plain` value has priority. To get the JSON we can request it explicitly:
 
 ```typst
 #output("json-result", format: "application/json")

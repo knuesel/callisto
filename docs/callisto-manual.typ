@@ -1207,12 +1207,13 @@ Example:
 
 Used to select the format for an output items, as Jupyter notebooks can store the same output in several formats to let the viewer choose a format.
 
-This can be a MIME string such as `"image/png"`, or an array of such strings. The array order sets the preference: the first match is used. Every listed format must have a corresponding #link(<handlers>)[handler].
+This can be a MIME string such as `"image/png"`, or an array of such strings. The order of the array sets the preference: the first match is used. Every listed format must have a corresponding #link(<handlers>)[handler].
 
 The value `auto` (the default) represents the default array:
 
 ```typc
 (
+  "text/vnd.typst",
   "image/svg+xml",
   "image/png",
   "image/gif",
@@ -1233,6 +1234,28 @@ The value `auto` can also be used as one element of an array of values; in this 
 // Get PNG version where available, use default precedence otherwise
 #outputs(output-type: "display", format: ("image/png", auto))
 ```
+
+Note that the format with highest precedence is `text/vnd.typst`. This is the MIME type for Typst source code. The default handler for this format renders the value as Typst markup using the `eval` function.
+
+For example, the following Python cell produces a `text/vnd.typst` value with `text/plain` fallback:
+
+```py
+#| label: typst-markup
+from IPython.display import display
+
+typst_code = """
+= Basel Problem
+
+$ sum_(i=1)^oo = pi^2/6 $
+"""
+
+display({
+    'text/vnd.typst': typst_code,
+    'text/plain': '<Typst Document>'
+}, raw=True)
+```
+
+Writing `#output("typst-markup")` will include the Typst heading and equation in the document. The text fallback will be used in notebook viewers that don't know how to render Typst source code.
 
 #setting-doc[`ignore-wrong-format`][#pills.bool]
 
@@ -2073,6 +2096,7 @@ The following handlers process raw data.
 
 The image handlers turn encoded data into an `image` element. They all accept `alt`, `width` and `height` keyword arguments. The default image handlers delegate to one of the image processing handlers in the next section.
 
+/ `txt/vnd.typst`: For Typst source code. The data is the source code as string. The default renders the source code using `eval` with `mode: "markup"`.
 / `image/svg+xml`: For SVG images.
 / `image/png`: For PNG images.
 / `image/jpeg`: For JPEG images.

@@ -1,5 +1,64 @@
 #import "/callisto.typ"
 
+== Render
+
+#[
+]
+
+== Extract
+
+#[
+#let (source, display, result, output, outputs) = callisto.config(
+   nb: path("/docs/example.ipynb"),
+)
+
+#source("plot1")
+#source("plot1").text.contains("matplotlib")
+#source(0)
+#output("plot1")
+// Doesn't work
+// #result("plot1")
+#display("plot1")
+#display("plot2")
+#result("plot2")
+#output("calc")
+#output("plot1")
+// #output("plot2")
+#output("plot2", item: 0) // first item
+#output("plot2", item: 1) // second item
+#outputs("plot2")
+#let last-output = output.with(
+  output-type: ("display", "result"),
+  item: -1,
+)
+#[
+  #set image(width: 75%)
+  #set align(center)
+  #output("plot1")
+]
+#let img-data = output("plot1").source
+#let img = image(img-data, width: 75%)
+#align(center, img)
+#output("plot1", format: "image/png")
+#output("plot1", format: ("image/png", "image/svg+xml"))
+#output("plot1", format: ("image/png", auto))
+
+#output("typst-markup")
+
+#type(output("calc"))
+
+#output("json-result", format: "application/json")
+#let (output,) = callisto.config(
+  nb: path("/docs/example.ipynb"),
+  format: ("application/json", auto),
+)
+
+#output("json-result")
+]
+
+== Export
+
+#[
 #let (output, export, execute, evaluate, stage-notebook, Out) = callisto.config(
   nb: path("export.ipynb"),
   kernel: "python3",
@@ -70,3 +129,4 @@ The square of 3 is `3*3`<x>.
 
 
 #evaluate(`2+3`, transform: x => my-table(int(x)))
+]

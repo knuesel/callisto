@@ -108,6 +108,9 @@
   node(label("text/html")),
   edge(label("text/html"), <markdown-generic>),
 
+  node(label("text/vnd.typst")),
+  edge(<rich-output-generic>, label("text/vnd.typst")),
+
   edge(<rich-output-generic>, label("image/svg+xml")),
   edge(<rich-output-generic>, label("image/png")),
   edge(<rich-output-generic>, label("image/jpeg")),

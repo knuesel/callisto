@@ -1,6 +1,7 @@
 // Default list of supported formats, in order of precedence: we will use
 // the first format in this list that is available in the object dict.
 #let default-formats = (
+  "text/vnd.typst",
   "image/svg+xml",
   "image/png",
   "image/jpeg",

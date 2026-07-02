@@ -44,6 +44,9 @@
 //
 // To call a handler, use the 'handle' function from common.typ.
 
+// Handler for Typst source code
+#let text-vnd-typst(data, ctx: none, ..args) = eval(data, mode: "markup")
+
 // Generic image handler that supports image path and image bytes, used by
 // several others to actually render the image.
 #let image-generic(data, ctx: none, ..args) = {
@@ -474,6 +477,7 @@
 // Default handlers
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
+  "text/vnd.typst"  : text-vnd-typst,
   "image/svg+xml"   : image-svg-xml,
   "image/png"       : handle.with(mime: "image-base64"),
   "image/jpeg"      : handle.with(mime: "image-base64"),

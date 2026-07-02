@@ -121,7 +121,7 @@ In the calls `#render(0)`, `#render("plot1")` and `#render(((0, -1))` the argume
 
 Instead of selecting code cells by label, we can use the *execution count*: When a cell is executed, Jupyter gives it a count shown as `[1]` or `[2]` in the margin in the Jupyter interface:
 
-![plot 1 cell with execution count 2](cell-plot1.png)
+<img src="cell-plot1.png" alt="plot 1 cell with execution count 2" width=400>
 
 Here we see that the cell `"plot1"` has execution count 2, and we can use it to select the cell:
 

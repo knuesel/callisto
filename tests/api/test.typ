@@ -268,3 +268,9 @@ $$
 )
 #assert.eq(render("caption-test").caption.body, [My Caption])
 
+
+// Cell that produces Typst value
+#let o = callisto.output("typst-markup", nb: path("/docs/example.ipynb"))
+#let elem-funcs = o.children.map(x => x.func())
+#assert(heading in elem-funcs)
+#assert(math.equation in elem-funcs)
