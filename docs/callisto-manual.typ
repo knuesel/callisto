@@ -1215,7 +1215,7 @@ Used to select the format for an output items, as Jupyter notebooks can store th
 
 This can be a MIME string such as `"image/png"`, or an array of such strings. The order of the array sets the preference: the first match is used. Every listed format must have a corresponding #link(<handlers>)[handler].
 
-The value `auto` (the default) represents the default array:
+The value `auto` (the default) represents the default array `callisto.default-formats`:
 
 ```typc
 (
@@ -1710,6 +1710,10 @@ Apart from the functions described in the previous sections, the top-level Calli
 #function-doc(`themes`)
 
 A dictionary holding the built-in #link(<themes>)[themes]: `plain`, `notebook` and `neat`.
+
+#function-doc(`default-formats`)
+
+A dictionary holding the default #setting(content: [formats])[format].
 
 #function-doc(`default-handlers`)
 

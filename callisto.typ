@@ -17,9 +17,11 @@
 #import "core/ansi.typ"
 #import "core/exporting.typ"
 #import "core/header-pattern.typ"
+#import "core/ctx/ctx.typ"
 
 #import util: handle
 #import exporting: export-names
+#import ctx.outputs: default-formats
 
 #let cells = reading.cell.cells.with(
   default-handlers: default-handlers,
