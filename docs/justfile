@@ -1,6 +1,4 @@
-all: lorenz handler-trees
-    
-lorenz: (screenshot "lorenz-extract.typ")
+all: handler-trees
 
 screenshot filename:
     typst c --root=.. {{filename}} {{file_stem(filename)}}.png
