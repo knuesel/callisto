@@ -1,6 +1,6 @@
 #import "@preview/based:0.2.0": base64
 #import "@preview/percencode:0.1.0": percent-decode
-#import "@preview/cmarker:0.1.9"
+#import "@preview/cmarker:0.1.10"
 #import "@preview/mitex:0.2.7"
 
 #import "util.typ": handle
