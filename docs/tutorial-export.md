@@ -251,17 +251,18 @@ This also works for inline raw elements, which can be useful together with `eval
 The square of 3 is `3*3`<x>.
 ```
 
-However using `evaluate` or an alias is preferred:
+However directly using `evaluate` or an alias is preferred:
 
 ```typst
+// Define a short alias
 #let py = evaluate
 
 The square of 3 is #py(`3*3`).
 ```
 
-This avoids the problem with show rules style inheritance so we don't need hacks like `set text(1em/0.8)`.
+This avoids the style inheritance problem with show rules so we don't need hacks like `set text(1em/0.8)`.
 
-Typst labels can also used as cell specification, to find all cells that where exported from code blocks with the given label:
+Typst labels can also be used as cell specification, to find all cells that where exported from code blocks with the given label:
 
 ```typst
 // Render all cells that were passed to `execute`
@@ -273,7 +274,7 @@ Typst labels should not be confused with cell labels. Cell labels are strings an
 
 ## Transforming Output Values
 
-When reading from a notebook like `example.ipynb`, we can manipulate output items like any Typst value. For example the `calc` cell computes the value `4`, though in the notebook it's actually stored as string. Let's use it to make a table with a dynamic number of columns:
+When reading from a regular notebook like `example.ipynb`, we can manipulate output items like any Typst value. For example the `calc` cell computes the value `4`, though in the notebook it's actually stored as string. Let's use it to make a table with a dynamic number of columns:
 
 ```typst
 // Make table with n columns holding numbers 0 to n-1

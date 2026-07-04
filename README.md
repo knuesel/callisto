@@ -161,9 +161,9 @@ You can share the exported notebook together with your Typst file, it's all one 
 
 The following tutorials are meant to be read in order:
 
-1. [Rendering Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-render.md)
-1. [Extraction Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-extract.md)
-1. [Execution Tutorial](https://github.com/sijow/callisto/blob/release-0.3/docs/tutorial-export.md)
+1. [Rendering tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-render.md)
+1. [Extraction tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-extract.md)
+1. [Export and execution tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-export.md)
 
 ## Reference Manual
 
