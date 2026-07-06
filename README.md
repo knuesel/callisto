@@ -152,7 +152,7 @@ Export code blocks to a Jupyter notebook and render the results:
   </tr>
 </table>
 
-The export is done with `typst eval`, the execution with `jupyter-nbconvert` (see Execution tutorial below).
+The export is done with `typst eval`, the execution with `jupyter-nbconvert` (see Export and Execution tutorial below).
 
 You can share the exported notebook together with your Typst file, it's all one needs to recompile the document.
 
@@ -163,7 +163,7 @@ The following tutorials are meant to be read in order:
 
 1. [Rendering tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-render.md)
 1. [Extraction tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-extract.md)
-1. [Export and execution tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-export.md)
+1. [Export and Execution tutorial](https://github.com/sijow/callisto/blob/v0.3.0/docs/tutorial-export.md)
 
 ## Reference Manual
 
