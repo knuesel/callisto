@@ -60,29 +60,38 @@
 // path of the form "attachment:name" where 'name' refers to a cell attachment.
 // As all image handlers, this handler can receive extra arguments such as
 // 'alt' that must be forwarded to the subhandler.
-#let image-markdown(path, ctx: none, ..args) = {
+// This handler is also used to render images found in HTML parts of Markdown
+// content.
+#let image-markdown(data, ctx: none, ..args) = {
+  if type(data) == bytes {
+    // This can happen for images in HTML in Markdown
+    return handle(data, mime: "image-generic", ctx: ctx, ..args)
+  }
+  if type(data) != str {
+    panic("unsupported data type: " + str(type(data)))
+  }
   let (handlers, cell) = ctx
-  if path.starts-with("attachment:") {
-    let name = path.trim("attachment:", at: start)
+  if data.starts-with("attachment:") {
+    let name = data.trim("attachment:", at: start)
     let attachments = cell.at("attachments", default: (:))
     if name in attachments {
       // Get data dict (keyed by MIME type) for this attachment
-      let data = attachments.at(name)
+      let dict = attachments.at(name)
       handle(
-        data,
+        dict,
         mime: "attachment",
         ctx: ctx,
-        metadata: (path: path),
+        metadata: (path: data),
         subhandler-args: args,
       )
     } else {
       panic("cell attachment " + name + " not found")
     }
-  } else if path.starts-with("data:") {
+  } else if data.starts-with("data:") {
     // This can happen for images in HTML in Markdown
-    handle(path, mime: "image-data-url", ctx: ctx, ..args)
+    handle(data, mime: "image-data-url", ctx: ctx, ..args)
   } else {
-    handle(path, mime: "image-generic", ctx: ctx, ..args)
+    handle(data, mime: "image-generic", ctx: ctx, ..args)
   }
 }
 

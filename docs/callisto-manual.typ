@@ -2120,7 +2120,7 @@ The image handlers turn encoded data into an `image` element. They all accept `a
 
 The following handlers process image data and return an `image` element. They all accept `alt`, `width` and `height` keyword arguments.
 
-/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary. The default dispatches to the `attachment`, `image-data-url` or `image-generic` handler.
+/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary, or bytes. The default dispatches to the `attachment`, `image-data-url` or `image-generic` handler.
 
 / `image-data-url`: For images encoded as data URLs, for example in `<img>` HTML tags. The data is a string that includes the `data:` prefix.
 
