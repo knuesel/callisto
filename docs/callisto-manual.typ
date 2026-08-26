@@ -1283,18 +1283,32 @@ For stream outputs, this selects the type of streams that should be returned. Ca
 
 #setting-doc[`result`][#pills.str]
 
-How the function should return its result: `"value"` (the default) to return each result as a simple value, or `"dict"` to return it as a dictionary that contains a `"value"` field plus other fields holding metadata.
+How the #func[outputs] function and its variants should return output items: `"value"` (the default) to return each item as a simple value, or `"dict"` to return it as a dictionary that contains at least:
 
-The additional fields depend on the function called but include at least a `cell` dict holding the cell index, ID, metadata, type and (for code cells) execution count.
+#pad(left: 1em)[
+  / `value`: the processed value,
+  / `type`: the #setting[output-type],
+  / `index`: the item index in the cell's output list,
+  / `cell`: a dict holding the cell index, ID, metadata, type and (for code cells) execution count.
+]
+
+For "display" and "result" outputs the dictionary also contains:
+
+#pad(left: 1em)[
+  / `available-formats`: the list of MIME types available for this output,
+  / `format`: the format selected for rendering,
+  / `data`: the unprocessed data for the selected format,
+  / `metadata`: the metadata for the selected format (or the whole output metadata if no format-specific metadata is present).
+]
 
 Examples:
 
 ```typ
-// Get for each code cell a a dict with source and various metadata
-#sources(cell-type: "code", result: "dict")
-
 // Get the traceback of the first error
 #error(item: 0, result: "dict").traceback
+
+// Get available formats for the "plot1" output
+#output("plot1", result: "dict").available-formats
 ```
 
 #setting-doc[`handlers`][#pills.dictionary]

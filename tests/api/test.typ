@@ -136,6 +136,8 @@
   #assert.eq(result("scatter", name-path: "metadata.callisto.header.type", theme: "plain").func(), image)
 ]
 
+// Getting the list of available formats
+#assert.eq(output("plot1", result: "dict").available-formats.len(), 2)
 
 // With python.ipynb
 #let (
@@ -178,6 +180,7 @@
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
 #assert.eq(out.format, "image/png")
+
 
 // ctx.item-desc fields
 #let out = output(

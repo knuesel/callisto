@@ -52,6 +52,7 @@
     data: data,
     metadata: metadata,
     format: fmt,
+    available-formats: available,
   )
 }
 
