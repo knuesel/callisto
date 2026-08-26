@@ -19,12 +19,24 @@
 // a dict keyed by MIME types.
 // Can return none if item is available only in unsupported formats (and
 // ignore-wrong-format is true) or if the item is empty (data dict empty in
-// notebook JSON).
+// notebook JSON). This is different from returning data: none, which happens
+// when the caller has set ctx.format: none.
 #let preprocess(item, ctx: none) = {
   // Ignore item with no format (data dict empty)
   if item.data.len() == 0 { return none }
   // Pick the first desired format that is available, or none
   let available = item.data.keys()
+
+  // When no format is desired, return list of formats and whole metadata
+  if ctx.format == none {
+    return (
+      format: none,
+      data: none,
+      metadata: item.metadata,
+      available-formats: available,
+    )
+  }
+  
   let fmt = ctx.format.find(f => f in available)
   if fmt == none {
     if not ctx.ignore-wrong-format {
@@ -49,9 +61,9 @@
   let metadata = item.metadata.at(fmt, default: item.metadata)
 
   return (
+    format: fmt,
     data: data,
     metadata: metadata,
-    format: fmt,
     available-formats: available,
   )
 }
@@ -66,7 +78,9 @@
   ctx: none,
   handler-args: none,
 ) = {
-  if item.data.len() == 0 { return none }
+  // No data present (probably because format = none) => processed value is none
+  if item.data == none { return none }
+
   // Add some context fields
   ctx.item-desc.metadata = item.metadata
   ctx.item-desc.format = item.format

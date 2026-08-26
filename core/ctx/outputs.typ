@@ -14,10 +14,14 @@
 )
 
 // Return a normalized list of desired formats:
+// - value none is left as is
 // - a single value is wrapped in an array
 // - if the array contains the value 'auto', the default list is spliced at
 //   that position
 #let normalize-formats(formats) = {
+  if formats == none {
+    return formats
+  }
   if type(formats) != array {
     formats = (formats,)
   }

@@ -70,7 +70,6 @@
       let preprocessed = proc-module.preprocess(item, ctx: ctx)
       if preprocessed == none { continue }
       let value = handle(preprocessed, mime: "output", ctx: ctx)
-      if value == none { continue }
       // Make final result (value or dict)
       let result = final-result(preprocessed, value, ctx: ctx)
       outs.push(result)

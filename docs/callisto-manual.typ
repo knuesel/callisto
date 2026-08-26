@@ -107,7 +107,7 @@ Making full sense of all the settings requires some familiarity with the reading
   #setting-short[output-type][#pills.str #pills.array][
     The types of output to keep. Default: `"all"`.
   ]
-  #setting-short[format][#pills.str #pills.array #pills.auto][
+  #setting-short[format][#pills.str #pills.array #pills.auto #pills.none][
     The output format(s) to use, in order of preference.
     Default: `auto` for the default list.
   ]
@@ -1209,7 +1209,7 @@ Example:
 #outputs(output-type: ("result", "error"))
 ```
       
-#setting-doc[`format`][#pills.str #pills.array #pills.auto]
+#setting-doc[`format`][#pills.str #pills.array #pills.auto #pills.none]
 
 Used to select the format for an output items, as Jupyter notebooks can store the same output in several formats to let the viewer choose a format.
 
@@ -1263,6 +1263,15 @@ display({
 
 Writing `#output("typst-markup")` will include the Typst heading and equation in the document. The text fallback will be used in notebook viewers that don't know how to render Typst source code.
 
+The value `none` can be specified to use no format at all. This can be used together with #setting[result] to retrieve information about an output item without rendering it. Example:
+
+```typ
+// Get a list of available formats for the output of the "plot1" cell
+#output("plot1", format: none, result: "dict").available-formats
+```
+
+Here the `format: none` setting ensures the call will work even for items in unknown formats.
+
 #setting-doc[`ignore-wrong-format`][#pills.bool]
 
 By default an error is raised if a selected output is not available in one of the desired formats (see #setting[format] setting). Set this to `true` to skip the output silently. Example:
@@ -1308,7 +1317,7 @@ Examples:
 #error(item: 0, result: "dict").traceback
 
 // Get available formats for the "plot1" output
-#output("plot1", result: "dict").available-formats
+#output("plot1", result: "dict", format: none).available-formats
 ```
 
 #setting-doc[`handlers`][#pills.dictionary]

@@ -137,7 +137,7 @@
 ]
 
 // Getting the list of available formats
-#assert.eq(output("plot1", result: "dict").available-formats.len(), 2)
+#assert.eq(output("plot1", result: "dict", format: none).available-formats.len(), 2)
 
 // With python.ipynb
 #let (
@@ -195,7 +195,8 @@
 #assert.eq(out.format, "image/png")
 
 // check that none handlers work
-#assert.eq(outputs(6, handlers: ("image/png": none)).len(), 2)
+#assert.eq(outputs(6, handlers: ("image/png": none)).len(), 4)
+#assert.eq(outputs(6, handlers: ("image/png": none)).filter(x => x == none).len(), 2)
 #assert.eq(output(6, item: 2, handlers: (
   "image/png": (none, (data, ..args) => block(data)),
 )), block(none))
