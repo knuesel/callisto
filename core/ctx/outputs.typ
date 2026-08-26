@@ -8,8 +8,8 @@
   "image/gif",
   "text/markdown",
   "text/latex",
-  "text/html",
   "text/plain",
+  "text/html",
   "application/json",
 )
 

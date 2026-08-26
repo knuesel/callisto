@@ -1226,8 +1226,8 @@ The value `auto` (the default) represents the default array `callisto.default-fo
   "image/jpeg",
   "text/markdown",
   "text/latex",
-  "text/html",
   "text/plain",
+  "text/html",
   "application/json",
 )
 ```
@@ -2112,9 +2112,9 @@ The image handlers turn encoded data into an `image` element. They all accept `a
 / `image/jpeg`: For JPEG images.
 / `image/gif`: For GIF images.
 / `text/markdown`: For Markdown text. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block.
-/ `text/html`: For HTML. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block. Therefore, by default HTML rendering is limited to the tags supported by #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker]. Support for additional tags can be implemented using the `html` field of the #setting[cmarker] setting.
 / `text/latex`: For LaTeX text. The data is a string. The default renders the string using #link("https://github.com/mitex-rs/mitex")[MiTeX].
 / `text/plain`: For plain text. The data is a string. The default returns the string unmodified. The default themes (active during rendering) override this by delegating to `text-console-block`.
+/ `text/html`: For HTML. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block. Therefore, by default HTML rendering is limited to the tags supported by #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] ( support for additional tags can be implemented using the `html` field of the #setting[cmarker] setting). Going through the Markdown parser also means that newlines in tags or extra newlines between tags can cause issues.
 
 === For Image Processing
 

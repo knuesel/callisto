@@ -193,8 +193,8 @@ When `format` is `auto`, the following order of preference is used (with preferr
 "image/gif"
 "text/markdown"
 "text/latex"
-"text/html"
 "text/plain"
+"text/html"
 "application/json"
 ```
 
