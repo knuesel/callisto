@@ -198,7 +198,9 @@ When `format` is `auto`, the following order of preference is used (with preferr
 "application/json"
 ```
 
-We can also use the special value `auto` as an element of the array; The default list will then be inserted at that position:
+This default order can be found in the array `callisto.default-formats`.
+
+We can also use the special value `auto` as an element of the array given to `format`; The default list will then be inserted at that position:
 
 ```typst
 // Get PNG if available, otherwise use default order
@@ -206,6 +208,32 @@ We can also use the special value `auto` as an element of the array; The default
 ```
 
 Every value given in `format` must have a matching handler function to process values of that format. To add support for a new format we can register our own handlers with the `new-handlers` setting, see the [reference manual](callisto-manual.pdf#nameddest=setting:new-handlers).
+
+### Disabling a format
+
+Sometimes it's useful to disable a format that would normally be used by Callisto. For example in the default list above we see that `text/latex` is listed before `text/plain`. This way, when a cell outputs a math formula in both LateX and plain text by default Callisto will use the LaTeX version, converting it to a nice Typst math formula. But this can cause trouble when a cell output contains LaTeX code not supported by [MiTeX](https://github.com/mitex-rs/mitex) (the LaTeX converter used by Callisto). In such cases a simple fix is to pick the plain text format manually:
+
+```typst
+// Get result of "equ" cell as plain text instead of LaTeX
+// (although the LaTeX version would work fine in this case)
+#output("equ", format: "text/plain")
+```
+
+A more global fix would be to remove `text/latex` from the list of formats to use:
+
+```typst
+#import "@preview/callisto:0.3.0"
+
+#let formats = callisto.default-formats.filter(f => f != "text/latex")
+
+#let (source, display, result, output, outputs) = callisto.config(
+  nb: path("example.ipynb"),
+  format: formats,
+)
+
+// This will use the text/plain version
+#output("equ")
+```
 
 ## Producing Typst code from Notebook Cells
 
